@@ -1,8 +1,6 @@
 language: node_js
 sudo: true
 node_js:
-  - "0.10"
-  - "0.12"
   - "4"
 dist: trusty
 before_script:
@@ -12,3 +10,15 @@ before_script:
   - grunt css
 services:
   - redis-server
+deploy:
+  provider: releases
+  api_key:
+    secure: W3nIzaD4My6ePIMS7rOjA8FIDCY8UokHQGmWhcFsuh2KssfYHlKNsadyPWWOOTxgEVUhOrOMprLTNLzBHxVt0VpuKUgie4+G8X2CMwhLj1wSLTPRVB3eeMJAyUMAPlhBVxuu56LdZQFSbXJDyKCBO9yBYpbo70SVUsIwMRtkasQ=
+  file_glob: true
+  file: ../enketo-express-packages/*.zip
+  on:
+    tags: true
+    condition: $TRAVIS_TAG =~ \.oc-
+    repo: OpenClinica/enketo-express-oc
+    node: 4
+    all_branches: true 
