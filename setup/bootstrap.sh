@@ -11,38 +11,44 @@ ENKETO_EXPRESS_USE_NODE_ENV=${ENKETO_EXPRESS_USE_NODE_ENV:-"false"}
 
 # install redis
 echo 'installing redis...'
-add-apt-repository -y ppa:rwky/redis
 apt-get update
 apt-get upgrade -y
 apt-get install -y redis-server
 
 # further redis setup with persistence, security, logging, multiple instances, priming 
-echo 'copying enketo redis conf...'
+echo 'Setting up Redis instances...'
 if [ -f "/etc/redis/redis.conf" ]; then
+    systemctl stop redis
+    systemctl disable redis
+    systemctl daemon-reload
+    
+    echo 'Moving redis configs...'
     mv /etc/redis/redis.conf /etc/redis/redis-origin.conf
     cp -f $ENKETO_EXPRESS_REPO_DIR/setup/redis/conf/redis-enketo-main.conf /etc/redis/
     cp -f $ENKETO_EXPRESS_REPO_DIR/setup/redis/conf/redis-enketo-cache.conf /etc/redis/
-    chown redis:redis /var/lib/redis/
-    echo 'copying enketo redis-server configs...'
-    mv /etc/init/redis-server.conf /etc/init/redis-server.conf.disabled
-    cp -f $ENKETO_EXPRESS_REPO_DIR/setup/redis/init/redis-server-enketo-main-vagrant.conf /etc/init/
-    cp -f $ENKETO_EXPRESS_REPO_DIR/setup/redis/init/redis-server-enketo-cache.conf /etc/init/
-    if [ -f "/var/lib/redis/redis.rdb" ]; then
-	   rm /var/lib/redis/redis.rdb
-    fi
-    echo 'copying enketo default redis db...'
+    systemctl enable redis-server@enketo-main.service
+    systemctl enable redis-server@enketo-cache.service
+
+    #chown redis:redis /var/lib/redis/
+
+    #if [ -f "/var/lib/redis/redis.rdb" ]; then
+	   #rm /var/lib/redis/redis.rdb
+    #fi
+    echo 'Copying enketo default redis db...'
     cp -f $ENKETO_EXPRESS_REPO_DIR/setup/redis/enketo-main.rdb /var/lib/redis/
     chown redis:redis /var/lib/redis/enketo-main.rdb
     chmod 660 /var/lib/redis/enketo-main.rdb
 fi
-echo 'starting first enketo redis instance...'
-service redis-server-enketo-main-vagrant restart
-echo 'starting second enketo redis instance...'
-service redis-server-enketo-cache restart
+
+echo 'Starting first enketo redis instance (systemd)...'
+systemctl start redis-server@enketo-main.service
+
+echo 'Starting second enketo redis instance (systemd)...'
+systemctl start redis-server@enketo-cache.service
 
 # install dependencies, development tools, node, grunt
 echo 'installing some apt-get packages...'
-apt-get install -y build-essential git libfontconfig curl
+apt-get install -y build-essential git python libfontconfig curl
 echo 'installing nodejs...'
 cd $ENKETO_EXPRESS_REPO_DIR
 if [ $ENKETO_EXPRESS_USE_NODE_ENV = "true" ]; then
@@ -51,8 +57,13 @@ if [ $ENKETO_EXPRESS_USE_NODE_ENV = "true" ]; then
     nodeenv env
     . env/bin/activate
 else
-    curl -sL https://deb.nodesource.com/setup_4.x | sudo bash -
-    apt-get install -y nodejs
+    # using nvm as xenial is not officially supported for NodeJS 4?
+    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.0/install.sh | bash
+    export NVM_DIR="$HOME/.nvm"
+    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+    [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+    nvm install 4
+    nvm use 4
 fi
 
 # create a local configuration file unless it already exists
@@ -67,7 +78,7 @@ if [ -d "$ENKETO_EXPRESS_REPO_DIR/node_modules" ]; then
 fi
 #npm -g install npm@2.14.3
 npm install -g grunt-cli gulp nodemon mocha
-npm install
+npm install --production
 
 # build js and css
 grunt
