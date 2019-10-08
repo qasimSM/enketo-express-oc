@@ -2,7 +2,7 @@ language: node_js
 sudo: true
 node_js:
   - "4"
-dist: xenial
+dist: trusty
 before_script:
   - npm install -g grunt-cli
   - chmod 777 ./setup/travis/travis-redis.sh
@@ -10,6 +10,8 @@ before_script:
   - grunt css
 services:
   - redis-server
+before_deploy:
+  - sh ./tools/release.sh
 deploy:
   provider: releases
   api_key:
