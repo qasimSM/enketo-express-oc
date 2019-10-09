@@ -20,7 +20,7 @@
     "contributors": [],
     "scripts": {
         "start": "node .",
-        "test": "exit 0",
+        "test": "grunt test",
         "postinstall": "grunt"
     },
     "private": true,
