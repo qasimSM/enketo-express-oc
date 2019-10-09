@@ -5,7 +5,7 @@ var config = require( '../models/config-model' ).server;
 var keys = {
     singleOnce: config[ 'less secure encryption key' ],
     preview: config[ 'less secure encryption key' ] + 'preview-oc'
-}
+};
 
 function enketoIdParam( req, res, next, id ) {
     if ( /^::[A-z0-9]{4,8}$/.test( id ) ) {
