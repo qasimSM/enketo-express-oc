@@ -23,7 +23,8 @@
         "test": "grunt test",
         "postinstall": "grunt",
         "beautify": "grunt jsbeautifier:fix",
-        "build-docs": "rimraf docs && ./node_modules/.bin/jsdoc -c jsdoc.config.js"
+        "build-docs": "rimraf docs && ./node_modules/.bin/jsdoc -c jsdoc.config.js",
+        "build": "grunt"
     },
     "private": true,
     "license": "Apache-2.0",
