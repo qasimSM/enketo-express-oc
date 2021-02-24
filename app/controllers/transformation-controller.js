@@ -95,9 +95,11 @@ function getSurveyHash( req, res, next ) {
         } )
         .then( _updateCache )
         .then( function( survey ) {
+            console.log('updated cache', survey);
             if ( survey.hasOwnProperty( 'credentials' ) ) {
                 delete survey.credentials;
             }
+            console.log('all good, sending 200');
             res.status( 200 );
             res.send( {
                 hash: _getCombinedHash( survey )
