@@ -35,7 +35,8 @@ router
     .post( '/xform/:encrypted_enketo_id', getSurveyParts )
     .post( '/xform/:encrypted_enketo_id_preview', getSurveyParts )
     .post( '/xform', getSurveyParts )
-    .post( '/xform/hash', getSurveyHash );
+    .post( '/xform/hash', getSurveyHash )
+    .post( '/xform/hash/:enketo_id', getSurveyHash );
 
 /**
  * Obtains HTML Form, XML model, and existing XML instance
@@ -160,7 +161,6 @@ function _updateCache( survey ) {
 }
 
 function _addMediaHashes( survey ) {
-    console.log('adding media hashes', survey);
     survey.mediaHash = utils.getXformsManifestHash( survey.manifest, 'all' );
     console.log('media hash generated', survey.mediaHash);
     return Promise.resolve( survey );
