@@ -40,6 +40,7 @@ module.exports = {
             message: getErrorMessage( req, err ),
             stack: err.stack
         };
+        console.error('error handler', err);
         res.status( err.status || 500 );
         var contentType = res.get( 'Content-type' );
         if ( contentType && contentType.indexOf( 'application/json' ) === 0 ) {
