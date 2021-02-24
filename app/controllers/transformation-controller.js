@@ -85,6 +85,7 @@ function getSurveyParts( req, res, next ) {
  * @return {[type]}        [description]
  */
 function getSurveyHash( req, res, next ) {
+    console.log('getting survey hash');
     _getSurveyParams( req )
         .then( function( survey ) {
             console.log('attempting to obtain survey hashes from server db', survey);
@@ -196,10 +197,11 @@ function _toLocalMediaUrl( url ) {
 
 function _checkQuota( survey ) {
     var error;
-
+    console.log('checking quota');
     return surveyModel
         .getNumber( survey.account.linkedServer )
         .then( function( quotaUsed ) {
+            console.log('quota info', quotaUsed,survey.account.quota );
             if ( quotaUsed <= survey.account.quota ) {
                 return Promise.resolve( survey );
             }
@@ -247,7 +249,7 @@ function _getSurveyParams( req ) {
     var enketoId;
     var params = req.body;
     var noHashes = ( params.noHashes === 'true' );
-
+    console.log('getSurveyParams', req.enketoId);
     if ( req.enketoId ) {
         return surveyModel.get( req.enketoId )
             .then( account.check )
