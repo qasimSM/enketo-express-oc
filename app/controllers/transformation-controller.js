@@ -35,7 +35,10 @@ router
     .post( '/xform/:encrypted_enketo_id', getSurveyParts )
     .post( '/xform/:encrypted_enketo_id_preview', getSurveyParts )
     .post( '/xform', getSurveyParts )
-    .post( '/xform/hash*', getSurveyHash );
+    .post( '/xform/hash', getSurveyHash )
+    .post( '/xform/hash/:enketo_id', getSurveyHash )
+    .post( '/xform/hash/:encrypted_enketo_id', getSurveyHash )
+    .post( '/xform/hash/:encrypted_enketo_id_preview', getSurveyHash );
 
 /**
  * Obtains HTML Form, XML model, and existing XML instance
@@ -85,21 +88,16 @@ function getSurveyParts( req, res, next ) {
  * @return {[type]}        [description]
  */
 function getSurveyHash( req, res, next ) {
-    console.log('getting survey hash');
     _getSurveyParams( req )
         .then( function( survey ) {
-            console.log('attempting to obtain survey hashes from server db', survey);
             var hashes = cacheModel.getHashes( survey );
-            console.log('hashes found in server db', hashes);
             return hashes;
         } )
         .then( _updateCache )
         .then( function( survey ) {
-            console.log('updated cache', survey);
             if ( survey.hasOwnProperty( 'credentials' ) ) {
                 delete survey.credentials;
             }
-            console.log('all good, sending 200');
             res.status( 200 );
             res.send( {
                 hash: _getCombinedHash( survey )
@@ -131,7 +129,6 @@ function _updateCache( survey ) {
         .then( communicator.getManifest )
         .then( cacheModel.check )
         .then( function( upToDate ) {
-            console.log('cache model up to date?', upToDate);
             if ( !upToDate ) {
                 delete survey.xform;
                 delete survey.form;
@@ -148,7 +145,6 @@ function _updateCache( survey ) {
         } )
         .then( _addMediaHashes )
         .catch( function( error ) {
-            console.error('an error occurred during the cache update', error);
             if ( error.status === 401 || error.status === 404 ) {
                 cacheModel.flush( survey );
             } else {
@@ -161,7 +157,6 @@ function _updateCache( survey ) {
 
 function _addMediaHashes( survey ) {
     survey.mediaHash = utils.getXformsManifestHash( survey.manifest, 'all' );
-    console.log('media hash generated', survey.mediaHash);
     return Promise.resolve( survey );
 }
 
@@ -200,11 +195,10 @@ function _toLocalMediaUrl( url ) {
 
 function _checkQuota( survey ) {
     var error;
-    console.log('checking quota');
+    
     return surveyModel
         .getNumber( survey.account.linkedServer )
         .then( function( quotaUsed ) {
-            console.log('quota info', quotaUsed,survey.account.quota );
             if ( quotaUsed <= survey.account.quota ) {
                 return Promise.resolve( survey );
             }
@@ -252,7 +246,6 @@ function _getSurveyParams( req ) {
     var enketoId;
     var params = req.body;
     var noHashes = ( params.noHashes === 'true' );
-    console.log('getSurveyParams', req.enketoId);
     if ( req.enketoId ) {
         return surveyModel.get( req.enketoId )
             .then( account.check )
