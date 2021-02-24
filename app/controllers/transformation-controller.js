@@ -87,7 +87,10 @@ function getSurveyParts( req, res, next ) {
 function getSurveyHash( req, res, next ) {
     _getSurveyParams( req )
         .then( function( survey ) {
-            return cacheModel.getHashes( survey );
+            console.log('attempting to obtain survey hashes from server db', survey);
+            var hashes = cacheModel.getHashes( survey );
+            console.log('hashes found in server db', hashes);
+            return hashes;
         } )
         .then( _updateCache )
         .then( function( survey ) {
@@ -125,6 +128,7 @@ function _updateCache( survey ) {
         .then( communicator.getManifest )
         .then( cacheModel.check )
         .then( function( upToDate ) {
+            console.log('cache model up to date?', upToDate);
             if ( !upToDate ) {
                 delete survey.xform;
                 delete survey.form;
@@ -141,6 +145,7 @@ function _updateCache( survey ) {
         } )
         .then( _addMediaHashes )
         .catch( function( error ) {
+            console.error('an error occurred during the cache update', error);
             if ( error.status === 401 || error.status === 404 ) {
                 cacheModel.flush( survey );
             } else {
