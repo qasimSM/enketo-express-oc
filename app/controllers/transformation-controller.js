@@ -160,7 +160,9 @@ function _updateCache( survey ) {
 }
 
 function _addMediaHashes( survey ) {
+    console.log('adding media hashes', survey);
     survey.mediaHash = utils.getXformsManifestHash( survey.manifest, 'all' );
+    console.log('media hash generated', survey.mediaHash);
     return Promise.resolve( survey );
 }
 
