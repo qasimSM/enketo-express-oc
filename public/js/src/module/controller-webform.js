@@ -254,8 +254,6 @@ function _submitRecord() {
 
     gui.alert( `${beforeMsg}<div class="loader-animation-small" style="margin: 40px auto 0 auto;"/>`, t( 'alert.submission.msg' ), 'bare' );
 
-
-
     return fileManager.getCurrentFiles()
         .then( files => {
             const record = {
@@ -268,7 +266,7 @@ function _submitRecord() {
             if ( form.encryptionKey ) {
                 const formProps = {
                     encryptionKey: form.encryptionKey,
-                    id: form.view.html.id, // TODO: after enketo-core support, use form.id
+                    id: form.id,
                     version: form.version,
                 };
 
@@ -410,7 +408,7 @@ function _saveRecord( draft = true, recordName, confirmed, errorMsg ) {
             if ( form.encryptionKey && !draft ) {
                 const formProps = {
                     encryptionKey: form.encryptionKey,
-                    id: form.view.html.id, // TODO: after enketo-core support, use form.id
+                    id: form.id,
                     version: form.version,
                 };
 
