@@ -50,7 +50,7 @@
         "csurf": "^1.11.0",
         "db.js": "^0.15.0",
         "debug": "^4.3.1",
-        "enketo-core": "github:theywa/enketo-core#db19e9bcf5f742ea45fdc5010796717ead71cd3d",
+        "enketo-core": "github:enketo/enketo-core#db19e9b",
         "enketo-transformer": "1.43.0",
         "enketo-xpath-extensions-oc": "github:OpenClinica/enketo-xpath-extensions-oc#727803c",
         "enketo-xpathjs": "^1.9.4",
