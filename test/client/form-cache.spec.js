@@ -1,33 +1,139 @@
 import formCache from '../../public/js/src/module/form-cache';
 import connection from '../../public/js/src/module/connection';
+import store from '../../public/js/src/module/store';
+import settings from '../../public/js/src/module/settings';
+
+/**
+ * @typedef { import('sinon').SinonSandbox } SinonSandbox
+ */
+
+/**
+ * @typedef { import('sinon').SinonFakeTimers } SinonFakeTimers
+ */
+
+/**
+ * @typedef { import('sinon').SinonStub } SinonStub
+ */
+
+/**
+ * @typedef {import('../../app/models/record-model').EnketoRecord} EnketoRecord
+ */
+
+/**
+ * @typedef {import('../../app/models/survey-model').SurveyObject} Survey
+ */
+
+/**
+ * @typedef {import('../../../../app/models/survey-model').SurveyExternalData} SurveyExternalData
+ */
+
+/**
+ * @typedef GetFormPartsStubResult
+ * @property { string } enketoId
+ * @property { string } form
+ * @property { string } model
+ * @property { string } hash
+ */
+
+const parser = new DOMParser();
 
 const url1 = '/path/to/source.png';
 const form1 = `<form class="or"><img src="${url1}"/></form>`;
-const model1 = '<model/>';
+const defaultInstanceData = '<data id="modelA"><item>initial</item><meta><instanceID/></meta></data>';
+const model1 = `<model><instance>${defaultInstanceData}</instance><instance id="last-saved" src="jr://instance/last-saved"/></model>`;
 const hash1 = '12345';
 
 describe( 'Client Form Cache', () => {
-    let survey, sandbox, getFormPartsSpy, getFileSpy;
+    /** @type {Survey} */
+    let survey;
 
-    beforeEach( () => {
+    /** @type {SurveyExternalData} */
+    let lastSavedExternalData;
+
+    /** @type {SinonSandbox} */
+    let sandbox;
+
+    /** @type {SinonStub} */
+    let getFormPartsSpy;
+
+    /** @type {GetFormPartsStubResult} */
+    let getFormPartsStubResult;
+
+    /** @type {SinonStub} */
+    let getFileSpy;
+
+    /** @type {SinonFakeTimers} */
+    let timers;
+
+    beforeEach( done => {
+        const formElement = document.createElement( 'form' );
+
+        formElement.className = 'or';
+        document.body.appendChild( formElement );
+
         survey = {};
         sandbox = sinon.createSandbox();
-        getFormPartsSpy = sandbox.stub( connection, 'getFormParts' ).callsFake( survey => Promise.resolve( {
-            enketoId: survey.enketoId,
+
+        // Prevent calls to `_updateCache` after tests complete/stubs are restored
+        timers = sinon.useFakeTimers();
+
+        lastSavedExternalData = {
+            id: 'last-saved',
+            src: 'jr://instance/last-saved',
+            xml: parser.parseFromString( defaultInstanceData, 'text/xml' ),
+        };
+
+        getFormPartsStubResult = {
+            externalData: [
+                lastSavedExternalData,
+            ],
             form: form1,
             model: model1,
             hash: hash1
-        } ) );
+        };
+
+        getFormPartsSpy = sandbox.stub( connection, 'getFormParts' ).callsFake( survey => {
+            return Promise.resolve( survey.enketoId )
+                .then( enketoId => {
+                    if ( enketoId != null ) {
+                        return formCache.getLastSavedRecord( survey.enketoId );
+                    }
+                } )
+                .then( lastSavedRecord => {
+                    if ( lastSavedRecord != null ) {
+                        return { lastSavedRecord };
+                    }
+
+                    return {};
+                } )
+                .then( lastSavedData => {
+                    const formParts = Object.assign( {
+                        enketoId: survey.enketoId,
+                    }, getFormPartsStubResult, lastSavedData );
+
+                    return formParts;
+                } );
+        } );
+
         getFileSpy = sandbox.stub( connection, 'getMediaFile' ).callsFake( url => Promise.resolve( {
             url,
             item: new Blob( [ 'babdf' ], {
                 type: 'image/png'
             } )
         } ) );
+
+        store.init().then( done, done );
     } );
 
-    afterEach( () => {
+    afterEach( done => {
         sandbox.restore();
+        timers.clearTimeout();
+        timers.clearInterval();
+        timers.restore();
+
+        document.body.removeChild( document.querySelector( 'form.or' ) );
+
+        store.survey.removeAll().then( done, done );
     } );
 
     it( 'is loaded', () => {
@@ -35,7 +141,6 @@ describe( 'Client Form Cache', () => {
     } );
 
     describe( 'in empty state', () => {
-
         it( 'will call connection.getFormParts to obtain the form parts', done => {
             survey.enketoId = '10';
             formCache.init( survey )
@@ -49,7 +154,11 @@ describe( 'Client Form Cache', () => {
             survey.enketoId = '20';
             formCache.init( survey )
                 .then( result => {
-                    result.htmlView = document.createRange().createContextualFragment( result.form );
+                    const currentForm = document.querySelector( 'form.or' );
+                    const form = document.createRange().createContextualFragment( result.form );
+
+                    currentForm.parentNode.replaceChild( form, currentForm );
+
                     return formCache.updateMedia( result );
                 } )
                 .then( () => {
@@ -63,6 +172,7 @@ describe( 'Client Form Cache', () => {
             formCache.get( survey )
                 .then( result => {
                     expect( result ).to.equal( undefined );
+
                     return formCache.init( survey );
                 } )
                 .then( () => // we could also leave this out as formCache.init will return the survey object
@@ -86,40 +196,112 @@ describe( 'Client Form Cache', () => {
 
     } );
 
-    /*
-    describe( 'in cached state', function() {
-        
-        it( 'initializes succesfully', function( done ) {
-            survey = {
-                enketoId: 'TESt',
-                form: '<form class="or"></form>',
-                model: '<model></model>',
-                hash: '12345'
+    describe( 'access types', () => {
+        /** @type {import('sinon').SinonStub} */
+        let getSpy;
+
+        /** @type {import('sinon').SinonStub} */
+        let setSpy;
+
+        beforeEach( () => {
+            getSpy = sandbox.stub( store.survey, 'get' );
+            setSpy = sandbox.stub( store.survey, 'set' );
+        } );
+
+        it( 'bypasses the store when initializing a form in preview mode', done => {
+            sandbox.stub( settings, 'type' ).get( () => 'preview' );
+
+            const previewSurvey = {
+                enketoId: null,
+                xformUrl: 'https://xlsform.getodk.org/downloads/b0x0gdti/Range%20test.xml',
+                defaults: {}
             };
-            
-            formCache.set( survey )
-                .then( function() {
-                    return formCache.init( survey );
+
+            let initResult;
+
+            formCache.init( previewSurvey )
+                .then( survey => {
+                    initResult = survey;
+
+                    return getFormPartsSpy.getCall( 0 ).returnValue;
                 } )
-                .then( function( result ) {
-                    expect( result ).to.deep.equal( survey );
+                .then( formParts => {
+                    expect( getSpy.called ).to.equal( false );
+                    expect( setSpy.called ).to.equal( false );
+                    expect( initResult ).to.deep.equal( formParts );
                 } )
                 .then( done, done );
-                
         } );
 
+        it( 'bypasses the store when initializing a form in single mode', done => {
+            sandbox.stub( settings, 'type' ).get( () => 'single' );
+
+            const singleSurvey = {
+                enketoId: 'surveyA',
+            };
+
+            let initResult;
+
+            formCache.init( singleSurvey )
+                .then( survey => {
+                    initResult = survey;
+
+                    return getFormPartsSpy.getCall( 0 ).returnValue;
+                } )
+                .then( formParts => {
+                    expect( getSpy.called ).to.equal( false );
+                    expect( setSpy.called ).to.equal( false );
+                    expect( initResult ).to.deep.equal( formParts );
+                } )
+                .then( done, done );
+        } );
+
+        it( 'bypasses the store when initializing a form in edit mode', done => {
+            sandbox.stub( settings, 'type' ).get( () => 'edit' );
+
+            const editSurvey = {
+                enketoId: 'surveyA',
+                instanceId: 'instance',
+            };
+
+            let initResult;
+
+            formCache.init( editSurvey )
+                .then( survey => {
+                    initResult = survey;
+
+                    return getFormPartsSpy.getCall( 0 ).returnValue;
+                } )
+                .then( formParts => {
+                    expect( getSpy.called ).to.equal( false );
+                    expect( setSpy.called ).to.equal( false );
+                    expect( initResult ).to.deep.equal( formParts );
+                } )
+                .then( done, done );
+        } );
+
+        it( 'bypasses the store when initializing a form in view mode', done => {
+            sandbox.stub( settings, 'type' ).get( () => 'view' );
+
+            const viewSurvey = {
+                enketoId: 'surveyA',
+                instanceId: 'instance',
+            };
+
+            let initResult;
+
+            formCache.init( viewSurvey )
+                .then( survey => {
+                    initResult = survey;
+
+                    return getFormPartsSpy.getCall( 0 ).returnValue;
+                } )
+                .then( formParts => {
+                    expect( getSpy.called ).to.equal( false );
+                    expect( setSpy.called ).to.equal( false );
+                    expect( initResult ).to.deep.equal( formParts );
+                } )
+                .then( done, done );
+        } );
     } );
-
-        
-    describe( 'in outdated cached state', function() {
-
-        it( 'initializes (the outdated survey) succesfully', function() {
-
-        } );
-
-        it( 'updates automatically', function() {
-
-        } );
-    } );
-    */
 } );
