@@ -574,15 +574,8 @@ class Comment extends Widget {
             widget.style[ o[ 0 ] ] = o[ 1 ];
         } );
 
-        // Scroll directly to Query modal if not enough height for user to view the Query modal
-        // https://github.com/OpenClinica/enketo-express-oc/issues/378
-        if ( this.linkedQuestion.classList.contains( 'or-appearance-image-map' ) ) {
-            setTimeout( () => {
-                this._scrollToview();
-            }, 500 );
-        } else {
-            this._scrollToview();
-        }
+        // https://github.com/OpenClinica/enketo-express-oc/issues/495
+        this._mapChecker();
 
         const closeButton = widget.querySelector( '.or-comment-widget__content__btn-close-x' );
         const overlay = widget.querySelector( '.or-comment-widget__overlay--click-preventer' );
@@ -594,6 +587,34 @@ class Comment extends Widget {
             } );
         } );
 
+    }
+
+    _mapChecker() {
+        const root = this.element.closest( 'form' ),
+        maps = Array.from( root.querySelectorAll( '.or-appearance-image-map' ) );
+        let ready = maps.every( map => map.querySelector( 'svg' ) );
+
+        let count = 0;
+        if ( !ready ) {
+            const mutationObserver = new MutationObserver( mutations => {
+                mutations.forEach( mutation => {
+                    if ( mutation.attributeName === 'viewBox' && mutation.target.tagName === 'svg' ) {
+                        count++;
+                        if ( count === maps.length ) {
+                            this._scrollToview();
+                            mutationObserver.disconnect();
+                        }
+                    }
+                });
+            });
+
+            mutationObserver.observe( root, {
+                attributes: true,
+                childList: true,
+                subtree: true });
+        } else {
+            this._scrollToview();
+        }
     }
 
     _scrollToview() {
