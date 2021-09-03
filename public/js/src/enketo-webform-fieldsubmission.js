@@ -3,10 +3,14 @@ import gui from './module/gui';
 import controller from './module/controller-webform-fieldsubmission';
 import settings from './module/settings';
 import connection from './module/connection';
-import { init as initTranslator, t, localize } from './module/translator';
+import { init as initTranslator, t, localize, loadTranslation } from './module/translator';
 import calculationModule from 'enketo-core/src/js/calculate';
 import preloadModule from 'enketo-core/src/js/preload';
 import relevantModule from './module/relevant';
+import events from './module/event';
+import formCache from './module/form-cache';
+import applicationCache from './module/application-cache';
+
 import oc from './module/custom';
 
 const loader = document.querySelector( '.main-loader' );
@@ -21,49 +25,89 @@ const survey = {
 };
 const range = document.createRange();
 
-initTranslator( survey )
-    .then( connection.getFormParts )
-    .then( formParts => {
-        if ( location.pathname.indexOf( '/edit/' ) > -1 || location.pathname.indexOf( '/view/' ) > -1 ) {
-            if ( survey.instanceId ) {
-                return connection.getExistingInstance( survey )
-                    .then( response => {
-                        formParts.instance = response.instance;
-                        formParts.instanceAttachments = response.instanceAttachments;
+_setEmergencyHandlers();
 
-                        // TODO: this will fail massively if instanceID is not populated (will use POST instead of PUT). Maybe do a check?
-                        return formParts;
-                    } );
-            } else if ( location.pathname.indexOf( '/edit/' ) > -1 ) {
-                throw new Error( 'This URL is invalid' );
-            }
-        }
+if ( settings.offline ) {
+    console.log( 'App in offline-capable mode.', survey );
+    delete survey.xformUrl;
+    _setAppCacheEventHandlers();
+    applicationCache.init( survey )
+        .then( initTranslator )
+        .then( formCache.init )
+        .then( _swapTheme )
+        .then( formCache.updateMaxSubmissionSize )
+        .then ( _updateMaxSizeSetting )
+        .then( _init )
+        .then( formParts => {
+            formParts.languages.forEach( loadTranslation );
 
-        return formParts;
-    } )
-    .then( formParts => {
-        // don't use settings.headless here because this also includes pdf views
-        if ( window.location.pathname.includes( '/headless' ) ){
             return formParts;
-        } else if ( formParts.form && formParts.model ) {
-            return gui.swapTheme( formParts );
-        } else {
-            throw new Error( t( 'error.unknown' ) );
-        }
-    } )
-    .then( formParts => {
-        if ( /\/fs\/dnc?\//.test( window.location.pathname ) ) {
-            return _convertToReadonly( formParts, true );
-        } else if ( settings.type === 'view' ) {
-            return _convertToReadonly( formParts, false );
-        }
+        } )
+        .then( formCache.updateMedia )
+        .then( _setFormCacheEventHandlers )
+        .catch( _showErrorOrAuthenticate );
+} else {
+    console.log( 'App in online-only mode.' );
+    initTranslator( survey )
+        .then( connection.getFormParts )
+        .then( formParts => {
+            if ( location.pathname.indexOf( '/edit/' ) > -1 || location.pathname.indexOf( '/view/' ) > -1 ) {
+                if ( survey.instanceId ) {
+                    return connection.getExistingInstance( survey )
+                        .then( response => {
+                            formParts.instance = response.instance;
+                            formParts.instanceAttachments = response.instanceAttachments;
 
-        return formParts;
-    } )
-    .then( connection.getMaximumSubmissionSize )
-    .then( _updateMaxSizeSetting )
-    .then( _init )
-    .catch( _showErrorOrAuthenticate );
+                            // TODO: this will fail massively if instanceID is not populated (will use POST instead of PUT). Maybe do a check?
+                            return formParts;
+                        } );
+                } else if ( location.pathname.indexOf( '/edit/' ) > -1 ) {
+                    throw new Error( 'This URL is invalid' );
+                }
+            }
+
+            return formParts;
+        } )
+        .then( formParts => {
+        // don't use settings.headless here because this also includes pdf views
+            if ( window.location.pathname.includes( '/headless' ) ){
+                return formParts;
+            } else if ( formParts.form && formParts.model ) {
+                return gui.swapTheme( formParts );
+            } else {
+                throw new Error( t( 'error.unknown' ) );
+            }
+        } )
+        .then( formParts => {
+            if ( /\/fs\/dnc?\//.test( window.location.pathname ) ) {
+                return _convertToReadonly( formParts, true );
+            } else if ( settings.type === 'view' ) {
+                return _convertToReadonly( formParts, false );
+            }
+
+            return formParts;
+        } )
+        .then( connection.getMaximumSubmissionSize )
+        .then( _updateMaxSizeSetting )
+        .then( _init )
+        .catch( _showErrorOrAuthenticate );
+}
+
+
+/**
+ * Swaps the theme if necessary.
+ *
+ * @param  {*} survey - [description]
+ * @return {*}        [description]
+ */
+function _swapTheme( survey ) {
+    if ( survey.form && survey.model ) {
+        return gui.swapTheme( survey );
+    } else {
+        return Promise.reject( new Error( 'Received form incomplete' ) );
+    }
+}
+
 
 function _updateMaxSizeSetting( survey ) {
     if ( survey.maxSize ) {
@@ -80,6 +124,62 @@ function _showErrorOrAuthenticate( error ) {
         window.location.href = `/login?return_url=${encodeURIComponent( window.location.href )}`;
     } else {
         gui.alert( error.message, t( 'alert.loaderror.heading' ) );
+    }
+}
+
+function _setAppCacheEventHandlers() {
+
+    document.addEventListener( events.OfflineLaunchCapable().type, event => {
+        const capable = event.detail.capable;
+        gui.updateStatus.offlineCapable( capable );
+
+        const scriptUrl = applicationCache.serviceWorkerScriptUrl;
+        if ( scriptUrl ) {
+            connection.getServiceWorkerVersion( scriptUrl )
+                .then( gui.updateStatus.applicationVersion );
+        }
+
+    } );
+
+    document.addEventListener( events.ApplicationUpdated().type, () => {
+        gui.feedback( t( 'alert.appupdated.msg' ), 20, t( 'alert.appupdated.heading' ) );
+    } );
+}
+
+function _setFormCacheEventHandlers( survey ) {
+    document.addEventListener( events.FormUpdated().type, () => {
+        gui.feedback( t( 'alert.formupdated.msg' ), 20, t( 'alert.formupdated.heading' ) );
+    } );
+
+    return survey;
+}
+
+/**
+ * Advanced/emergency handlers that should always be activated even if form loading fails.
+ */
+function _setEmergencyHandlers() {
+    const flushBtn = document.querySelector( '.side-slider__advanced__button.flush-db' );
+
+    if ( flushBtn ) {
+        flushBtn.addEventListener( 'click', () => {
+            gui.confirm( {
+                msg: t( 'confirm.deleteall.msg' ),
+                heading: t( 'confirm.deleteall.heading' )
+            }, {
+                posButton: t( 'confirm.deleteall.posButton' ),
+            } )
+                .then( confirmed => {
+                    if ( !confirmed ) {
+                        throw new Error( 'Cancelled by user' );
+                    }
+
+                    return store.flush();
+                } )
+                .then( () => {
+                    location.reload();
+                } )
+                .catch( () => {} );
+        } );
     }
 }
 
@@ -160,7 +260,7 @@ function _init( formParts ) {
                 external: formParts.externalData,
                 instanceAttachments: formParts.instanceAttachments
             }, formParts.loadErrors ).then( form => {
-                //formParts.languages = form.languages; // be careful form is undefined if there were load errors
+                formParts.languages = form.languages; // be careful form is undefined if there were load errors
                 formParts.htmlView = formEl;
                 const titleEl = document.querySelector( '#form-title' );
                 const titleText = settings.pid ? `${settings.pid}: ${titleEl.textContent}` : titleEl.textContent;

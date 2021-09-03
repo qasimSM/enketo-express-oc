@@ -52,6 +52,7 @@ router
     .get( /\/(single)\/fs(\/rfc)?(\/c)?\/i/, _setNextPrompt )
     .get( /\/(edit|single)\/fs\/(?!(participant|rfc|dn|view))/, _setCompleteButton )
     .get( '*', _setCloseButtonClass )
+    .get( `/fs/participant${config[ 'offline path' ]}/:encrypted_enketo_id_fs_participant`, fieldSubmissionOffline )
     .get( `${config[ 'offline path' ]}/:enketo_id`, offlineWebform )
     .get( `${config[ 'offline path' ]}/`, redirect )
     .get( '/connection', ( req, res ) => {
@@ -192,6 +193,23 @@ function fieldSubmission( req, res, next ) {
     };
 
     _renderWebform( req, res, next, options );
+}
+
+function fieldSubmissionOffline( req, res, next ) {
+    var options = {
+        type: 'fieldsubmission',
+        participant: req.participant,
+        closeButtonIdSuffix: req.closeButtonIdSuffix,
+        offlinePath: config[ 'offline path' ]
+    };
+
+    if ( !req.app.get( 'offline enabled' ) ) {
+        const error = new Error( 'Offline functionality has not been enabled for this application.' );
+        error.status = 405;
+        next( error );
+    } else {
+        _renderWebform( req, res, next, options );
+    }
 }
 
 /**
