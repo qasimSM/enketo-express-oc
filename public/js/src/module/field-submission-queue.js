@@ -262,10 +262,7 @@ class FieldSubmissionQueue {
                 .done( ( data, textStatus, jqXHR ) => {
                     if ( jqXHR.status === 201 || jqXHR.status === 202 ) {
                         that.submittedCounter = jqXHR.status === 201 ? that.submittedCounter + 1 : that.submittedCounter;
-                        // Add a delay between fieldsubmissions to troubleshoot/patch for https://github.com/OpenClinica/enketo-express-oc/issues/501
-                        setTimeout( () =>  {
-                            resolve( jqXHR.status );
-                        }, 20 );
+                        resolve( jqXHR.status );
                     } else {
                         throw jqXHR;
                     }
