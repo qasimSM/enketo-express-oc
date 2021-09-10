@@ -186,7 +186,7 @@ class FieldSubmissionQueue {
                     }
                 } );
         } else {
-            Promise.resolve( );
+            return Promise.resolve( );
         }
 
     }
