@@ -182,6 +182,10 @@ class FieldSubmissionQueue {
                         // to avoid infinite immediate retries.
                         return true;
                     } else {
+                        if ( !failed ){
+                            console.log( 'Submitted one field. Current remaining queue is', this.submissionQueue );
+                        }
+
                         return this.submitAll( failed );
                     }
                 } );
