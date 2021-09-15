@@ -12,7 +12,7 @@ class FieldSubmissionQueue {
 
     constructor(){
         this.submissionQueue = {};
-        this.submissionOngoing = false;
+        this.submissionOngoing = null;
         this.lastAdded = {};
         this.repeatRemovalCounter = 0;
         this.submittedCounter = 0;
@@ -137,7 +137,7 @@ class FieldSubmissionQueue {
         }
 
         if ( this.submissionOngoing ){
-            return Promise.resolve();
+            return this.submissionOngoing;
         }
 
         const key = Object.keys( this.submissionQueue )[0];
@@ -147,14 +147,11 @@ class FieldSubmissionQueue {
             const fd = this.submissionQueue[key];
             delete this.submissionQueue[key];
             this._uploadStatus.update( 'ongoing' );
-            this.submissionOngoing = true;
             this._clearSubmissionInterval();
-
-            // Submit sequentially
             const keyParts = key.split( '_' );
             const method = keyParts[ 0 ];
 
-            return this._submitOne( FIELDSUBMISSION_URL,fd, method )
+            this.submissionOngoing = this._submitOne( FIELDSUBMISSION_URL,fd, method )
                 .catch( error => {
                     failed = true;
                     console.debug( 'failed to submit ', key, 'adding it back to the queue, error:', error );
@@ -174,7 +171,7 @@ class FieldSubmissionQueue {
                 .then( () => {
                     const status = failed ? 'fail' : 'success';
                     this._uploadStatus.update( status );
-                    this.submissionOngoing = false;
+                    this.submissionOngoing = null;
                     this._resetSubmissionInterval();
 
                     if ( failed && previousFailed ){
@@ -186,9 +183,12 @@ class FieldSubmissionQueue {
                             console.log( 'Submitted one field. Current remaining queue is', this.submissionQueue );
                         }
 
+                        // Submit sequentially
                         return this.submitAll( failed );
                     }
                 } );
+
+            return this.submissionOngoing;
         } else {
             return Promise.resolve( );
         }
