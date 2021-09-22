@@ -12,10 +12,10 @@ class FieldSubmissionQueue {
 
     constructor(){
         this.submissionQueue = {};
+        this.submissionOngoing = null;
         this.lastAdded = {};
         this.repeatRemovalCounter = 0;
         this.submittedCounter = 0;
-        this.queuedSubmitAllRequest = undefined;
         this._enabled = false;
 
         // TODO: move outside of constructor
@@ -94,9 +94,9 @@ class FieldSubmissionQueue {
             if ( deprecatedId ) {
                 fd.append( 'deprecated_id', deprecatedId );
                 // Overwrite if older value fieldsubmission in queue.
-                this.submissionQueue[ `PUT_${fieldPath}` ] = fd;
+                this.submissionQueue[ `PUT_${fieldPath}_${Date.now()}` ] = fd;
             } else {
-                this.submissionQueue[ `POST_${fieldPath}` ] = fd;
+                this.submissionQueue[ `POST_${fieldPath}_${Date.now()}` ] = fd;
             }
 
         } else {
@@ -128,9 +128,7 @@ class FieldSubmissionQueue {
         }
     }
 
-
-    submitAll() {
-        const that = this;
+    submitAll( previousFailed = false ) {
 
         if ( !this._enabled ) {
             this._uploadStatus.update( 'disabled' );
@@ -138,109 +136,63 @@ class FieldSubmissionQueue {
             return Promise.resolve();
         }
 
-        if ( this.ongoingSubmissions ) {
-        // store the successive request in a global variable (without executing it)
-            this.queuedSubmitAllRequest = this._submitAll;
-            this.ongoingSubmissions = this.ongoingSubmissions
-                .then( result => {
-                    let request;
-                    if ( that.queuedSubmitAllRequest ) {
-                        request = that.queuedSubmitAllRequest();
-                        /*
-                     * Any subsequent submitAll requests that arrived while the first request
-                     * was ongoing have overwritten the that.queuedSubmitAllRequest variable.
-                     * Only the last request received in this period is relevant.
-                     *
-                     * Before we execute the queued request we set the variable to undefined.
-                     *
-                     * This means that those subsequent requests will only be executed once.
-                     * Subsequent stacked request immediate return result.
-                     * In other words, the stack of successive submitAll request will never
-                     * be larger than 2.
-                     */
-                        that.queuedSubmitAllRequest = undefined;
-
-                        return request;
-                    }
-
-                    return result;
-                } );
-        } else {
-            this.ongoingSubmissions = this._submitAll();
+        if ( this.submissionOngoing ){
+            return this.submissionOngoing;
         }
 
-        this.ongoingSubmissions
-            .then( () => {
-                that.ongoingSubmissions = undefined;
-            } );
+        const key = Object.keys( this.submissionQueue )[0];
 
-        return this.ongoingSubmissions;
-    }
-
-    _submitAll() {
-        let _queue;
-        let method;
-        let url;
-        let status;
-        let keyParts;
-        const that = this;
-        let authRequired;
-
-        if ( Object.keys( this.submissionQueue ).length > 0 ) {
-
+        if ( key ) {
+            let failed = false;
+            const fd = this.submissionQueue[key];
+            delete this.submissionQueue[key];
             this._uploadStatus.update( 'ongoing' );
+            this._clearSubmissionInterval();
+            const keyParts = key.split( '_' );
+            const method = keyParts[ 0 ];
 
-            // convert fieldSubmissionQueue object to array of objects
-            _queue = Object.keys( that.submissionQueue ).map( key => ( {
-                key,
-                fd: that.submissionQueue[ key ]
-            } ) );
-
-            // empty the fieldSubmission queue
-            that.submissionQueue = {};
-
-            // clear submissionInterval to avoid a never-ending loop of submissions if /fieldsubmission is failing
-            that._clearSubmissionInterval();
-
-            // submit sequentially
-            return _queue.reduce( ( prevPromise, fieldSubmission ) => prevPromise.then( () => {
-                keyParts = fieldSubmission.key.split( '_' );
-                method = keyParts[ 0 ];
-                url = FIELDSUBMISSION_URL;
-
-                return that._submitOne( url, fieldSubmission.fd, method )
-                    .catch( error => {
-                        console.debug( 'failed to submit ', fieldSubmission.key, 'adding it back to the queue, error:', error );
-                        // add back to the fieldSubmission queue if the field value wasn't overwritten in the mean time
-                        if ( typeof that.submissionQueue[ fieldSubmission.key ] === 'undefined' ) {
-                            that.submissionQueue[ fieldSubmission.key ] = fieldSubmission.fd;
-                        }
-                        if ( error.status === 401 ) {
-                            authRequired = true;
-                        }
-
-                        return error;
-                    } );
-            } ), Promise.resolve() )
-                .then( () => {
-                    console.log( 'All done with queue submission. Current remaining queue is', that.submissionQueue );
-                    if ( authRequired ) {
+            this.submissionOngoing = this._submitOne( FIELDSUBMISSION_URL,fd, method )
+                .catch( error => {
+                    failed = true;
+                    console.debug( 'failed to submit ', key, 'adding it back to the queue, error:', error );
+                    // add back to the fieldSubmission queue if the field value wasn't overwritten in the mean time
+                    if ( typeof this.submissionQueue[ key ] === 'undefined' ) {
+                        this.submissionQueue[ key ] = fd;
+                    }
+                    if ( error.status === 401 ) {
                         gui.confirmLogin();
                     }
+
+                    return error;
                 } )
                 .catch( error => {
                     console.error( 'Unexpected error:', error.message );
                 } )
                 .then( () => {
-                    that._resetSubmissionInterval();
-                    status = Object.keys( that.submissionQueue ).length > 0 ? 'fail' : 'success';
-                    that._uploadStatus.update( status );
+                    const status = failed ? 'fail' : 'success';
+                    this._uploadStatus.update( status );
+                    this.submissionOngoing = null;
+                    this._resetSubmissionInterval();
 
-                    return true;
+                    if ( failed && previousFailed ){
+                        // After 2 subsequent failures, give up for now, and let the interval schedule the next attempt
+                        // to avoid infinite immediate retries.
+                        return true;
+                    } else {
+                        if ( !failed ){
+                            console.log( 'Submitted one field. Current remaining queue is', this.submissionQueue );
+                        }
+
+                        // Submit sequentially
+                        return this.submitAll( failed );
+                    }
                 } );
+
+            return this.submissionOngoing;
+        } else {
+            return Promise.resolve( );
         }
 
-        return Promise.resolve();
     }
 
     _submitOne( url, fd, method ) {
@@ -308,10 +260,9 @@ class FieldSubmissionQueue {
     }
 
     _resetSubmissionInterval() {
-        const that = this;
         this._clearSubmissionInterval();
         this.submissionInterval = setInterval( () => {
-            that.submitAll();
+            this.submitAll();
         }, 1 * 60 * 1000 );
     }
 
