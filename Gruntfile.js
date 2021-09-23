@@ -13,7 +13,6 @@ module.exports = grunt => {
     ];
     const path = require( 'path' );
     const nodeSass = require( 'node-sass' );
-    const bundles = require( './buildFiles' ).bundles;
 
     require( 'time-grunt' )( grunt );
     require( 'load-grunt-tasks' )( grunt );
@@ -82,7 +81,14 @@ module.exports = grunt => {
                     spawn: false,
                     livereload: true
                 }
-            }
+            },
+            mochaTest: {
+                files: [ 'app/**/*.js', 'test/server/**/*.js' ],
+                tasks: [ 'mochaTest:all' ],
+                options: {
+                    atBegin: true,
+                },
+            },
         },
         shell: {
             buildReadmeBadge: {
@@ -109,6 +115,7 @@ module.exports = grunt => {
                 // Does not work correctly yet for TError() calls and probably not for pug files either.
                 // npx i18next -c ./i18next-parser.config.js
             },
+            /*
             rollup: {
                 command: 'npx rollup --config'
             },
@@ -128,6 +135,10 @@ module.exports = grunt => {
                     .concat( [ 'rm -f public/js/build/*ie11-*-bundle.js' ] )
                     .join( '&&' )
             },
+            */
+            build: {
+                command: 'node ./scripts/build.js'
+            }
         },
         eslint: {
             check: {
@@ -156,14 +167,33 @@ module.exports = grunt => {
         karma: {
             options: {
                 singleRun: true,
-                configFile: 'test/client/config/karma.conf.js'
+                configFile: 'test/client/config/karma.conf.js',
+                customLaunchers: {
+                    ChromeHeadlessDebug: {
+                        base: 'ChromeHeadless',
+                        flags: [ '--no-sandbox', '--remote-debugging-port=9333' ],
+                    },
+                },
             },
             headless: {
                 browsers: [ 'ChromeHeadless' ]
             },
             browsers: {
                 browsers: [ 'Chrome', 'ChromeCanary', 'Firefox', 'Opera' /*,'Safari'*/ ],
-            }
+            },
+            watch: {
+                browsers: [ 'ChromeHeadlessDebug' ],
+                options: {
+                    autoWatch: true,
+                    client: {
+                        mocha: {
+                            timeout: Number.MAX_SAFE_INTEGER,
+                        },
+                    },
+                    reporters: [ 'dots' ],
+                    singleRun: false,
+                }
+            },
         },
         nyc: {
             cover: {
@@ -180,6 +210,7 @@ module.exports = grunt => {
                 args: [ 'grunt', 'mochaTest:all' ]
             }
         },
+        /*
         terser: {
             options: {
                 // https://github.com/enketo/enketo-express/issues/72
@@ -196,6 +227,7 @@ module.exports = grunt => {
                     }, {} )
             },
         },
+        */
         env: {
             develop: {
                 NODE_ENV: 'develop'
@@ -304,15 +336,17 @@ module.exports = grunt => {
         grunt.log.writeln( `File ${WIDGETS_SASS} created` );
     } );
 
-    grunt.registerTask( 'default', [ 'clean', 'locales', 'widgets', 'css', 'js', 'terser' ] );
+    grunt.registerTask( 'default', [ 'clean', 'locales', 'widgets', 'css', 'js' ] );
     grunt.registerTask( 'clean', [ 'shell:clean-js','shell:clean-css' , 'shell:clean-locales' ] );
     grunt.registerTask( 'locales', [ 'i18next' ] );
-    grunt.registerTask( 'js', [ 'widgets', 'shell:rollup' ] );
-    grunt.registerTask( 'js-ie11', [ 'shell:rollup-ie11', 'shell:polyfill-ie11', 'shell:babel-ie11', 'shell:browserify-ie11', 'replace:widgets-controller' ] );
-    grunt.registerTask( 'build-ie11', [ 'js-ie11', 'terser' ] );
+    grunt.registerTask( 'js', [ 'widgets', 'shell:build' ] );
+    //grunt.registerTask( 'js-ie11', [ 'shell:rollup-ie11', 'shell:polyfill-ie11', 'shell:babel-ie11', 'shell:browserify-ie11', 'replace:widgets-controller' ] );
+    //grunt.registerTask( 'build-ie11', [ 'js-ie11', 'terser' ] );
     grunt.registerTask( 'css', [ 'system-sass-variables:create', 'sass' ] );
-    grunt.registerTask( 'test', [ 'env:test', 'transforms', 'js', 'css', 'nyc:cover', 'karma:headless', 'shell:buildReadmeBadge', 'eslint:check' ] );
-    grunt.registerTask( 'test-browser', [ 'env:test', 'transforms', 'css', 'karma:browsers' ] );
+    grunt.registerTask( 'test', [ 'env:test', 'js', 'css', 'nyc:cover', 'karma:headless', 'shell:buildReadmeBadge', 'eslint:check' ] );
+    grunt.registerTask( 'test-browser', [ 'env:test', 'css', 'karma:browsers' ] );
+    grunt.registerTask( 'test-watch-client', [ 'env:test', 'karma:watch' ], );
+    grunt.registerTask( 'test-watch-server', [ 'env:test', 'watch:mochaTest' ], );
     grunt.registerTask( 'develop', [ 'env:develop', 'i18next', 'js', 'css', 'concurrent:develop' ] );
     grunt.registerTask( 'develop-ie11', [ 'env:develop', 'i18next', 'js-ie11', 'css', 'concurrent:develop' ] );
     grunt.registerTask( 'test-and-build', [ 'env:test', 'mochaTest:all', 'karma:headless', 'env:production', 'default' ] );

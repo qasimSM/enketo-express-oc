@@ -6,13 +6,14 @@
 
 import connection from '../../public/js/src/module/connection';
 import settings from '../../public/js/src/module/settings';
+import store from '../../public/js/src/module/store';
 
 /**
  * @see {@link https://github.com/enketo/enketo-express/pull/269#issuecomment-861887583}
  * TODO [2021-07-22]: remove these polyfills when CI is able to use a newer version of Chrome
  */
 import 'abortcontroller-polyfill/dist/polyfill-patch-fetch';
-import fromEntries from 'object.fromentries'; 'object.fromentries';
+import fromEntries from 'object.fromentries';
 if ( Object.fromEntries == null ) {
     fromEntries.shim();
 }
@@ -20,6 +21,10 @@ if ( Object.fromEntries == null ) {
 
 /**
  * @typedef {import('../../app/models/record-model').EnketoRecord} EnketoRecord
+ */
+
+/**
+ * @typedef {import('../../app/models/survey-model').SurveyObject} Survey
  */
 
 /**
@@ -48,10 +53,13 @@ describe( 'Connection', () => {
         /** @type { EnketoRecord } */
         let record;
 
+        /** @type { Survey } */
+        let survey;
+
         /** @type { StubbedRequest[] } */
         let requests;
 
-        beforeEach( () => {
+        beforeEach( done => {
             requests = [];
 
             record = {
@@ -61,6 +69,8 @@ describe( 'Connection', () => {
                 xml: '<model><something>a</something></model>',
                 files: [],
             };
+
+            survey = { enketoId };
 
             sandbox = sinon.createSandbox();
             sandbox.stub( settings, 'enketoId' ).get( () => enketoId );
@@ -80,14 +90,18 @@ describe( 'Connection', () => {
                     },
                 } );
             } );
+
+            store.init().then( () => done(), done );
         } );
 
-        afterEach( () => {
+        afterEach( done => {
             sandbox.restore();
+
+            store.record.removeAll().then( () => done(), done );
         } );
 
         it( 'uploads a record', done => {
-            connection.uploadRecord( record )
+            connection.uploadRecord( survey, record )
                 .then( result => {
                     expect( result.status ).to.equal( 201 );
                     expect( requests.length ).to.equal( 1 );

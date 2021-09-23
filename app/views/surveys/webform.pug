@@ -16,10 +16,7 @@ block style
 
 block script
   - var suffix = (type && type !== 'preview' && type !== 'single') ? '-' + type : ''
-  if environment == 'production'
-    script#main-script(defer, module, src=`${basePath}${offlinePath || ''}/js/build/enketo-webform${suffix}-bundle.min.js`)
-  else
-    script#main-script(defer, module, src=`${basePath}${offlinePath || ''}/js/build/enketo-webform${suffix}-bundle.js`)
+  script#main-script(defer, module, src=`${basePath}${offlinePath || ''}/js/build/enketo-webform${suffix}.js`)
   script.
     if ( /rv:11.0/i.test(navigator.userAgent) || /Edge\/\d./i.test(navigator.userAgent) ) {
       var mainScript = document.querySelector( '#main-script' );
@@ -41,7 +38,7 @@ block script
       document.body.appendChild( cssEscapeScript );
       var script = document.createElement( 'script' );
       script.type = 'text/javascript';
-      script.src = mainScriptSrc.replace('-bundle.', '-ie11-bundle.');
+      script.src = mainScriptSrc.replace('enketo-webform.', 'enketo-webform-ie11.');
       document.body.appendChild( script );
     }
 
