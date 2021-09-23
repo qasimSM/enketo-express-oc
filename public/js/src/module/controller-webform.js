@@ -83,9 +83,6 @@ function init( formEl, data, loadErrors = [] ) {
             form = new Form( formEl, data, formOptions );
             loadErrors = loadErrors.concat( form.init() );
 
-            if ( !settings.headless && data.instanceStr ) {
-                form.specialOcLoadValidate();
-            }
             // Determine whether UI language should be attempted to be switched.
             if ( getCurrentUiLanguage() !== form.currentLanguage &&  /^[a-z]{2,3}/.test( form.currentLanguage ) )  {
                 localize( document.querySelector( 'body' ), form.currentLanguage )

@@ -1,7 +1,6 @@
 import settings from './settings';
 import { t } from './translator';
 import utils from './utils';
-import Promise from 'lie';
 import $ from 'jquery';
 import gui from './gui';
 import MD5 from 'crypto-js/md5';
