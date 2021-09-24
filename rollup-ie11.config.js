@@ -5,7 +5,6 @@ const commonjs = require( 'rollup-plugin-commonjs' );
 const builtins = require( 'rollup-plugin-node-builtins' );
 const globals = require( 'rollup-plugin-node-globals' );
 const alias = require( 'rollup-plugin-alias' );
-const buildFiles = require( './buildFiles' );
 const path = require( 'path' );
 const pkg = require( './package' );
 
@@ -46,12 +45,14 @@ const onwarn = warning => {
     console.warn( `(!) ${warning.message}` );
 };
 
-const configs = buildFiles.entries.map( ( entryFile, i ) => {
+const ie11Bundles = pkg.entries.map( file => file.replace( '/src/', '/build/' ) );
+
+const configs = ie11Bundles.map( ( entryFile, i ) => {
     return {
         input: entryFile,
         output: {
             // IE11 mod
-            file: buildFiles.bundles[ i ].replace( '-bundle.js', '-ie11-src-bundle.js' ),
+            file: ie11Bundles[ i ].replace( '.js', '-ie11-src.js' ),
             format: 'iife',
         },
         plugins,

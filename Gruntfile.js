@@ -13,6 +13,8 @@ module.exports = grunt => {
     ];
     const path = require( 'path' );
     const nodeSass = require( 'node-sass' );
+    const pkg = require( './package' );
+    const ie11Bundles = pkg.entries.map( file => file.replace( '/src/', '/build/' ) );
 
     require( 'time-grunt' )( grunt );
     require( 'load-grunt-tasks' )( grunt );
@@ -110,32 +112,29 @@ module.exports = grunt => {
             'clean-js': {
                 command: 'rm -f public/js/build/* && rm -f public/js/*.js'
             },
+            'clean-temp-ie11-js' : {
+                command: 'rm -f public/js/build/*ie11-*.js'
+            },
             translation: {
                 command: 'echo "No automatic translation key generation at the moment."'
                 // Does not work correctly yet for TError() calls and probably not for pug files either.
                 // npx i18next -c ./i18next-parser.config.js
             },
-            /*
-            rollup: {
-                command: 'npx rollup --config'
-            },
             'rollup-ie11': {
                 command: 'npx rollup --config rollup-ie11.config.js'
             },
             'babel-ie11': {
-                command: bundles
-                    .map( bundle => bundle.replace( '-bundle.js',  '-ie11-src-bundle.js' ) )
-                    .map( bundle => `npx babel ${bundle} --config-file ./babel-ie11.config.js --out-file ${bundle.replace( '-ie11-src-bundle.', '-ie11-babel-bundle.' )}` )
+                command: ie11Bundles
+                    .map( bundle => bundle.replace( '.js',  '-ie11-src.js' ) )
+                    .map( bundle => `npx babel ${bundle} --config-file ./babel-ie11.config.js --out-file ${bundle.replace( '-ie11-src.', '-ie11-babel.' )}` )
                     .join( '&&' )
             },
             'browserify-ie11': {
-                command: bundles
-                    .map( bundle => bundle.replace( '-bundle.js',  '-ie11-babel-bundle.js' ) )
-                    .map( bundle => `npx browserify node_modules/enketo-core/src/js/workarounds-ie11.js ${bundle} -o ${bundle.replace( '-ie11-babel-bundle.', '-ie11-bundle.' )}` )
-                    .concat( [ 'rm -f public/js/build/*ie11-*-bundle.js' ] )
+                command: ie11Bundles
+                    .map( bundle => bundle.replace( '.js',  '-ie11-babel.js' ) )
+                    .map( bundle => `npx browserify node_modules/enketo-core/src/js/workarounds-ie11.js ${bundle} -o ${bundle.replace( '-ie11-babel.', '-ie11-browserify.' )}` )
                     .join( '&&' )
             },
-            */
             build: {
                 command: 'node ./scripts/build.js'
             }
@@ -210,16 +209,16 @@ module.exports = grunt => {
                 args: [ 'grunt', 'mochaTest:all' ]
             }
         },
-        /*
+        // IE11 only
         terser: {
             options: {
                 // https://github.com/enketo/enketo-express/issues/72
                 keep_classnames: true,
             },
             all: {
-                files: bundles
-                    .concat( bundles.map( bundle => bundle.replace( '-bundle.', '-ie11-bundle.' ) ) )
-                    .map( bundle => [ bundle.replace( '.js', '.min.js' ), [ bundle ] ] )
+                files: ie11Bundles
+                    .map( bundle => bundle.replace( '.js', '-ie11-browserify.js' ) )
+                    .map( bundle => [ bundle.replace( '-ie11-browserify.js', '-ie11.js' ), [ bundle ] ] )
                     .reduce( ( o, [ key, value ] ) => {
                         o[ key ] = value;
 
@@ -227,7 +226,6 @@ module.exports = grunt => {
                     }, {} )
             },
         },
-        */
         env: {
             develop: {
                 NODE_ENV: 'develop'
@@ -254,8 +252,8 @@ module.exports = grunt => {
         replace: {
             // https://github.com/OpenClinica/enketo-express-oc/issues/426
             // widget.name is not working properly on IE 11 win 10
-            'widgets-controller': {
-                src: [ 'public/js/build/*ie11-bundle.js' ],
+            'widgets-controller-ie11': {
+                src: [ 'public/js/build/*-ie11-browserify.js' ],
                 overwrite: true,
                 replacements: [ {
                     from: 'Widget.name',
@@ -340,8 +338,8 @@ module.exports = grunt => {
     grunt.registerTask( 'clean', [ 'shell:clean-js','shell:clean-css' , 'shell:clean-locales' ] );
     grunt.registerTask( 'locales', [ 'i18next' ] );
     grunt.registerTask( 'js', [ 'widgets', 'shell:build' ] );
-    //grunt.registerTask( 'js-ie11', [ 'shell:rollup-ie11', 'shell:polyfill-ie11', 'shell:babel-ie11', 'shell:browserify-ie11', 'replace:widgets-controller' ] );
-    //grunt.registerTask( 'build-ie11', [ 'js-ie11', 'terser' ] );
+    grunt.registerTask( 'js-ie11', [ 'shell:rollup-ie11', 'shell:polyfill-ie11', 'shell:babel-ie11', 'shell:browserify-ie11', 'replace:widgets-controller-ie11' ] );
+    grunt.registerTask( 'build-ie11', [ 'js-ie11', 'terser', 'shell:clean-temp-ie11-js' ] );
     grunt.registerTask( 'css', [ 'system-sass-variables:create', 'sass' ] );
     grunt.registerTask( 'test', [ 'env:test', 'js', 'css', 'nyc:cover', 'karma:headless', 'shell:buildReadmeBadge', 'eslint:check' ] );
     grunt.registerTask( 'test-browser', [ 'env:test', 'css', 'karma:browsers' ] );

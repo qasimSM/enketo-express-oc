@@ -336,9 +336,9 @@ describe( 'api', () => {
                 ret: false,
                 auth: true,
                 status: 200,
-                expected: /\/single\/fs\/participant\/i\/[A-z0-9]{32}$/,
+                expected: /\/single\/fs\/participant\/i\/[A-z0-9]{32}\?/,
             } );
-            // POST /survey/collect/participant
+            // POST /survey/collect/offline/participant
             testResponse( {
                 version,
                 endpoint: '/survey/collect/offline/participant',
@@ -346,7 +346,7 @@ describe( 'api', () => {
                 ret: false,
                 auth: true,
                 status: 200,
-                expected: /\/fs\/participant\/x\/[A-z0-9]{32}$/,
+                expected: /\/fs\/participant\/x\/[A-z0-9]{32}\?/,
             } );
         } );
 
