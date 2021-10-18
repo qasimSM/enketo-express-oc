@@ -1,28 +1,15 @@
 language: node_js
 sudo: true
 node_js:
-  - "12"
-dist: trusty
-before_script:
-  - npm install -g grunt-cli
+  - "14"
+  - "16"
+dist: focal
+before_install:
+  - npm install -g npm@^6
   - chmod 777 ./setup/travis/travis-redis.sh
   - ./setup/travis/travis-redis.sh
+before_script:
+  - npm install -g grunt-cli
   - grunt css
-addons: 
+addons:
   chrome: stable
-services:
-  - redis-server
-before_deploy:
-  - sh ./tools/release.sh
-deploy:
-  provider: releases
-  api_key:
-    secure: W3nIzaD4My6ePIMS7rOjA8FIDCY8UokHQGmWhcFsuh2KssfYHlKNsadyPWWOOTxgEVUhOrOMprLTNLzBHxVt0VpuKUgie4+G8X2CMwhLj1wSLTPRVB3eeMJAyUMAPlhBVxuu56LdZQFSbXJDyKCBO9yBYpbo70SVUsIwMRtkasQ=
-  file_glob: true
-  file: ../enketo-express-packages/*.zip
-  on:
-    tags: true
-    condition: $TRAVIS_TAG =~ \.oc-
-    repo: OpenClinica/enketo-express-oc
-    node: 8
-    all_branches: true 
