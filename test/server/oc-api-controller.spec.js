@@ -103,12 +103,15 @@ describe( 'api', () => {
         const ecid = typeof test.ecid === 'undefined' ? 'a1b1' : test.ecid;
         const pid = typeof test.pid === 'undefined' ? 'qwe' : test.pid;
         const interfce = typeof test.interface === 'undefined' ? false : test.interface;
+        const offlineEnabled = !!test.offline;
 
         it( `${test.method.toUpperCase()} /oc/api/v${version}${endpoint} with ${authDesc} authentication ` +
             `and ${server}, ${id}, ${ret}, ${instance}, ${instanceId}, ${test.theme}, ` +
             `parentWindowOrigin: ${test.parentWindowOrigin}, defaults: ${JSON.stringify( test.defaults )}, ` +
             `interface:${interfce}, pid:${pid}, ecid:${ecid}, jini:${test.jini} responds with ${test.status}`,
         done => {
+            app.set( 'offline enabled', offlineEnabled );
+
             request( app )[ test.method ]( `/oc/api/v${version}${endpoint}` )
                 .set( auth )[ dataSendMethod ]( {
                     server_url: server,
@@ -346,6 +349,7 @@ describe( 'api', () => {
                 ret: false,
                 auth: true,
                 status: 200,
+                offline: true,
                 expected: /\/fs\/participant\/x\/[A-z0-9]{32}\?/,
             } );
         } );
@@ -820,6 +824,7 @@ describe( 'api', () => {
                     endpoint,
                     instanceId: true,
                     instance: true,
+                    offline: true,
                     status: endpoint.startsWith( '/instance' ) ? 201 : 200,
                 };
                 obj.parentWindowOrigin = 'http://example.com';
@@ -837,6 +842,7 @@ describe( 'api', () => {
                     endpoint,
                     instanceId: true,
                     instance: true,
+                    offline: true,
                     status: endpoint.startsWith( '/instance' ) ? 201 : 200,
                 };
                 obj.ecid = 'abcd';
@@ -851,6 +857,7 @@ describe( 'api', () => {
                     endpoint,
                     instanceId: true,
                     instance: true,
+                    offline: true,
                     status: 400,
                 };
                 obj.ecid = '';
@@ -866,6 +873,7 @@ describe( 'api', () => {
                     endpoint,
                     instanceId: true,
                     instance: true,
+                    offline: true,
                     status: endpoint.startsWith( '/instance' ) ? 201 : 200,
                 };
                 obj.pid = '123';
@@ -880,6 +888,7 @@ describe( 'api', () => {
                     endpoint,
                     instanceId: true,
                     instance: true,
+                    offline: true,
                     status: endpoint.startsWith( '/instance' ) ? 201 : 200,
                 };
                 obj.pid = ''; // is optional
