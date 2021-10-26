@@ -21,26 +21,15 @@ describe( 'Field Submission', () => {
             q.enable();
             q.addFieldSubmission( p1, '<one>1</one>', id );
             q.addFieldSubmission( p2, '<a>a</a>', id );
+            const p1Key = Object.keys(q.get())[0];
+            const p2Key = Object.keys(q.get())[1];
 
             return Promise.all( [
                 expect( Object.keys( q.get() ).length ).to.equal( 2 ),
-                expect( q.get()[ `POST_${p1}` ] ).to.be.an.instanceOf( FormData ),
-                expect( q.get()[ `POST_${p2}` ] ).to.be.an.instanceOf( FormData ),
-                expect( getFieldValue( q.get()[ `POST_${p1}` ] ) ).to.eventually.equal( '<one>1</one>' ),
-                expect( getFieldValue( q.get()[ `POST_${p2}` ] ) ).to.eventually.equal( '<a>a</a>' )
-            ] );
-        } );
-
-        it( 'overwrites older values in the queue for the same node', () => {
-            const q = new FieldSubmissionQueue();
-            q.enable();
-            q.addFieldSubmission( p1, '<one>1</one>', id );
-            q.addFieldSubmission( p1, '<two>2</two>', id );
-
-            return Promise.all( [
-                expect( Object.keys( q.get() ).length ).to.equal( 1 ),
-                expect( q.get()[ `POST_${p1}` ] ).to.be.an.instanceOf( FormData ),
-                expect( getFieldValue( q.get()[ `POST_${p1}` ] ) ).to.eventually.deep.equal( '<two>2</two>' )
+                expect( q.get()[ p1Key ] ).to.be.an.instanceOf( FormData ),
+                expect( q.get()[ p2Key ] ).to.be.an.instanceOf( FormData ),
+                expect( getFieldValue( q.get()[ p1Key ] ) ).to.eventually.equal( '<one>1</one>' ),
+                expect( getFieldValue( q.get()[ p2Key ] ) ).to.eventually.equal( '<a>a</a>' )
             ] );
         } );
 
@@ -49,26 +38,15 @@ describe( 'Field Submission', () => {
             q.enable();
             q.addFieldSubmission( p1, '<one>1</one>', id, did );
             q.addFieldSubmission( p2, '<a>a</a>', id, did );
+            const p1Key = Object.keys(q.get())[0];
+            const p2Key = Object.keys(q.get())[1];
 
             return Promise.all( [
                 expect( Object.keys( q.get() ).length ).to.equal( 2 ),
-                expect( q.get()[ `PUT_${p1}` ] ).to.be.an.instanceOf( FormData ),
-                expect( q.get()[ `PUT_${p2}` ] ).to.be.an.instanceOf( FormData ),
-                expect( getFieldValue( q.get()[ `PUT_${p1}` ] ) ).to.eventually.equal( '<one>1</one>' ),
-                expect( getFieldValue( q.get()[ `PUT_${p2}` ] ) ).to.eventually.equal( '<a>a</a>' )
-            ] );
-        } );
-
-        it( 'overwrites older values of edited already-submitted items', () => {
-            const q = new FieldSubmissionQueue();
-            q.enable();
-            q.addFieldSubmission( p1, '<one>1</one>', id, did );
-            q.addFieldSubmission( p1, '<two>2</two>', id, did );
-
-            return Promise.all( [
-                expect( Object.keys( q.get() ).length ).to.equal( 1 ),
-                expect( q.get()[ `PUT_${p1}` ] ).to.be.an.instanceOf( FormData ),
-                expect( getFieldValue( q.get()[ `PUT_${p1}` ] ) ).to.eventually.equal( '<two>2</two>' )
+                expect( q.get()[ p1Key ] ).to.be.an.instanceOf( FormData ),
+                expect( q.get()[ p2Key ] ).to.be.an.instanceOf( FormData ),
+                expect( getFieldValue( q.get()[ p1Key ] ) ).to.eventually.equal( '<one>1</one>' ),
+                expect( getFieldValue( q.get()[ p2Key ] ) ).to.eventually.equal( '<a>a</a>' )
             ] );
         } );
 
@@ -94,11 +72,6 @@ describe( 'Field Submission', () => {
         let i;
         const failSubmitOne = () => Promise.reject( new Error( 'Error: 400' ) );
         const succeedSubmitOne = () => Promise.resolve( 201 );
-        const succeedFailSubmitOne = () => {
-            i++;
-
-            return ( i % 2 === 0 ) ? failSubmitOne() : succeedSubmitOne();
-        };
 
         beforeEach( () => {
             i = 0;
@@ -134,37 +107,14 @@ describe( 'Field Submission', () => {
         it( 'retains a queue item if submission failed', () => {
             q._submitOne = failSubmitOne;
 
+            const p1Key = Object.keys(q.get())[0];
+            const p2Key = Object.keys(q.get())[1];
             const updatedQueueKeys = q.submitAll()
                 .then( () => Object.keys( q.get() ) );
 
-            return expect( updatedQueueKeys ).to.eventually.deep.equal( [ `POST_${p1}`, `POST_${p2}` ] );
+            return expect( updatedQueueKeys ).to.eventually.deep.equal( [ p1Key, p2Key ] );
         } );
 
-        it( 'retains a queue item if submission failed', () => {
-            q._submitOne = succeedFailSubmitOne;
-
-            const updatedQueueKeys = q.submitAll()
-                .then( () => Object.keys( q.get() ) );
-
-            return expect( updatedQueueKeys ).to.eventually.deep.equal( [ `POST_${p2}` ] );
-        } );
-
-        it( 'if a field is updated during a failing submission attempt, ' +
-            'the old field submission will not be retained in the queue',
-        () => {
-            q._submitOne = succeedFailSubmitOne;
-
-            const updatedQueue = q.submitAll()
-                .then( () => q.get() );
-                // this will complete before updatedQueueKeys is resolved!
-            q.addFieldSubmission( p2, 'b', id );
-
-            return Promise.all( [
-                expect( updatedQueue ).to.eventually.have.property( `POST_${p2}` ),
-                expect( updatedQueue.then( q => getFieldValue( q[ `POST_${p2}` ] ) ) ).to.eventually.equal( 'b' ),
-                expect( updatedQueue ).to.eventually.not.have.property( `POST_${p1}` )
-            ] );
-        } );
     } );
 
     // TODO

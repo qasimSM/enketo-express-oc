@@ -30,14 +30,11 @@ router
     .post( '/:encrypted_enketo_id_participant', submit )
     .post( '/complete/:enketo_id', complete )
     .post( '/complete/:encrypted_enketo_id_fs_c', complete )
-    .put( '/:enketo_id', submit )
-    .put( '/:encrypted_enketo_id_fs_c', submit )
-    .put( '/:encrypted_enketo_id_view_dn', submit )
-    .put( '/:encrypted_enketo_id_view_dnc', submit )
-    .put( '/:encrypted_enketo_id_rfc', submit )
-    .put( '/:encrypted_enketo_id_rfc_c', submit )
-    .put( '/:encrypted_enketo_id_headless', submit )
-    .put( '/:encrypted_enketo_id_participant', submit )
+    .post( '/:encrypted_enketo_id_view_dn', submit )
+    .post( '/:encrypted_enketo_id_view_dnc', submit )
+    .post( '/:encrypted_enketo_id_rfc', submit )
+    .post( '/:encrypted_enketo_id_rfc_c', submit )
+    .post( '/:encrypted_enketo_id_headless', submit )
     .put( '/complete/:enketo_id', complete )
     .put( '/complete/:encrypted_enketo_id_fs_c', complete )
     .put( '/complete/:encrypted_enketo_id_view_dn', complete )
@@ -100,7 +97,7 @@ function _request( type, req, res, next ) {
                 timeout: req.app.get( 'timeout' ) + 500
             };
 
-            // pipe the request 
+            // pipe the request
             req.pipe( request( options ) ).on( 'response', orResponse => {
                 if ( orResponse.statusCode === 201 ) {
                     // TODO: Do we really want to log all field submissions? It's a huge amount.

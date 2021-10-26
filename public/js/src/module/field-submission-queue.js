@@ -92,11 +92,9 @@ class FieldSubmissionQueue {
 
             if ( deprecatedId ) {
                 fd.append( 'deprecated_id', deprecatedId );
-                // Overwrite if older value fieldsubmission in queue.
-                this.submissionQueue[ `PUT_${fieldPath}_${Date.now()}` ] = fd;
-            } else {
-                this.submissionQueue[ `POST_${fieldPath}_${Date.now()}` ] = fd;
             }
+
+            this.submissionQueue[ `POST_${fieldPath}_${Date.now()}` ] = fd;
 
         } else {
             console.error( 'Attempt to add field submission without path, XML fragment or instanceID' );
@@ -230,8 +228,6 @@ class FieldSubmissionQueue {
     }
 
     complete( instanceId, deprecatedId ) {
-        let error;
-        let method = 'POST';
 
         if ( !this._enabled ) {
             this._uploadStatus( 'disabled' );
@@ -245,13 +241,12 @@ class FieldSubmissionQueue {
 
             if ( deprecatedId ) {
                 fd.append( 'deprecated_id', deprecatedId );
-                method = 'PUT';
             }
 
-            return this._submitOne( FIELDSUBMISSION_COMPLETE_URL, fd, method )
+            return this._submitOne( FIELDSUBMISSION_COMPLETE_URL, fd, 'POST' )
                 .then( () => true );
         } else {
-            error = new Error( 'Attempt to make a "complete" request when queue is not empty or instanceId is missing', this.submissionQueue, instanceId );
+            const error = new Error( 'Attempt to make a "complete" request when queue is not empty or instanceId is missing', this.submissionQueue, instanceId );
             console.error( error );
 
             return Promise.reject( error );
