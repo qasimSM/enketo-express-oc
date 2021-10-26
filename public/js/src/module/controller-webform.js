@@ -41,6 +41,7 @@ const formOptions = {
  * @property {Document[]} external
  * @property {Survey} survey
  * @property {InstanceAttachment[]} [instanceAttachments]
+ * @property {boolean} [isEditing]
  */
 
 /**
@@ -60,10 +61,7 @@ function init( formEl, data, loadErrors = [] ) {
                 data.instanceStr = record.xml;
             }
 
-            if ( record && record.draft ) {
-                // Make sure that Enketo Core won't do the instanceID --> deprecatedID move
-                data.submitted = false;
-            }
+            data.submitted = Boolean( data.isEditing );
 
             if ( data.instanceAttachments ) {
                 fileManager.setInstanceAttachments( data.instanceAttachments );
@@ -197,7 +195,6 @@ function _resetForm( survey, options = {} ) {
 
             const loadErrors = form.init();
 
-            // formreset event will update the form media:
             form.view.html.dispatchEvent( events.FormReset() );
 
             if ( options.isOffline ) {
@@ -217,10 +214,11 @@ function _resetForm( survey, options = {} ) {
 /**
  * Loads a record from storage
  *
- * @param  { string } instanceId - [description]
- * @param  {=boolean?} confirmed -  [description]
+ * @param {Survey} survey
+ * @param {string} instanceId - [description]
+ * @param {=boolean?} confirmed -  [description]
  */
-function _loadRecord( instanceId, confirmed ) {
+function _loadRecord( survey, instanceId, confirmed ) {
     let texts;
     let choices;
     let loadErrors;
@@ -236,7 +234,7 @@ function _loadRecord( instanceId, confirmed ) {
         gui.confirm( texts, choices )
             .then( confirmed => {
                 if ( confirmed ) {
-                    _loadRecord( instanceId, true );
+                    _loadRecord( survey, instanceId, true );
                 }
             } );
     } else {
@@ -254,8 +252,11 @@ function _loadRecord( instanceId, confirmed ) {
                     submitted: false
                 }, formOptions );
                 loadErrors = form.init();
-                // formreset event will update the form media:
+
                 form.view.html.dispatchEvent( events.FormReset() );
+
+                formCache.updateMedia( survey );
+
                 form.recordName = record.name;
                 records.setActive( record.instanceId );
 
@@ -672,7 +673,7 @@ function _setEventHandlers( survey ) {
     } );
 
     $doc.on( 'click', '.record-list__records__record[data-draft="true"]', function() {
-        _loadRecord( $( this ).attr( 'data-id' ), false );
+        _loadRecord( survey, $( this ).attr( 'data-id' ), false );
     } );
 
     $doc.on( 'click', '.record-list__records__record', function() {
