@@ -2,6 +2,17 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+[3.0.4] - 2021-11-04
+---------------------
+##### Changed
+- [#317](https://github.com/enketo/enketo-express/pull/317) Docker: run `grunt` only when building image; remove config and commit logic from start-up script; update to node 14
+
+##### Fixed
+- [#337](https://github.com/enketo/enketo-express/issues/337) Docker: cannot start because `grunt` expects missing `esbuild` dev dependency
+- [#348](https://github.com/enketo/enketo-express/pull/348) Escaped form ID when requesting form list
+- [#360](https://github.com/enketo/enketo-express/pull/360) Ensure dynamic manifest URLs are mapped by
+- [#351](https://github.com/enketo/enketo-express/issues/351) Fix query parameters not passed to form resources
+
 [3.0.3] - 2021-10-21
 ---------------------
 ##### Fixed
@@ -33,15 +44,15 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 [2.8.0] - 2021-07-13
 ---------------------
-#### Added
+##### Added
 - Support for odk:setgeopoint for odk-instance-first-load and xforms-value-changed events.
 - Support for [last-saved](https://docs.getodk.org/form-logic/?highlight=last%20saved#values-from-the-last-saved-record) values!
 
-#### Changed
+##### Changed
 - Updated Russian translation.
 - Increased maximum number of columns in Grid Theme from 10 to 13.
 
-#### Fixed
+##### Fixed
 - Range default or loaded value (number) not shown.
 - Distresspicker default or loaded mercury level not shown.
 - Radiobuttons value still shown in view after programmatic clearing (e.g. by a calculation).
