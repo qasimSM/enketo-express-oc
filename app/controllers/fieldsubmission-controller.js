@@ -42,12 +42,12 @@ router
     .put( '/complete/:encrypted_enketo_id_rfc', complete )
     .put( '/complete/:encrypted_enketo_id_rfc_c', complete )
     .put( '/complete/:encrypted_enketo_id_headless', complete )
-    .delete( '/:enketo_id', submit )
-    .delete( '/:encrypted_enketo_id_fs_c', submit )
-    .delete( '/:encrypted_enketo_id_rfc', submit )
-    .delete( '/:encrypted_enketo_id_rfc_c', submit )
-    .delete( '/:encrypted_enketo_id_headless', submit )
-    .delete( '/:encrypted_enketo_id_participant', submit )
+    .delete( '/:enketo_id/*', del ) // fieldsubmission API 2.0.0
+    .delete( '/:encrypted_enketo_id_fs_c/*', del ) // fieldsubmission API 2.0.0
+    .delete( '/:encrypted_enketo_id_rfc/*', del ) // fieldsubmission API 2.0.0
+    .delete( '/:encrypted_enketo_id_rfc_c/*', del ) // fieldsubmission API 2.0.0
+    .delete( '/:encrypted_enketo_id_headless/*', del ) // fieldsubmission API 2.0.0
+    .delete( '/:encrypted_enketo_id_participant/*', del ) // fieldsubmission API 2.0.0
     .all( '/*', ( req, res, next ) => {
         const error = new Error( 'Not allowed' );
         error.status = 405;
@@ -62,6 +62,10 @@ function submit( req, res, next ) {
     _request( 'field', req, res, next );
 }
 
+function del( req, res, next ) {
+    _request( 'delete', req, res, next );
+}
+
 /**
  * Simply pipes well-formed request to the OpenRosa server and
  * copies the response received.
@@ -73,23 +77,23 @@ function submit( req, res, next ) {
  * @return {[type]}        [description]
  */
 function _request( type, req, res, next ) {
-    let credentials;
-    let options;
     let submissionUrl;
-    const paramName = req.app.get( 'query parameter to pass to submission' );
-    const paramValue = req.query[ paramName ];
-    const query = ( paramValue ) ? `?${paramName}=${paramValue}` : '';
-    const id = req.enketoId;
-
-    surveyModel.get( id )
+    surveyModel.get( req.enketoId )
         .then( survey => {
-            submissionUrl = _getSubmissionUrl( survey.openRosaServer, type ) + query;
-            credentials = userModel.getCredentials( req );
+            if ( type === 'delete' ){
+                submissionUrl = _getSubmissionUrlAPI2( survey.openRosaServer, req.originalUrl );
+            } else {
+                const ecidValue = req.query[ 'ecid' ];
+                const query = ecidValue ? `?ecid=${ecidValue}` : '';
+                submissionUrl = _getSubmissionUrlAPI1( survey.openRosaServer, type ) + query;
+            }
+
+            const credentials = userModel.getCredentials( req );
 
             return communicator.getAuthHeader( submissionUrl, credentials );
         } )
         .then( authHeader => {
-            options = {
+            const options = {
                 url: submissionUrl,
                 headers: authHeader ? {
                     'Authorization': authHeader
@@ -112,10 +116,14 @@ function _request( type, req, res, next ) {
         .catch( next );
 }
 
-function _getSubmissionUrl( server, type ) {
+function _getSubmissionUrlAPI1( server, type ) {
     const lastPathPart = ( type === 'field' || !type ) ? '' : `/${type}`;
 
     return ( server.lastIndexOf( '/' ) === server.length - 1 ) ? `${server}fieldsubmission${lastPathPart}` : `${server}/fieldsubmission${lastPathPart}`;
+}
+
+function _getSubmissionUrlAPI2( server, path ) {
+    return  new URL( path, server ).href;
 }
 
 /*

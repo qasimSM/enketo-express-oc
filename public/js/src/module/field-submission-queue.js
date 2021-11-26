@@ -4,8 +4,9 @@ import utils from './utils';
 import $ from 'jquery';
 import gui from './gui';
 import MD5 from 'crypto-js/md5';
-const FIELDSUBMISSION_URL = ( settings.enketoId ) ? `${settings.basePath}/fieldsubmission/${settings.enketoId}${utils.getQueryString( settings.submissionParameter )}` : null;
-const FIELDSUBMISSION_COMPLETE_URL = ( settings.enketoId ) ? `${settings.basePath}/fieldsubmission/complete/${settings.enketoId}${utils.getQueryString( settings.submissionParameter )}` : null;
+const FIELDSUBMISSION_URL = settings.enketoId  ? `${settings.basePath}/fieldsubmission/${settings.enketoId}${utils.getQueryString( { name: 'ecid', value: settings.ecid } )}` : null;
+const FIELDSUBMISSION_2_URL = settings.enketoId  ? `${settings.basePath}/fieldsubmission/${settings.enketoId}/ecid/${settings.ecid}` : null;
+const FIELDSUBMISSION_COMPLETE_URL = ( settings.enketoId ) ? `${settings.basePath}/fieldsubmission/complete/${settings.enketoId}${utils.getQueryString( { name: 'ecid', value: settings.ecid } )}` : null;
 
 class FieldSubmissionQueue {
 
@@ -70,6 +71,7 @@ class FieldSubmissionQueue {
         return this.submissionQueue;
     }
 
+    // This still follows the old API: https://app.swaggerhub.com/apis-docs/martijnr/openclinica-fieldsubmission/1.0.0
     addFieldSubmission( fieldPath, xmlFragment, instanceId, deprecatedId, file ) {
         let fd;
 
@@ -101,27 +103,18 @@ class FieldSubmissionQueue {
         }
     }
 
-    addRepeatRemoval( xmlFragment, instanceId, deprecatedId ) {
-        let fd;
-
+    // This follows the new API: https://app.swaggerhub.com/apis-docs/martijnr/openclinica-fieldsubmission/2.0.0
+    addRepeatRemoval( repeatNodeName, repeatOrdinal, instanceId ) {
         // No duplicate check necessary for deleting as the event should only fire once.
 
-        fd = new FormData();
-        if ( xmlFragment && instanceId ) {
-
-            fd.append( 'xml_submission_fragment_file', new Blob( [ xmlFragment ], {
-                type: 'text/xml'
-            } ), 'xml_submission_fragment_file.xml' );
-
-            fd.append( 'instance_id', instanceId );
-            if ( deprecatedId ) {
-                fd.append( 'deprecated_id', deprecatedId );
-            }
-
-            // Overwrite if older value fieldsubmission in queue.
-            this.submissionQueue[ `DELETE_${this.repeatRemovalCounter++}` ] = fd;
+        if ( repeatNodeName && repeatOrdinal ) {
+            this.submissionQueue[ `DELETE_${this.repeatRemovalCounter++}` ] = {
+                instance: instanceId,
+                repeat: repeatNodeName,
+                ordinal: repeatOrdinal
+            };
         } else {
-            console.error( 'Attempt to add repeat removal without XML fragment or instanceID' );
+            console.error( 'Attempt to add repeat removal request without repeat name or repeat ordinal' );
         }
     }
 
@@ -147,8 +140,9 @@ class FieldSubmissionQueue {
             this._clearSubmissionInterval();
             const keyParts = key.split( '_' );
             const method = keyParts[ 0 ];
+            const url = method === 'DELETE' ? `${FIELDSUBMISSION_2_URL}/instance/${fd.instance}/repeat/${fd.repeat}/ordinal/${fd.ordinal}` : FIELDSUBMISSION_URL;
 
-            this.submissionOngoing = this._submitOne( FIELDSUBMISSION_URL,fd, method )
+            this.submissionOngoing = this._submitOne( url,fd, method )
                 .catch( error => {
                     failed = true;
                     console.debug( 'failed to submit ', key, 'adding it back to the queue, error:', error );
@@ -192,7 +186,7 @@ class FieldSubmissionQueue {
 
     }
 
-    _submitOne( url, fd, method ) {
+    _submitOne( url, fd = null, method ) {
         const that = this;
         let error;
 

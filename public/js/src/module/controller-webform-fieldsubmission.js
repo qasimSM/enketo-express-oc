@@ -875,17 +875,27 @@ function _setFormEventHandlers() {
         form.view.html.addEventListener( events.Removed().type, event => {
             const updated = event.detail || {};
             const instanceId = form.instanceID;
-            if ( !updated.xmlFragment ) {
-                console.error( 'Could not submit repeat removal fieldsubmission. XML fragment missing.' );
+
+            if ( !updated.nodeName ) {
+                console.error( 'Could not submit repeat removal fieldsubmission. Node name is missing.' );
 
                 return;
             }
+            if ( !updated.ordinal ) {
+                console.error( 'Could not submit repeat removal fieldsubmission. Ordinal is missing.' );
+
+                return;
+            }
+
             if ( !instanceId ) {
                 console.error( 'Could not submit repeat removal fieldsubmission. InstanceID missing' );
+
+                return;
             }
 
             postHeartbeat();
-            fieldSubmissionQueue.addRepeatRemoval( updated.xmlFragment, instanceId, form.deprecatedID );
+
+            fieldSubmissionQueue.addRepeatRemoval( updated.nodeName, updated.ordinal, instanceId );
             fieldSubmissionQueue.submitAll();
         } );
         // Field is changed

@@ -21,8 +21,8 @@ describe( 'Field Submission', () => {
             q.enable();
             q.addFieldSubmission( p1, '<one>1</one>', id );
             q.addFieldSubmission( p2, '<a>a</a>', id );
-            const p1Key = Object.keys(q.get())[0];
-            const p2Key = Object.keys(q.get())[1];
+            const p1Key = Object.keys( q.get() )[0];
+            const p2Key = Object.keys( q.get() )[1];
 
             return Promise.all( [
                 expect( Object.keys( q.get() ).length ).to.equal( 2 ),
@@ -38,8 +38,8 @@ describe( 'Field Submission', () => {
             q.enable();
             q.addFieldSubmission( p1, '<one>1</one>', id, did );
             q.addFieldSubmission( p2, '<a>a</a>', id, did );
-            const p1Key = Object.keys(q.get())[0];
-            const p2Key = Object.keys(q.get())[1];
+            const p1Key = Object.keys( q.get() )[0];
+            const p2Key = Object.keys( q.get() )[1];
 
             return Promise.all( [
                 expect( Object.keys( q.get() ).length ).to.equal( 2 ),
@@ -53,15 +53,12 @@ describe( 'Field Submission', () => {
         it( 'adds items that delete a repeat', () => {
             const q = new FieldSubmissionQueue();
             q.enable();
-            q.addRepeatRemoval( '<one>1</one>', id );
-            q.addRepeatRemoval( '<a>a</a>', id, did );
+            q.addRepeatRemoval( 'one', 1, id );
+            q.addRepeatRemoval( 'a', 2, id );
 
             return Promise.all( [
-                expect( Object.keys( q.get() ).length ).to.equal( 2 ),
-                expect( q.get()[ 'DELETE_0' ] ).to.be.an.instanceOf( FormData ),
-                expect( q.get()[ 'DELETE_1' ] ).to.be.an.instanceOf( FormData ),
-                expect( getFieldValue( q.get()[ 'DELETE_0' ] ) ).to.eventually.equal( '<one>1</one>' ),
-                expect( getFieldValue( q.get()[ 'DELETE_1' ] ) ).to.eventually.equal( '<a>a</a>' )
+                expect( q.get()[ 'DELETE_0' ] ).to.deep.equal( { instance: id, repeat: 'one', ordinal: 1 } ),
+                expect( q.get()[ 'DELETE_1' ]  ).to.deep.equal( { instance: id, repeat: 'a', ordinal: 2 } )
             ] );
         } );
 
@@ -69,12 +66,10 @@ describe( 'Field Submission', () => {
 
     describe( 'queue manages submission failures and successes', () => {
         let q;
-        let i;
         const failSubmitOne = () => Promise.reject( new Error( 'Error: 400' ) );
         const succeedSubmitOne = () => Promise.resolve( 201 );
 
         beforeEach( () => {
-            i = 0;
             q = new FieldSubmissionQueue();
             q.enable();
             q.addFieldSubmission( p1, '1', id );
@@ -107,8 +102,8 @@ describe( 'Field Submission', () => {
         it( 'retains a queue item if submission failed', () => {
             q._submitOne = failSubmitOne;
 
-            const p1Key = Object.keys(q.get())[0];
-            const p2Key = Object.keys(q.get())[1];
+            const p1Key = Object.keys( q.get() )[0];
+            const p2Key = Object.keys( q.get() )[1];
             const updatedQueueKeys = q.submitAll()
                 .then( () => Object.keys( q.get() ) );
 

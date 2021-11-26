@@ -3,11 +3,11 @@
 import { FormModel as Model } from 'enketo-core';
 import { getXPath } from 'enketo-core/src/js/dom-utils';
 import $ from 'jquery';
-
 import sniffer from './sniffer';
 
 // load customized nodeset module
 import './nodeset';
+const ENKETO_XFORMS_NS = 'http://enketo.org/xforms';
 
 Model.prototype.getUpdateEventData = function( el, type ) {
     let fullPath;
@@ -34,7 +34,9 @@ Model.prototype.getRemovalEventData = function( el ) {
     const xmlFragment = this.getXmlFragmentStr( el );
 
     return {
-        xmlFragment
+        xmlFragment,
+        nodeName: el.nodeName,
+        ordinal: el.getAttributeNS( ENKETO_XFORMS_NS, 'ordinal' )
     };
 };
 
