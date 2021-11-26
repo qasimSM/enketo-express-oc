@@ -4,13 +4,13 @@ import controller from './module/controller-webform-fieldsubmission';
 import settings from './module/settings';
 import connection from './module/connection';
 import { init as initTranslator, t, localize, loadTranslation } from './module/translator';
+import store from './module/store';
 import calculationModule from 'enketo-core/src/js/calculate';
 import preloadModule from 'enketo-core/src/js/preload';
 import relevantModule from './module/relevant';
 import events from './module/event';
 import formCache from './module/form-cache';
 import applicationCache from './module/application-cache';
-
 import oc from './module/custom';
 
 const loader = document.querySelector( '.main-loader' );
