@@ -5,7 +5,7 @@ import $ from 'jquery';
 import gui from './gui';
 import MD5 from 'crypto-js/md5';
 const FIELDSUBMISSION_URL = settings.enketoId  ? `${settings.basePath}/fieldsubmission/${settings.enketoId}${utils.getQueryString( { name: 'ecid', value: settings.ecid } )}` : null;
-const FIELDSUBMISSION_2_URL = settings.enketoId  ? `${settings.basePath}/fieldsubmission/${settings.enketoId}/ecid/${settings.ecid}` : null;
+const FIELDSUBMISSION_2_URL = settings.enketoId  ? `${settings.basePath}/fieldsubmission/${settings.enketoId}/ecid/${encodeURIComponent( settings.ecid )}` : null;
 const FIELDSUBMISSION_COMPLETE_URL = ( settings.enketoId ) ? `${settings.basePath}/fieldsubmission/complete/${settings.enketoId}${utils.getQueryString( { name: 'ecid', value: settings.ecid } )}` : null;
 
 class FieldSubmissionQueue {
@@ -140,7 +140,7 @@ class FieldSubmissionQueue {
             this._clearSubmissionInterval();
             const keyParts = key.split( '_' );
             const method = keyParts[ 0 ];
-            const url = method === 'DELETE' ? `${FIELDSUBMISSION_2_URL}/instance/${fd.instance}/repeat/${fd.repeat}/ordinal/${fd.ordinal}` : FIELDSUBMISSION_URL;
+            const url = method === 'DELETE' ? `${FIELDSUBMISSION_2_URL}/instance/${encodeURIComponent( fd.instance )}/repeat-group/${encodeURIComponent( fd.repeat )}/ordinal/${encodeURIComponent( fd.ordinal )}` : FIELDSUBMISSION_URL;
 
             this.submissionOngoing = this._submitOne( url,fd, method )
                 .catch( error => {

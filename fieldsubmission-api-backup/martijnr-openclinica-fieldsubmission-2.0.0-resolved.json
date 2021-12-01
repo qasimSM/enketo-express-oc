@@ -15,7 +15,7 @@
     }
   ],
   "paths": {
-    "/ecid/{ecid}/instance/{instanceId}/repeat/{repeatNodeName}/ordinal/{repeatOrdinal}/node/{nodeName}": {
+    "/ecid/{ecid}/instance/{instanceId}/repeat-group/{repeatNodeName}/ordinal/{repeatOrdinal}/node/{nodeName}": {
       "put": {
         "tags": [
           "fieldsubmission"
@@ -331,7 +331,7 @@
         ]
       }
     },
-    "/ecid/{ecid}/instance/{instanceId}/repeat/{repeatNodeName}/ordinal/{repeatOrdinal}": {
+    "/ecid/{ecid}/instance/{instanceId}/repeat-group/{repeatNodeName}/ordinal/{repeatOrdinal}": {
       "delete": {
         "tags": [
           "fieldsubmission"
@@ -468,7 +468,7 @@
         ]
       }
     },
-    "/complete/ecid/{ecid}/instance/{instanceId}/repeat/{repeatNodeName}/ordinal/{repeatOrdinal}/node/{nodeName}": {
+    "/complete/ecid/{ecid}/instance/{instanceId}/repeat-group/{repeatNodeName}/ordinal/{repeatOrdinal}/node/{nodeName}": {
       "put": {
         "tags": [
           "fieldsubmission"

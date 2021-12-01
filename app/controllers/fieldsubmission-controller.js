@@ -123,6 +123,8 @@ function _getSubmissionUrlAPI1( server, type ) {
 }
 
 function _getSubmissionUrlAPI2( server, path ) {
+    path = path.replace( /(\/fieldsubmission)(\/[A-z0-9]+)(\/ecid\/.+)/, ( match, p1, p2, p3 ) => `${p1}${p3}` );
+
     return  new URL( path, server ).href;
 }
 
