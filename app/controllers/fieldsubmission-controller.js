@@ -2,6 +2,7 @@ const communicator = require( '../lib/communicator' );
 const surveyModel = require( '../models/survey-model' );
 const userModel = require( '../models/user-model' );
 const routerUtils = require( '../lib/router-utils' );
+const { getSubmissionUrlAPI1, getSubmissionUrlAPI2 } = require( '../lib/url-oc' );
 const request = require( 'request' );
 const express = require( 'express' );
 const router = express.Router();
@@ -81,11 +82,11 @@ function _request( type, req, res, next ) {
     surveyModel.get( req.enketoId )
         .then( survey => {
             if ( type === 'delete' ){
-                submissionUrl = _getSubmissionUrlAPI2( survey.openRosaServer, req.originalUrl );
+                submissionUrl = getSubmissionUrlAPI2( survey.openRosaServer, req.originalUrl );
             } else {
                 const ecidValue = req.query[ 'ecid' ];
                 const query = ecidValue ? `?ecid=${ecidValue}` : '';
-                submissionUrl = _getSubmissionUrlAPI1( survey.openRosaServer, type ) + query;
+                submissionUrl = getSubmissionUrlAPI1( survey.openRosaServer, type ) + query;
             }
 
             const credentials = userModel.getCredentials( req );
@@ -114,18 +115,6 @@ function _request( type, req, res, next ) {
 
         } )
         .catch( next );
-}
-
-function _getSubmissionUrlAPI1( server, type ) {
-    const lastPathPart = ( type === 'field' || !type ) ? '' : `/${type}`;
-
-    return ( server.lastIndexOf( '/' ) === server.length - 1 ) ? `${server}fieldsubmission${lastPathPart}` : `${server}/fieldsubmission${lastPathPart}`;
-}
-
-function _getSubmissionUrlAPI2( server, path ) {
-    path = path.replace( /(\/fieldsubmission)(\/[A-z0-9]+)(\/ecid\/.+)/, ( match, p1, p2, p3 ) => `${p1}${p3}` );
-
-    return  new URL( path, server ).href;
 }
 
 /*
