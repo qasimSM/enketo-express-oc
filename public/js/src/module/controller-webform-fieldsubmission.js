@@ -11,7 +11,7 @@ import { Form } from './form'; // modified for OC
 import { FormModel } from './form-model'; // modified for OC
 import fileManager from './file-manager';
 import events from './event';
-import { t } from './translator';
+import { t, localize, getCurrentUiLanguage, getBrowserLanguage } from './translator';
 import records from './records-queue';
 import $ from 'jquery';
 import FieldSubmissionQueue from './field-submission-queue';
@@ -46,6 +46,17 @@ function init( formEl, data, loadErrors = [] ) {
 
         if ( data.instanceAttachments ) {
             fileManager.setInstanceAttachments( data.instanceAttachments );
+        }
+
+        const langSelector = formEl.querySelector( '#form-languages' );
+        const formDefaultLanguage = langSelector ? langSelector.dataset.defaultLang : undefined;
+        const browserLanguage = getBrowserLanguage();
+
+        // Determine which form language to load
+        if ( settings.languageOverrideParameter ) {
+            formOptions.language = settings.languageOverrideParameter.value;
+        } else if ( !formDefaultLanguage && langSelector && langSelector.querySelector( `option[value="${browserLanguage}"]` ) ){
+            formOptions.language = browserLanguage;
         }
 
         // Create separate model just to identify static default values.
@@ -126,6 +137,12 @@ function init( formEl, data, loadErrors = [] ) {
         form.view.html.addEventListener( events.GoToInvisible().type, handleGoToInvisible );
 
         loadErrors = loadErrors.concat( form.init() );
+
+        // Determine whether UI language should be attempted to be switched.
+        if ( getCurrentUiLanguage() !== form.currentLanguage &&  /^[a-z]{2,3}/.test( form.currentLanguage ) )  {
+            localize( document.querySelector( 'body' ), form.currentLanguage )
+                .then( dir => document.querySelector( 'html' ).setAttribute( 'dir', dir ) );
+        }
 
         // Create fieldsubmissions for static default values
         if ( !settings.offline ){
@@ -959,6 +976,19 @@ function _setFormEventHandlers() {
             reasons.clearAll();
 
             return true;
+        } );
+    }
+
+    // This actually belongs in gui.js but that module doesn't have access to the form object.
+    // Enketo core takes care of language switching of the form itself, i.e. all language strings in the form definition.
+    // This handler does the UI around the form, as well as the UI inside the form that are part of the application.
+    const formLanguages = document.querySelector( '#form-languages' );
+    if ( formLanguages ) {
+        formLanguages.addEventListener( events.Change().type, event => {
+            event.preventDefault();
+            console.log( 'ready to set UI lang', form.currentLanguage );
+            localize( document.querySelector( 'body' ), form.currentLanguage )
+                .then( dir => document.querySelector( 'html' ).setAttribute( 'dir', dir ) );
         } );
     }
 }
