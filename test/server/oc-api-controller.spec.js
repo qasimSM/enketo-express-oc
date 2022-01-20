@@ -341,16 +341,26 @@ describe( 'api', () => {
                 status: 200,
                 expected: /\/single\/fs\/participant\/i\/[A-z0-9]{32}\?/,
             } );
-            // POST /survey/collect/offline/participant
+            // POST /survey/anonymous/collect/participant
             testResponse( {
                 version,
-                endpoint: '/survey/collect/offline/participant',
+                endpoint: '/survey/collect/anonymous/participant',
+                method: 'post',
+                ret: false,
+                auth: true,
+                status: 200,
+                expected: /\/single\/an\/participant\/[A-z0-9]{32}\?/,
+            } );
+            // POST /survey/collect/anonymous/offline/participant
+            testResponse( {
+                version,
+                endpoint: '/survey/collect/anonymous/offline/participant',
                 method: 'post',
                 ret: false,
                 auth: true,
                 status: 200,
                 offline: true,
-                expected: /\/fs\/participant\/x\/[A-z0-9]{32}\?/,
+                expected: /\/an\/participant\/x\/[A-z0-9]{32}\?/,
             } );
         } );
 
@@ -816,7 +826,7 @@ describe( 'api', () => {
             ];
 
             // parentWindowOrigin
-            endpoints.concat( [ '/survey/preview', '/survey/collect/participant', '/survey/collect/offline/participant', '/instance/edit/participant' ] ).forEach( endpoint => {
+            endpoints.concat( [ '/survey/preview', '/survey/collect/participant','/survey/collect/anonymous/participant', '/survey/collect/anonymous/offline/participant', '/instance/edit/participant' ] ).forEach( endpoint => {
                 const obj = {
                     version,
                     auth: true,
@@ -833,7 +843,7 @@ describe( 'api', () => {
             } );
 
             // ecid
-            const ecidEndpoints = endpoints.concat( [ '/survey/collect/participant', '/survey/collect/offline/participant', '/instance/edit/participant' ] );
+            const ecidEndpoints = endpoints.concat( [ '/survey/collect/participant','/survey/collect/anonymous/participant', '/survey/collect/anonymous/offline/participant', '/instance/edit/participant' ] );
             ecidEndpoints.forEach( endpoint => {
                 const obj = {
                     version,

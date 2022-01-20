@@ -124,7 +124,9 @@ settings.openSingleDnThreadAutomaticallyUponLoadAndGoToDn = !/\/fs\/dn\//.test( 
 if ( /\/participant\//.test( window.location.pathname ) ) {
     settings.relevantIsStrict = true;
 }
-
+if ( /\/an\//.test( window.location.pathname ) ) {
+    settings.fullRecord = true;
+}
 
 function _getAllQueryParams() {
     let val;

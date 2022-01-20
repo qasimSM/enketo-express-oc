@@ -61,12 +61,16 @@ router
         req.webformType = 'note-instance';
         next();
     } )
-    .post( '*/offline/*', ( req, res, next ) => {
+    .post( '*/anonymous/*', ( req, res, next ) => {
+        req.webformType = 'single-anon';
+        next();
+    } )
+    .post( '*/anonymous/offline/*', ( req, res, next ) => {
         if ( req.app.get( 'offline enabled' ) ) {
-            req.webformType = 'offline';
+            req.webformType = 'anon-offline';
             next();
         } else {
-            const error = new Error( 'Not Allowed.' );
+            const error = new Error( 'Not Allowed. Offline capability is not enabled.' );
             error.status = 405;
             next( error );
         }
@@ -99,7 +103,8 @@ router
     .post( '/survey/collect', getNewOrExistingSurvey )
     .post( '/survey/collect/c', getNewOrExistingSurvey )
     .post( '/survey/collect/participant', getNewOrExistingSurvey )
-    .post( '/survey/collect/offline/participant', getNewOrExistingSurvey )
+    .post( '/survey/collect/anonymous/participant', getNewOrExistingSurvey )
+    .post( '/survey/collect/anonymous/offline/participant', getNewOrExistingSurvey )
     .post( '/instance/*', _setInterfaceQueryParam )
     .post( '/instance/view', cacheInstance )
     .post( '/instance/view/pdf', cacheInstance )
@@ -444,6 +449,7 @@ function _generateWebformUrls( id, req ) {
     const idEditRfcC = `${utils.insecureAes192Encrypt( id, keys.editRfcC )}`;
     const idFsC = `${utils.insecureAes192Encrypt( id, keys.fsC )}`;
     const idFsParticipant = `${utils.insecureAes192Encrypt( id, keys.fsParticipant )}`;
+    const idAnonParticipant = `${utils.insecureAes192Encrypt( id, keys.anonParticipant )}`;
     const idEditHeadless = `${utils.insecureAes192Encrypt( id, keys.editHeadless )}`;
     const idPreview = utils.insecureAes192Encrypt( id, keys.preview );
 
@@ -497,9 +503,14 @@ function _generateWebformUrls( id, req ) {
             url = `${BASEURL}edit/${FSPATH}participant/${IFRAMEPATH}${idFsParticipant}${queryString}${hash}`;
             break;
         }
-        case 'offline-participant': {
+        case 'single-anon-participant': {
             const queryString = _generateQueryString( [ req.ecid, req.pid, req.defaultsQueryParam, req.returnQueryParam, req.parentWindowOriginParam, req.jini ] );
-            url = `${BASEURL}${FSPATH}participant/${OFFLINEPATH}${idFsParticipant}${queryString}`;
+            url = `${BASEURL}single/an/participant/${idAnonParticipant}${queryString}`;
+            break;
+        }
+        case 'anon-offline-participant': {
+            const queryString = _generateQueryString( [ req.ecid, req.pid, req.defaultsQueryParam, req.returnQueryParam, req.parentWindowOriginParam, req.jini ] );
+            url = `${BASEURL}an/participant/${OFFLINEPATH}${idAnonParticipant}${queryString}`;
             break;
         }
         case 'view':

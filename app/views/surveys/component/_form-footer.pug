@@ -11,8 +11,8 @@ section.form-footer
           button#validate-form.btn.btn-primary
             i.icon.icon-check= ' '
             span(data-i18n='formfooter.validate.btn')= t('formfooter.validate.btn')
-        else if offlinePath
-          if draftEnabled
+        else if type === 'anon'
+          if draftEnabled && offlinePath
             button#save-draft.btn.btn-default
                 i.icon.icon-info-circle.save-draft-info= ' '
                 i.icon.icon-pencil= ' '
@@ -42,7 +42,7 @@ section.form-footer
           span(data-18n='form.pages.back')= t('form.pages.back')
 
       .form-footer__content__jump-nav
-        if !participant
+        if !nojump
           a.btn.btn-default.disabled.first-page(href="#", data-i18n='form.pages.return')= t('form.pages.return')
           a.btn.btn-default.disabled.last-page(href="#", data-i18n='form.pages.end')= t('form.pages.end')
 

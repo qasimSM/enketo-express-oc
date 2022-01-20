@@ -62,17 +62,25 @@ Returns a URL that points to a special "Participate" view to collect a new recor
 
 - Has a **required** `ecid` parameter with string value.
 
-**Note: Submissions for participate URLS go to /submission-full, and will be split into individual fieldsubmissions on the OC side.**
-
 Otherwise, use exactly as POST /survey/collect.
 
-### POST /survey/collect/offline/participant
+### POST /survey/collect/anonymous/participant
 
-Returns an offline-capable URL that points to a special "Participate" view to collect a new record.
+Returns a URL that points to a special "Participate" view to collect a new record.
 
 - Has a **required** `ecid` parameter with string value.
 
-**Note: Submissions for participate URLS go to /submission-full, and will be split into individual fieldsubmissions on the OC side.**
+**Note: Submissions go to /submission-full at the OC server, and will be split into individual fieldsubmissions on the OC side.**
+
+Otherwise, use exactly as POST /survey/collect.
+
+### POST /survey/collect/anonymous/offline/participant
+
+Returns an offline-capable URL that points to a special "Participate" offline-capable view to collect a new record.
+
+- Has a **required** `ecid` parameter with string value.
+
+**Note: Submissions go to /submission-full at the OC server, and will be split into individual fieldsubmissions on the OC side.**
 
 Otherwise, use exactly as POST /survey/collect.
 

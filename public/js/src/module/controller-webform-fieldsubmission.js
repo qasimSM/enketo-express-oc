@@ -5,7 +5,7 @@
  */
 
 import gui from './gui';
-
+import connection from './connection';
 import settings from './settings';
 import { Form } from './form'; // modified for OC
 import { FormModel } from './form-model'; // modified for OC
@@ -145,7 +145,7 @@ function init( formEl, data, loadErrors = [] ) {
         }
 
         // Create fieldsubmissions for static default values
-        if ( !settings.offline ){
+        if ( !settings.fullRecord ){
             _addFieldsubmissionsForModelNodes( m, staticDefaultNodes );
         }
 
@@ -702,6 +702,76 @@ function _confirmRecordName( recordName, errorMsg ) {
         } );
 }
 
+/**
+ * Used to submit a full record.
+ * This function does not save the record in the browser storage
+ * and is not used in offline-capable views.
+ */
+function _submitRecord(  ) {
+    let authLink;
+    let level;
+    let msg = '';
+    const include = { irrelevant: false };
+
+    form.view.html.dispatchEvent( events.BeforeSave() );
+
+    authLink = `<a href="${settings.loginUrl}" target="_blank">${t( 'here' )}</a>`;
+
+    gui.alert( `${t( 'alert.submission.redirectmsg' )}<div class="loader-animation-small" style="margin: 40px auto 0 auto;"/>`, t( 'alert.submission.msg' ), 'bare' );
+
+    return fileManager.getCurrentFiles()
+        .then( files => {
+            const record = {
+                enketoId: settings.enketoId,
+                xml: form.getDataStr( include ),
+                files: files,
+                instanceId: form.instanceID,
+                deprecatedId: form.deprecatedID
+            };
+
+            return record;
+        } )
+        .then( record => connection.uploadQueuedRecord( record ) )
+        .then( result => {
+            result = result || {};
+            level = 'success';
+
+            if ( result.failedFiles && result.failedFiles.length > 0 ) {
+                msg = `${t( 'alert.submissionerror.fnfmsg', {
+                    failedFiles: result.failedFiles.join( ', ' ),
+                    supportEmail: settings.supportEmail
+                } )}<br/>`;
+                level = 'warning';
+            }
+        } )
+        .then( () => {
+            // this event is used in communicating back to iframe parent window
+            document.dispatchEvent( events.SubmissionSuccess() );
+            msg += t( 'alert.submissionsuccess.redirectmsg' );
+            gui.alert( msg, t( 'alert.submissionsuccess.heading' ), level );
+            setTimeout( () => {
+                location.href = decodeURIComponent( settings.returnUrl || settings.defaultReturnUrl );
+            }, 1200 );
+        } )
+        .catch( result => {
+            let message;
+            result = result || {};
+            console.error( 'submission failed', result );
+            if ( result.status === 401 ) {
+                message = t( 'alert.submissionerror.authrequiredmsg', {
+                    here: authLink,
+                    // switch off escaping just for this known safe value
+                    interpolation: {
+                        escapeValue: false
+                    }
+                } );
+            } else {
+                message = result.message || gui.getErrorResponseMsg( result.status );
+            }
+            gui.alert( message, t( 'alert.submissionerror.heading' ) );
+        } );
+}
+
 function _saveRecord( draft = true, recordName, confirmed, errorMsg ) {
     const include = { irrelevant: draft };
 
@@ -877,7 +947,7 @@ function _setFormEventHandlers() {
     } );
 
     // field submission triggers, only for online-only views
-    if ( !settings.offline ){
+    if ( !settings.fullRecord ){
         // Trigger fieldsubmissions for static defaults in added repeat instance
         // It is important that this listener comes before the NewRepeat and AddRepeat listeners in enketo-core
         // that will also run setvalue/odk-new-repeat actions, calculations, and other stuff
@@ -1074,7 +1144,7 @@ function _setButtonEventHandlers() {
         return false;
     } );
 
-    // This is for closing a participant view.
+    // This is for closing a participant fieldsubmission view.
     $( 'button#close-form-participant' ).click( function() {
         const $button = $( this ).btnBusyState( true );
 
@@ -1089,8 +1159,8 @@ function _setButtonEventHandlers() {
         return false;
     } );
 
-
-    if ( settings.offline ) {
+    // Anonymous Participant views that submit the whole record.
+    if ( settings.fullRecord ){
         $( 'button#submit-form' ).click( function() {
             const $button = $( this ).btnBusyState( true );
 
@@ -1103,7 +1173,11 @@ function _setButtonEventHandlers() {
                         valid = !strictViolations;
                     }
                     if ( valid ) {
-                        return _saveRecord( false );
+                        if ( settings.offline ) {
+                            return _saveRecord( false );
+                        } else {
+                            return _submitRecord( );
+                        }
                     }
                     gui.alertStrictBlock();
                 } )
