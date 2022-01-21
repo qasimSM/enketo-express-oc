@@ -19,7 +19,7 @@ const keys = {
     preview: config[ 'less secure encryption key' ] + 'preview-oc',
     fsC: `${config[ 'less secure encryption key' ]}fs-c`,
     fsParticipant: `${config[ 'less secure encryption key' ]}fs-participant`,
-    anonParticipant: `${config[ 'less secure encryption key' ]}anon-participant`,
+    fullParticipant: `${config[ 'less secure encryption key' ]}full-participant`,
     editRfc: `${config[ 'less secure encryption key' ]}edit-rfc`,
     editRfcC: `${config[ 'less secure encryption key' ]}edit-rfc-c`,
     editHeadless: `${config[ 'less secure encryption key' ]}edit-headless`,
@@ -93,8 +93,8 @@ function encryptedEnketoIdFsParticipant( req, res, next, id ) {
     _encryptedEnketoIdParam( req, res, next, id, keys.fsParticipant );
 }
 
-function encryptedEnketoIdAnonParticipant( req, res, next, id ) {
-    _encryptedEnketoIdParam( req, res, next, id, keys.anonParticipant );
+function encryptedEnketoIdFullParticipant( req, res, next, id ) {
+    _encryptedEnketoIdParam( req, res, next, id, keys.fullParticipant );
 }
 
 function encryptedEnketoIdEditRfc( req, res, next, id ) {
@@ -156,6 +156,6 @@ module.exports = {
     encryptedEnketoIdEditRfc,
     encryptedEnketoIdEditRfcC,
     encryptedEnketoIdEditHeadless,
-    encryptedEnketoIdAnonParticipant,
+    encryptedEnketoIdFullParticipant,
     encryptedEnketoIdFsParticipant
 };

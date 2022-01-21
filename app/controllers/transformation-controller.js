@@ -31,7 +31,7 @@ router.param( 'encrypted_enketo_id_view_dnc', routerUtils.encryptedEnketoIdViewD
 router.param( 'encrypted_enketo_id_preview', routerUtils.encryptedEnketoIdPreview );
 router.param( 'encrypted_enketo_id_fs_c', routerUtils.encryptedEnketoIdFsC );
 router.param( 'encrypted_enketo_id_fs_participant', routerUtils.encryptedEnketoIdFsParticipant );
-router.param( 'encrypted_enketo_id_anon_participant', routerUtils.encryptedEnketoIdAnonParticipant );
+router.param( 'encrypted_enketo_id_full_participant', routerUtils.encryptedEnketoIdFullParticipant );
 router.param( 'encrypted_enketo_id_rfc', routerUtils.encryptedEnketoIdEditRfc );
 router.param( 'encrypted_enketo_id_rfc_c', routerUtils.encryptedEnketoIdEditRfcC );
 router.param( 'encrypted_enketo_id_headless', routerUtils.encryptedEnketoIdEditHeadless );
@@ -51,12 +51,12 @@ router
     .post( '/xform/:encrypted_enketo_id_rfc', getSurveyParts )
     .post( '/xform/:encrypted_enketo_id_rfc_c', getSurveyParts )
     .post( '/xform/:encrypted_enketo_id_fs_participant', getSurveyParts )
-    .post( '/xform/:encrypted_enketo_id_anon_participant', getSurveyParts )
+    .post( '/xform/:encrypted_enketo_id_full_participant', getSurveyParts )
     .post( '/xform/:encrypted_enketo_id_headless', getSurveyParts )
     .post( '/xform/:enketo_id', getSurveyParts )
     .post( '/xform', getSurveyParts )
     .post( '/xform/hash/:enketo_id', getSurveyHash )
-    .post( '/xform/hash/:encrypted_enketo_id_anon_participant', getSurveyHash );
+    .post( '/xform/hash/:encrypted_enketo_id_full_participant', getSurveyHash );
 
 /**
  * Obtains HTML Form, XML model, and existing XML instance

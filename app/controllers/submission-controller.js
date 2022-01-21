@@ -26,7 +26,7 @@ router.param( 'encrypted_enketo_id_view_dn', routerUtils.encryptedEnketoIdViewDn
 router.param( 'encrypted_enketo_id_view_dnc', routerUtils.encryptedEnketoIdViewDnc );
 router.param( 'encrypted_enketo_id_fs_c', routerUtils.encryptedEnketoIdFsC );
 router.param( 'encrypted_enketo_id_fs_participant', routerUtils.encryptedEnketoIdFsParticipant );
-router.param( 'encrypted_enketo_id_anon_participant', routerUtils.encryptedEnketoIdAnonParticipant );
+router.param( 'encrypted_enketo_id_full_participant', routerUtils.encryptedEnketoIdFullParticipant );
 router.param( 'encrypted_enketo_id_rfc', routerUtils.encryptedEnketoIdEditRfc );
 router.param( 'encrypted_enketo_id_rfc_c', routerUtils.encryptedEnketoIdEditRfcC );
 router.param( 'encrypted_enketo_id_headless', routerUtils.encryptedEnketoIdEditHeadless );
@@ -44,7 +44,7 @@ router
     .get( '/max-size/:encrypted_enketo_id_rfc', maxSize )
     .get( '/max-size/:encrypted_enketo_id_rfc_c', maxSize )
     .get( '/max-size/:encrypted_enketo_id_headless', maxSize )
-    .get( '/max-size/:encrypted_enketo_id_anon_participant', maxSize )
+    .get( '/max-size/:encrypted_enketo_id_full_participant', maxSize )
     .get( '/max-size/:encrypted_enketo_id_fs_participant', maxSize )
     .get( '/:encrypted_enketo_id_fs_c', getInstance )
     .get( '/max-size/:enketo_id?', maxSize )
@@ -59,7 +59,7 @@ router
     .post( '/:encrypted_enketo_id_single', submit )
     .post( '/:enketo_id', submit )
     .post( '/:encrypted_enketo_id_fs_participant', submit )
-    .post( '/:encrypted_enketo_id_anon_participant', ( req, res, next ) => {
+    .post( '/:encrypted_enketo_id_full_participant', ( req, res, next ) => {
         req.fullRecord = true;
 
         return submit( req, res, next );

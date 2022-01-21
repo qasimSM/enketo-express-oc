@@ -1159,7 +1159,7 @@ function _setButtonEventHandlers() {
         return false;
     } );
 
-    // Anonymous Participant views that submit the whole record.
+    // Participant views that submit the whole record (i.e. not fieldsubmissions).
     if ( settings.fullRecord ){
         $( 'button#submit-form' ).click( function() {
             const $button = $( this ).btnBusyState( true );

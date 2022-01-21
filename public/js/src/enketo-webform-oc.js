@@ -1,6 +1,6 @@
 import './module/radio-tab';
 import gui from './module/gui';
-import controller from './module/controller-webform-fieldsubmission';
+import controller from './module/controller-webform-oc';
 import settings from './module/settings';
 import connection from './module/connection';
 import { init as initTranslator, t, localize, loadTranslation } from './module/translator';

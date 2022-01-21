@@ -61,13 +61,13 @@ router
         req.webformType = 'note-instance';
         next();
     } )
-    .post( '*/anonymous/*', ( req, res, next ) => {
-        req.webformType = 'single-anon';
+    .post( '*/full/*', ( req, res, next ) => {
+        req.webformType = 'single-full';
         next();
     } )
-    .post( '*/anonymous/offline/*', ( req, res, next ) => {
+    .post( '*/full/offline/*', ( req, res, next ) => {
         if ( req.app.get( 'offline enabled' ) ) {
-            req.webformType = 'anon-offline';
+            req.webformType = 'full-offline';
             next();
         } else {
             const error = new Error( 'Not Allowed. Offline capability is not enabled.' );
@@ -103,8 +103,8 @@ router
     .post( '/survey/collect', getNewOrExistingSurvey )
     .post( '/survey/collect/c', getNewOrExistingSurvey )
     .post( '/survey/collect/participant', getNewOrExistingSurvey )
-    .post( '/survey/collect/anonymous/participant', getNewOrExistingSurvey )
-    .post( '/survey/collect/anonymous/offline/participant', getNewOrExistingSurvey )
+    .post( '/survey/collect/full/participant', getNewOrExistingSurvey )
+    .post( '/survey/collect/full/offline/participant', getNewOrExistingSurvey )
     .post( '/instance/*', _setInterfaceQueryParam )
     .post( '/instance/view', cacheInstance )
     .post( '/instance/view/pdf', cacheInstance )
@@ -449,7 +449,7 @@ function _generateWebformUrls( id, req ) {
     const idEditRfcC = `${utils.insecureAes192Encrypt( id, keys.editRfcC )}`;
     const idFsC = `${utils.insecureAes192Encrypt( id, keys.fsC )}`;
     const idFsParticipant = `${utils.insecureAes192Encrypt( id, keys.fsParticipant )}`;
-    const idAnonParticipant = `${utils.insecureAes192Encrypt( id, keys.anonParticipant )}`;
+    const idFullParticipant = `${utils.insecureAes192Encrypt( id, keys.fullParticipant )}`;
     const idEditHeadless = `${utils.insecureAes192Encrypt( id, keys.editHeadless )}`;
     const idPreview = utils.insecureAes192Encrypt( id, keys.preview );
 
@@ -503,14 +503,14 @@ function _generateWebformUrls( id, req ) {
             url = `${BASEURL}edit/${FSPATH}participant/${IFRAMEPATH}${idFsParticipant}${queryString}${hash}`;
             break;
         }
-        case 'single-anon-participant': {
+        case 'single-full-participant': {
             const queryString = _generateQueryString( [ req.ecid, req.pid, req.defaultsQueryParam, req.returnQueryParam, req.parentWindowOriginParam, req.jini ] );
-            url = `${BASEURL}single/an/participant/${idAnonParticipant}${queryString}`;
+            url = `${BASEURL}single/full/participant/${idFullParticipant}${queryString}`;
             break;
         }
-        case 'anon-offline-participant': {
+        case 'full-offline-participant': {
             const queryString = _generateQueryString( [ req.ecid, req.pid, req.defaultsQueryParam, req.returnQueryParam, req.parentWindowOriginParam, req.jini ] );
-            url = `${BASEURL}an/participant/${OFFLINEPATH}${idAnonParticipant}${queryString}`;
+            url = `${BASEURL}full/participant/${OFFLINEPATH}${idFullParticipant}${queryString}`;
             break;
         }
         case 'view':

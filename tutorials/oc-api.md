@@ -64,7 +64,7 @@ Returns a URL that points to a special "Participate" view to collect a new recor
 
 Otherwise, use exactly as POST /survey/collect.
 
-### POST /survey/collect/anonymous/participant
+### POST /survey/collect/full/participant
 
 Returns a URL that points to a special "Participate" view to collect a new record.
 
@@ -74,7 +74,7 @@ Returns a URL that points to a special "Participate" view to collect a new recor
 
 Otherwise, use exactly as POST /survey/collect.
 
-### POST /survey/collect/anonymous/offline/participant
+### POST /survey/collect/full/offline/participant
 
 Returns an offline-capable URL that points to a special "Participate" offline-capable view to collect a new record.
 
@@ -157,8 +157,6 @@ Returns a URL that points to a special "Participate" webform fieldsubmission vie
 - Has an optional `go_to` parameter with a string value consisting of the absolute path of the question. A fragment identifier (#hash) can be added to point to a specific discrepancy note thread_id. E.g. `go_to=/path/to/node_comment#345saUDfg`.
 - Has an optional `go_to_error_url` parameter that in conjunction with `go_to` will prompt the user to redirect to a _mini form_ if the go_to target is not available or hidden.
 - Has an optional `interface` parameter with a string value of either `"default"`, `"queries"`, or `"sdv"` that results in tweaked error messages.
-
-**Note: Submissions for participate URLS go to /submission-full, and will be split into individual fieldsubmissions on the OC side.**
 
 Otherwise, use as POST /instance/edit.
 

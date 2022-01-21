@@ -25,7 +25,7 @@ router.param( 'encrypted_enketo_id_view_dnc', routerUtils.encryptedEnketoIdViewD
 router.param( 'encrypted_enketo_id_preview', routerUtils.encryptedEnketoIdPreview );
 router.param( 'encrypted_enketo_id_fs_c', routerUtils.encryptedEnketoIdFsC );
 router.param( 'encrypted_enketo_id_fs_participant', routerUtils.encryptedEnketoIdFsParticipant );
-router.param( 'encrypted_enketo_id_anon_participant', routerUtils.encryptedEnketoIdAnonParticipant );
+router.param( 'encrypted_enketo_id_full_participant', routerUtils.encryptedEnketoIdFullParticipant );
 router.param( 'encrypted_enketo_id_rfc', routerUtils.encryptedEnketoIdEditRfc );
 router.param( 'encrypted_enketo_id_rfc_c', routerUtils.encryptedEnketoIdEditRfcC );
 router.param( 'encrypted_enketo_id_headless', routerUtils.encryptedEnketoIdEditHeadless );
@@ -53,7 +53,7 @@ router
     .get( /\/(single)\/fs(\/rfc)?(\/c)?\/i/, _setNextPrompt )
     .get( /\/(edit|single)\/fs\/(?!(participant|rfc|dn|view))/, _setCompleteButton )
     .get( '*', _setCloseButtonClass )
-    .get( `/an/participant${config[ 'offline path' ]}/:encrypted_enketo_id_anon_participant`, anonParticipantOffline )
+    .get( `/full/participant${config[ 'offline path' ]}/:encrypted_enketo_id_full_participant`, fullParticipantOffline )
     .get( `${config[ 'offline path' ]}/:enketo_id`, offlineWebform )
     .get( `${config[ 'offline path' ]}/`, redirect )
     .get( '/connection', ( req, res ) => {
@@ -71,7 +71,7 @@ router
     .get( '/single/fs/:mod/:enketo_id', fieldSubmission )
     .get( '/single/fs/c/:mod/:encrypted_enketo_id_fs_c', fieldSubmission )
     .get( '/single/fs/participant/:mod/:encrypted_enketo_id_fs_participant', fieldSubmission )
-    .get( '/single/an/participant/:encrypted_enketo_id_anon_participant', anonParticipant )
+    .get( '/single/full/participant/:encrypted_enketo_id_full_participant', fullParticipant )
     .get( '/single/:enketo_id', single )
     .get( '/single/:encrypted_enketo_id_single', single )
     .get( '/single/:mod/:enketo_id', single )
@@ -196,9 +196,9 @@ function fieldSubmission( req, res, next ) {
     _renderWebform( req, res, next, options );
 }
 
-function anonParticipant( req, res, next ) {
+function fullParticipant( req, res, next ) {
     var options = {
-        type: 'anon',
+        type: 'full',
         nojump: req.participant,
         closeButtonIdSuffix: req.closeButtonIdSuffix,
     };
@@ -206,9 +206,9 @@ function anonParticipant( req, res, next ) {
     _renderWebform( req, res, next, options );
 }
 
-function anonParticipantOffline( req, res, next ) {
+function fullParticipantOffline( req, res, next ) {
     var options = {
-        type: 'anon',
+        type: 'full',
         nojump: req.participant,
         closeButtonIdSuffix: req.closeButtonIdSuffix,
         offlinePath: config[ 'offline path' ]
