@@ -1,3 +1,5 @@
+![Build Status](https://github.com/OpenClinica/enketo-express-oc/actions/workflows/ci.yml/badge.svg)
+
 Enketo Express fork for OpenClinica
 ==============
 
