@@ -137,7 +137,10 @@ module.exports = grunt => {
             },
             build: {
                 command: 'node ./scripts/build.js'
-            }
+            },
+            nyc: {
+                command: 'nyc --reporter html --reporter text-summary --reporter json --reporter lcov --report-dir ./test-coverage/server --include "app/**/*.js" grunt mochaTest:all'
+            },
         },
         eslint: {
             check: {
@@ -193,21 +196,6 @@ module.exports = grunt => {
                     singleRun: false,
                 }
             },
-        },
-        nyc: {
-            cover: {
-                options: {
-                    reporter: [
-                        'html',
-                        'text-summary',
-                        'json'
-                    ],
-                    reportDir: './test-coverage/server',
-                    include: [ 'app/**/*.js' ],
-                },
-                cmd: false,
-                args: [ 'grunt', 'mochaTest:all' ]
-            }
         },
         // IE11 only
         terser: {
@@ -341,7 +329,7 @@ module.exports = grunt => {
     grunt.registerTask( 'js-ie11', [ 'shell:rollup-ie11', 'shell:polyfill-ie11', 'shell:babel-ie11', 'shell:browserify-ie11', 'replace:widgets-controller-ie11' ] );
     grunt.registerTask( 'build-ie11', [ 'js-ie11', 'terser', 'shell:clean-temp-ie11-js' ] );
     grunt.registerTask( 'css', [ 'system-sass-variables:create', 'sass' ] );
-    grunt.registerTask( 'test', [ 'env:test', 'js', 'css', 'nyc:cover', 'karma:headless', 'shell:buildReadmeBadge', 'eslint:check' ] );
+    grunt.registerTask( 'test', [ 'env:test', 'js', 'css', 'shell:nyc', 'karma:headless', 'shell:buildReadmeBadge', 'eslint:check' ] );
     grunt.registerTask( 'test-browser', [ 'env:test', 'css', 'karma:browsers' ] );
     grunt.registerTask( 'test-watch-client', [ 'env:test', 'karma:watch' ], );
     grunt.registerTask( 'test-watch-server', [ 'env:test', 'watch:mochaTest' ], );
