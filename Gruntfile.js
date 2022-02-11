@@ -329,8 +329,8 @@ module.exports = grunt => {
     grunt.registerTask( 'js-ie11', [ 'shell:rollup-ie11', 'shell:polyfill-ie11', 'shell:babel-ie11', 'shell:browserify-ie11', 'replace:widgets-controller-ie11' ] );
     grunt.registerTask( 'build-ie11', [ 'js-ie11', 'terser', 'shell:clean-temp-ie11-js' ] );
     grunt.registerTask( 'css', [ 'system-sass-variables:create', 'sass' ] );
-    grunt.registerTask( 'test', [ 'env:test', 'js', 'css', 'shell:nyc', 'karma:headless', 'shell:buildReadmeBadge', 'eslint:check' ] );
-    grunt.registerTask( 'test-browser', [ 'env:test', 'css', 'karma:browsers' ] );
+    grunt.registerTask( 'test', [ 'env:test', 'transforms', 'js', 'css', 'shell:nyc', 'karma:headless', 'shell:buildReadmeBadge', 'eslint:check' ] );
+    grunt.registerTask( 'test-browser', [ 'env:test', 'transforms', 'css', 'karma:browsers' ] );
     grunt.registerTask( 'test-watch-client', [ 'env:test', 'karma:watch' ], );
     grunt.registerTask( 'test-watch-server', [ 'env:test', 'watch:mochaTest' ], );
     grunt.registerTask( 'develop', [ 'env:develop', 'i18next', 'js', 'css', 'concurrent:develop' ] );
