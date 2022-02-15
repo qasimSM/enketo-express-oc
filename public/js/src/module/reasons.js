@@ -11,7 +11,7 @@ export default {
     },*/
     get section() {
         const contextual = range.createContextualFragment(
-                `<section class="reason-for-change">
+            `<section class="reason-for-change">
                     <header class="reason-for-change__header">
                         <h5>${t( 'fieldsubmission.reason.heading' )}</h5>
                         <div class="question reason-for-change__header__apply-to-all">
@@ -29,6 +29,7 @@ export default {
         const firstElementChild = contextual.firstElementChild || contextual.children[0];
         this._section = this._section ||
         document.querySelector( '.form-footer' ).insertAdjacentElement( 'beforebegin', firstElementChild );
+
         return this._section;
     },
     get questionMsg() {

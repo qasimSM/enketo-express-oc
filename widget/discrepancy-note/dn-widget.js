@@ -592,7 +592,7 @@ class Comment extends Widget {
 
     _mapChecker() {
         const root = this.element.closest( 'form' ),
-        maps = Array.from( root.querySelectorAll( '.or-appearance-image-map' ) );
+            maps = Array.from( root.querySelectorAll( '.or-appearance-image-map' ) );
         let ready = maps.every( map => map.querySelector( 'svg' ) );
 
         let count = 0;
@@ -606,13 +606,13 @@ class Comment extends Widget {
                             mutationObserver.disconnect();
                         }
                     }
-                });
-            });
+                } );
+            } );
 
             mutationObserver.observe( root, {
                 attributes: true,
                 childList: true,
-                subtree: true });
+                subtree: true } );
         } else {
             this._scrollToview();
         }
