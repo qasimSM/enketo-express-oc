@@ -112,7 +112,7 @@ describe( 'Customized Branching Logic', () => {
                 // make c irrelevant (and still failing constraint validation too)
                 form.view.html.querySelector( b ).value = 'diarrheadafsdsfdasd';
                 form.view.html.querySelector( b ).dispatchEvent(  events.Change() );
-                setTimeout( done, 500 );
+                setTimeout( done, 200 );
             } );
 
             it( 'shows relevant error but not constraint error when form.validate() is called', () => form.validate()
@@ -134,9 +134,7 @@ describe( 'Customized Branching Logic', () => {
                 form.view.$.find( b ).val( 'd' ).trigger( 'change' );
                 // make b irrelevant
                 form.view.$.find( a ).val( 'nothing' ).trigger( 'change' );
-                setTimeout( () => {
-                    done();
-                }, 500 );
+                setTimeout( done, 200 );
             } );
 
             it( 'when question becomes relevant again', () => {

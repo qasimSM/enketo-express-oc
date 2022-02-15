@@ -163,7 +163,7 @@ Form.prototype.validateInput = function( control ) {
     // This is very unfortunate, but these are the kind of acrobatics that are necessary to "fight" the built-in behavior of Enketo's form engine.
     return originalValidateInput.call( this, control )
         .then( result => {
-            if ( result && ( !result.requiredValid || !result.constraintValid ) ) {
+            if ( result && ( !result.requiredValid || result.constraintValid.some( valid => valid === false ) ) ) {
                 const question = control.closest( '.question' );
                 if ( question && question.classList.contains( 'invalid-relevant' ) ) {
                     // TODO: another perhaps more efficient approach would be to check with invalid-constraintN classes are currently present
