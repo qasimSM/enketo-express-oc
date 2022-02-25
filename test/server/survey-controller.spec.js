@@ -13,7 +13,6 @@ describe('Survey Controller', () => {
             '/x/abcd',
             '/abcd',
             '/preview',
-            '/preview/abcd',
             '/edit/abcd?instance_id=a',
         ];
 
