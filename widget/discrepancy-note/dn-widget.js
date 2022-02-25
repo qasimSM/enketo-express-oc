@@ -235,8 +235,8 @@ class Comment extends Widget {
                         // This query may not always select the correct error message if the group contains multiple irrelevant error messages
                         const errorEl = irrelevantGroupAncestor
                             ? irrelevantGroupAncestor.querySelector(
-                                '.or-relevant-msg.active'
-                            )
+                                  '.or-relevant-msg.active'
+                              )
                             : null;
                         errorMsg = errorEl ? errorEl.textContent : '';
                     }
@@ -662,31 +662,31 @@ class Comment extends Widget {
                     <div class="border">
                         <h3 class="or-comment-widget__nav__main">
                             <a id="dn-history" href="#" data-thread="*">${t(
-        'widget.dn.allhistory'
-    )}</a>
+                                'widget.dn.allhistory'
+                            )}</a>
                         </h3>
                         <h3 class="or-comment-widget__nav__main"><span class="or-comment-widget__nav__main__title">${t(
-        'widget.dn.queries'
-    )}</span>
+                            'widget.dn.queries'
+                        )}</span>
                             ${
-    settings.type !== 'view'
-        ? newQueryButtonHtml
-        : ''
-}
+                                settings.type !== 'view'
+                                    ? newQueryButtonHtml
+                                    : ''
+                            }
                         </h3>
                         <ul>
                             ${this._getThreadFirsts(this.notes, 'comment')
-        .map(
-            (item) =>
-                `<li class="or-comment-widget__nav__item">
+                                .map(
+                                    (item) =>
+                                        `<li class="or-comment-widget__nav__item">
                                         <a href="#"  data-type="comment" data-thread="${
-    item.thread_id || 'NULL'
-}">
+                                            item.thread_id || 'NULL'
+                                        }">
                                             <span class="or-comment-widget__nav__item__start">
                                                 <span class="or-comment-widget__nav__item__start__icon icon ${this._getQueryThreadStatus(
-        this.notes,
-        item.thread_id
-    )}"> </span>
+                                                    this.notes,
+                                                    item.thread_id
+                                                )}"> </span>
                                                 <span class="or-comment-widget__nav__item__start__id">${
                                                     item.visible_thread_id
                                                         ? item.visible_thread_id
@@ -695,48 +695,48 @@ class Comment extends Widget {
                                                 </span>
                                             </span>
                                             <span class="or-comment-widget__nav__item__text ${
-    item.comment.length < 66
-        ? 'short'
-        : ''
-}"><span>${
-    item.comment
-}</span></span>
+                                                item.comment.length < 66
+                                                    ? 'short'
+                                                    : ''
+                                            }"><span>${
+                                            item.comment
+                                        }</span></span>
                                         </a>
                                     </li>`
-        )
-        .join('')}
+                                )
+                                .join('')}
                         </ul>
                         <h3 class="or-comment-widget__nav__main"><span class="or-comment-widget__nav__main__title">${t(
-        'widget.dn.annotations'
-    )}</span>
+                            'widget.dn.annotations'
+                        )}</span>
                             ${
-    settings.type !== 'view'
-        ? newAnnotationButtonHtml
-        : ''
-}
+                                settings.type !== 'view'
+                                    ? newAnnotationButtonHtml
+                                    : ''
+                            }
                         </h3>
                         <ul>
                             ${this._getThreadFirsts(this.notes, 'annotation')
-        .map(
-            (item) =>
-                `<li  class="or-comment-widget__nav__item">
+                                .map(
+                                    (item) =>
+                                        `<li  class="or-comment-widget__nav__item">
                                         <a href="#"  data-type="annotation" data-thread="${
-    item.thread_id || 'NULL'
-}">
+                                            item.thread_id || 'NULL'
+                                        }">
                                             <span class="or-comment-widget__nav__item__start">
                                                 <span class="or-comment-widget__nav__item__start__icon icon icon-dn-annotation"> </span>
                                             </span>
                                             <span class="or-comment-widget__nav__item__text ${
-    item.comment.length < 66
-        ? 'short'
-        : ''
-}"><span>${
-    item.comment
-}</span></span>
+                                                item.comment.length < 66
+                                                    ? 'short'
+                                                    : ''
+                                            }"><span>${
+                                            item.comment
+                                        }</span></span>
                                         </a>
                                     </li>`
-        )
-        .join('')}
+                                )
+                                .join('')}
                         </ul>
                     </div>
                 </div>
@@ -748,8 +748,8 @@ class Comment extends Widget {
                             <span class="or-comment-widget__content__history__value-change-filler"></span>
                             <input id="dn-show-value-changes" class="or-comment-widget__content__history__value-change-toggle ignore" type="checkbox" name="show-value-changes" checked />
                             <label for="dn-show-value-changes" class="option-label">${t(
-        'widget.dn.showvaluechanges'
-    )}</span>
+                                'widget.dn.showvaluechanges'
+                            )}</span>
                         </div>
                     </div>
                 </div>
@@ -1315,8 +1315,8 @@ class Comment extends Widget {
                 this.type !== 'comment'
                     ? null
                     : this.threadId
-                        ? this._getQueryThreadStatus(this.notes, this.threadId)
-                        : null;
+                    ? this._getQueryThreadStatus(this.notes, this.threadId)
+                    : null;
 
             if (
                 settings.type === 'view' ||
@@ -1336,14 +1336,14 @@ class Comment extends Widget {
                 settings.dnCloseButton !== true
                     ? ''
                     : `<button name="closed" class="btn btn-default or-comment-widget__content__form__btn-submit" type="button">${t(
-                        'widget.dn.closequerytext'
-                    )}</button>`;
+                          'widget.dn.closequerytext'
+                      )}</button>`;
             const updateQueryButtonHtml = `<button name="updated" class="btn btn-primary or-comment-widget__content__form__btn-submit" type="button">
                     ${
-    reopen
-        ? t('widget.dn.reopen')
-        : t('widget.comment.update')
-}
+                        reopen
+                            ? t('widget.dn.reopen')
+                            : t('widget.comment.update')
+                    }
                 </button>`;
 
             if (
@@ -1387,7 +1387,7 @@ class Comment extends Widget {
             this.type === 'annotation' && !this.threadId
                 ? ''
                 : range.createContextualFragment(
-                    `<div class="or-comment-widget__content__form__user">
+                      `<div class="or-comment-widget__content__form__user">
                 <label class="or-comment-widget__content__form__user__dn-assignee">
                     <span>${assignText}</span>
                     <select name="dn-assignee" class="ignore" >${this.usersOptionsHtml}</select>
@@ -1399,7 +1399,7 @@ class Comment extends Widget {
                     </label>
                 </div>
             </div>`
-                );
+                  );
         const buttonGroup = range.createContextualFragment(
             `<div class="or-comment-widget__content__form__query-btns">${btnsHtml}</div>`
         );
@@ -1609,38 +1609,38 @@ class Comment extends Widget {
         const assignee = !item.assigned_to
             ? visibleThreadId
             : t('widget.dn.assignedto', {
-                id: visibleThreadId,
-                assignee: item.assigned_to,
-            }).trim();
+                  id: visibleThreadId,
+                  assignee: item.assigned_to,
+              }).trim();
         const status = item.status
             ? t('widget.dn.status', { status: item.status })
             : '';
 
         return `
             <div class="or-comment-widget__content__history__row ${
-    item.type === 'audit' ? 'audit' : ''
-}">
+                item.type === 'audit' ? 'audit' : ''
+            }">
                 <div class="or-comment-widget__content__history__row__start">
                     <span class="or-comment-widget__content__history__row__start__username tooltip" data-title="${fullName}${
-    item.user ? ` (${item.user})` : ''
-}">${options.username === 'full' ? fullName : initials}</span>
+            item.user ? ` (${item.user})` : ''
+        }">${options.username === 'full' ? fullName : initials}</span>
                     <span class="or-comment-widget__content__history__row__start__datetime tooltip" data-title="${rdDatetime}">${time}</span>
                 </div>
                 <div class="or-comment-widget__content__history__row__main${
-    item.type === 'audit' ? '--audit' : ''
-}">
+                    item.type === 'audit' ? '--audit' : ''
+                }">
                     <span class="or-comment-widget__content__history__row__main__icon">${
-    types[item.type]
-}</span>
+                        types[item.type]
+                    }</span>
                     <span class="or-comment-widget__content__history__row__main__comment">
                         <span class="or-comment-widget__content__history__row__main__comment__text">${msg}</span>
                         <span class="or-comment-widget__content__history__row__main__comment__meta">
                             ${
-    assignee
-        ? assignee[0].toUpperCase() +
+                                assignee
+                                    ? assignee[0].toUpperCase() +
                                       assignee.substring(1)
-        : ''
-} ${status}
+                                    : ''
+                            } ${status}
                         </span>
                     </span>
                 </div>
@@ -1790,13 +1790,13 @@ class Comment extends Widget {
             document.createRange().createContextualFragment(
                 `<div class="dn-temp-print">
                 ${items
-        .map((item) =>
-            this._getHistoryRow(item, {
-                timestamp: 'datetime',
-                username: 'full',
-            })
-        )
-        .join('')}
+                    .map((item) =>
+                        this._getHistoryRow(item, {
+                            timestamp: 'datetime',
+                            username: 'full',
+                        })
+                    )
+                    .join('')}
             </div>`
             )
         );

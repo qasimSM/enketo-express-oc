@@ -1,77 +1,76 @@
 ## Advanced Comment Widgets
 
-Advanced comments widgets enable adding and reading comments on a particular question as well as metadata for those comments. 
+Advanced comments widgets enable adding and reading comments on a particular question as well as metadata for those comments.
 
 These widgets build upon the [generic comment feature](./comments) and keeps the following characteristics:
 
-- A comment is coded in XForms like a separate question. 
-- The `for` attribute, in the _http://enketo.org/xforms_ namespace, is used on the `<bind>` element in the same manner.
-- An appearance is used to instantiate the widget.
-- Optionally, a custom-namespaced attribute could be added to the data node in the model in the XForm definition.
+-   A comment is coded in XForms like a separate question.
+-   The `for` attribute, in the _http://enketo.org/xforms_ namespace, is used on the `<bind>` element in the same manner.
+-   An appearance is used to instantiate the widget.
+-   Optionally, a custom-namespaced attribute could be added to the data node in the model in the XForm definition.
 
 The advanced comment widgets extend the generic comment feature by: populating the comment node with a stringified JSON data structure and a UI to accomplish this.
 
-### Data Structure 
-
+### Data Structure
 
 ```json
 {
-  "queries": [
-    { 
-      "type": "comment",
-      "id": "23",
-      "user": "jen",
-      "date_time": "2016-09-01 15:01.123 -06:00",
-      "comment": "This value seems impossible.",
-      "status": "new",
-      "assigned_to": "moss",
-      "notify": false,
-      "thread_id": "34324-2349234832-sdgadg-34234",
-      "visible_thread_id": "bef"
-    }, 
-    {
-      "type": "reason",
-      "id": "101",
-      "date_time": "2016-04-22 14:44:20.123 -06:00",
-      "comment": "No reason.", 
-    },
-    {
-      "type": "comment",
-      "id": "24",
-      "assigned_to": "jen",
-      "date_time": "2016-04-22 14:44:20.123 -06:00",
-      "comment": "This is an older comment.", 
-      "status": "updated",
-      "user": "moss",
-      "thread_id": "34324-2349234832-sdgadg-34234",
-      "visible_thread_id": "bef"
-    },
-    {
-      "type": "annotation",
-      "id": "29",
-      "assigned_to": "jen",
-      "date_time": "2016-04-26 14:44:20.123 -06:00",
-      "comment": "Comment", 
-      "status": "updated",
-      "user": "moss",
-      "thread_id": "aw42134a3240324-234324324c",
-      "visible_thread_id": "abc"
-    },
-  ],
-  "logs": [
-    { 
-      "type": "audit",  
-      "comment": "Item data value updated from old_value to new_value.",  
-      "date_time" : "2016-05-18 12:44:20.456 -06:00",
-      "user" : "jen",
-    },
-    { 
-      "type": "audit",  
-      "comment": "Item data value updated from old_value to new_value.",  
-      "date_time" : "2017-05-19 12:44:20.456 -06:00",
-      "user" : "moss",
-    }
-  ]
+    "queries": [
+        {
+            "type": "comment",
+            "id": "23",
+            "user": "jen",
+            "date_time": "2016-09-01 15:01.123 -06:00",
+            "comment": "This value seems impossible.",
+            "status": "new",
+            "assigned_to": "moss",
+            "notify": false,
+            "thread_id": "34324-2349234832-sdgadg-34234",
+            "visible_thread_id": "bef"
+        },
+        {
+            "type": "reason",
+            "id": "101",
+            "date_time": "2016-04-22 14:44:20.123 -06:00",
+            "comment": "No reason."
+        },
+        {
+            "type": "comment",
+            "id": "24",
+            "assigned_to": "jen",
+            "date_time": "2016-04-22 14:44:20.123 -06:00",
+            "comment": "This is an older comment.",
+            "status": "updated",
+            "user": "moss",
+            "thread_id": "34324-2349234832-sdgadg-34234",
+            "visible_thread_id": "bef"
+        },
+        {
+            "type": "annotation",
+            "id": "29",
+            "assigned_to": "jen",
+            "date_time": "2016-04-26 14:44:20.123 -06:00",
+            "comment": "Comment",
+            "status": "updated",
+            "user": "moss",
+            "thread_id": "aw42134a3240324-234324324c",
+            "visible_thread_id": "abc"
+        }
+    ],
+    "logs": [
+        {
+            "type": "audit",
+            "comment": "Item data value updated from old_value to new_value.",
+            "date_time": "2016-05-18 12:44:20.456 -06:00",
+            "user": "jen"
+        },
+        {
+            "type": "audit",
+            "comment": "Item data value updated from old_value to new_value.",
+            "date_time": "2017-05-19 12:44:20.456 -06:00",
+            "user": "moss"
+        }
+    ]
 }
 ```
 
@@ -88,7 +87,6 @@ In XLSForm on the settings sheet, add a column `namespaces` and populate this wi
 | form_title | namespaces                     |
 | ---------- | ------------------------------ |
 | My Form    | enk="http://enketo.org/xforms" |
-
 
 #### Question
 
@@ -107,7 +105,6 @@ Give this question the appearance `dn` to ensure the question will be displayed 
 | ---- | --------- | --------------- | ------------ |
 | text | a         | Enter text      |              |
 | text | a_comment | Enter a comment | multiline dn |
-
 
 #### Add a bind::enk:for column
 
@@ -131,7 +128,7 @@ In addition there is `comment-status` function that can be used to check the sta
 
 #### Users list
 
-Add a secondary instance with id "_users" to the XForm, with the following structure as *\_users.xml*:
+Add a secondary instance with id "\_users" to the XForm, with the following structure as _\_users.xml_:
 
 ```xml
 <root>
@@ -149,7 +146,6 @@ Add a secondary instance with id "_users" to the XForm, with the following struc
 ```
 
 Use the current attribute to pass information to Enketo on the current user. The value of this attribute is ignored.
-
 
 #### XForm sample
 

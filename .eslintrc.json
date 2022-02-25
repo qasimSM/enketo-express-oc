@@ -107,7 +107,8 @@
             "files": [
                 "app/views/**/*.js",
                 "public/js/src/**/*.js",
-                "test/client/**/*.js"
+                "test/client/**/*.js",
+                "widget/**/*.js"
             ],
             "env": {
                 "browser": true,

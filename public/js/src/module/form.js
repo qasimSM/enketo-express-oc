@@ -396,7 +396,7 @@ Form.prototype.updateValidityInUi = function (control, result) {
                 if (valid === true) {
                     this.setValid(control, cls);
                 } else if (valid === false) {
-                    passed == false;
+                    passed === false;
                     this.setInvalid(control, cls);
                 }
                 // no need to do anything if valid === undefined
