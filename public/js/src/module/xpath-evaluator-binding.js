@@ -4,10 +4,10 @@ import extendXPath from 'enketo-xpath-extensions-oc';
 /**
  * @function xpath-evaluator-binding
  */
-export default function( ) {
+export default function () {
     const evaluator = OpenRosaXPath();
 
-    extendXPath( evaluator );
+    extendXPath(evaluator);
 
     this.xml.jsEvaluate = evaluator.evaluate;
 }
