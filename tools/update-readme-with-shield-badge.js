@@ -1,4 +1,3 @@
-/* global process, __dirname */
 /* eslint no-console: 0 */
 
 /* **************

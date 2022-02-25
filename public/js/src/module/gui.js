@@ -379,24 +379,34 @@ function confirmLogin(msg) {
  * @param  {string=}        advice -  a string with advice
  */
 /*
-function alertLoadErrors( loadErrors, advice ) {
-    const errorStringHTML = `<ul class="error-list"><li>${loadErrors.join( '</li><li>' )}</li></ul>`;
-    const errorStringEmail = `* ${loadErrors.join( '\n* ' )}`;
-    const email = settings[ 'supportEmail' ];
-    const link = `<a href="mailto:${email}?subject=loading errors for: ${encodeURIComponent( location.href )}&body=${encodeURIComponent( errorStringEmail )}" target="_blank" >${email}</a>`;
+function alertLoadErrors(loadErrors, advice) {
+    const errorStringHTML = `<ul class="error-list"><li>${loadErrors.join(
+        '</li><li>'
+    )}</li></ul>`;
+    const errorStringEmail = `* ${loadErrors.join('\n* ')}`;
+    const email = settings.supportEmail;
+    const link = `<a href="mailto:${email}?subject=loading errors for: ${encodeURIComponent(
+        location.href
+    )}&body=${encodeURIComponent(
+        errorStringEmail
+    )}" target="_blank" >${email}</a>`;
     const params = {
         emailLink: link,
         count: loadErrors.length,
         // switch off escaping just for this known safe value
         interpolation: {
-            escapeValue: false
-        }
+            escapeValue: false,
+        },
     };
 
     advice = advice || '';
 
     alert(
-        `<p>${t( 'alert.loaderror.msg1', params )} ${advice}</p><p>${t( 'alert.loaderror.msg2', params )}</p>${errorStringHTML}`, t( 'alert.loaderror.heading', params )
+        `<p>${t('alert.loaderror.msg1', params)} ${advice}</p><p>${t(
+            'alert.loaderror.msg2',
+            params
+        )}</p>${errorStringHTML}`,
+        t('alert.loaderror.heading', params)
     );
 }
 */
@@ -485,36 +495,39 @@ function printForm() {
     const components = getPrintDialogComponents();
     const texts = {
         heading: components.heading,
-        msg: components.msg
+        msg: components.msg,
     };
     const options = {
         posButton: components.posButton,
         negButton: components.negButton,
     };
     const inputs = components.gridInputs + components.gridWarning;
-    const questions = document.querySelectorAll( '.question' );
+    const questions = document.querySelectorAll('.question');
 
     printHelper.openAllDetails();
-    questions.forEach( question => question.dispatchEvent( events.Printify() ) );
+    questions.forEach((question) => question.dispatchEvent(events.Printify()));
 
-    if ( formTheme === 'grid' || ( !formTheme && printHelper.isGrid() ) ) {
-        return prompt( texts, options, inputs )
-            .then( values => {
-                if ( values ) {
-                    return printGrid( values );
+    if (formTheme === 'grid' || (!formTheme && printHelper.isGrid())) {
+        return prompt(texts, options, inputs)
+            .then((values) => {
+                if (values) {
+                    return printGrid(values);
                 }
-            } )
-            .then( () => {
+            })
+            .then(() => {
                 printHelper.closeAllDetails();
-                questions.forEach( question => question.dispatchEvent( events.DePrintify() ) );
-            } );
-    } else {
-        window.print();
-        printHelper.closeAllDetails();
-        questions.forEach( question => question.dispatchEvent( events.DePrintify() ) );
-
-        return Promise.resolve();
+                questions.forEach((question) =>
+                    question.dispatchEvent(events.DePrintify())
+                );
+            });
     }
+    window.print();
+    printHelper.closeAllDetails();
+    questions.forEach((question) =>
+        question.dispatchEvent(events.DePrintify())
+    );
+
+    return Promise.resolve();
 }
 */
 

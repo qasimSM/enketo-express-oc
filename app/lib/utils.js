@@ -3,7 +3,7 @@
  */
 
 const crypto = require('crypto');
-const EVP_BytesToKey = require('evp_bytestokey');
+const evpBytesToKey = require('evp_bytestokey');
 const validUrl = require('valid-url');
 // var debug = require( 'debug' )( 'utils' );
 
@@ -167,7 +167,7 @@ function randomString(
  * @param { string } pw - password
  */
 function _getKeyIv(pw) {
-    return EVP_BytesToKey(pw, null, 192, 16);
+    return evpBytesToKey(pw, null, 192, 16);
 }
 
 /**

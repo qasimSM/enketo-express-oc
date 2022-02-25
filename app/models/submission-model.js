@@ -1,5 +1,3 @@
-/* global process, __dirname */
-
 /**
  * @module submission-model
  */

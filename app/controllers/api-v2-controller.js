@@ -709,10 +709,10 @@ function _generateWebformUrls(id, req) {
 
 /**
  * @param { number } status - HTTP status code
- * @param { object|string } [body] - response body
+ * @param { object|string } body - response body
  * @param { module:api-controller~ExpressResponse } res - HTTP response
  */
-function _render(status, body = {}, res) {
+function _render(status, body, res) {
     if (status === 204) {
         // send 204 response without a body
         res.status(status).end();

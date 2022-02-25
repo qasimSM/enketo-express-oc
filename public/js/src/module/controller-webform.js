@@ -494,7 +494,7 @@ function _confirmRecordName(recordName, errorMsg) {
 
 /**
  * @param {Survey} survey
- * @param {boolean} [draft]
+ * @param {boolean} draft
  * @param {string} [recordName]
  * @param {boolean} [confirmed]
  * @param {string} [errorMsg]

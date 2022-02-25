@@ -1,5 +1,3 @@
-/* global process */
-
 /**
  * @module survey-model
  */

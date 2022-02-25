@@ -1,5 +1,3 @@
-/* global process, __dirname */
-
 const { requestContextMiddleware } = require('../app/lib/context');
 const express = require('express');
 const path = require('path');

@@ -1,11 +1,10 @@
 ![Build Status](https://github.com/OpenClinica/enketo-express-oc/actions/workflows/ci.yml/badge.svg)
 
-Enketo Express fork for OpenClinica
-==============
+# Enketo Express fork for OpenClinica
 
 _The modern [Enketo Smart Paper](https://enketo.org) web application._
 
--------
+---
 
 This is a fork of [enketo/enketo-express](https://github.com/enketo/enketo-express) that has the following additions:
 
@@ -14,12 +13,11 @@ This is a fork of [enketo/enketo-express](https://github.com/enketo/enketo-expre
 3. An OpenClinica theme: [theme-oc](https://github.com/OpenClinica/enketo-express-oc/tree/master/app/views/styles/theme-oc).
 4. [Advanced comment widgets](./doc/advanced-comment-widgets.md): [discrepancy note widget](./doc/advanced-comment-widgets.md#discrepancy-notes-widget)
 
--------
-
+---
 
 **To get started visit our [technical documentation](https://enketo.github.io/enketo-express).**
 
-------
+---
 
 OpenClinica users, in addition to the configuration documentation linked above, may want to take special note of these recommended settings:
 
@@ -33,13 +31,11 @@ OpenClinica users, in addition to the configuration documentation linked above, 
 7. Set `"default theme": "oc"`
 8. Set `"text field character limit": 3999`
 
-
 OpenClinica users, to build special Internet Explorer 11 javascript bundles, do after the regular build (ie. `npm install`):
 
 0. `grunt build-ie11`
 
-
---------
+---
 
 ### Translation
 
@@ -47,11 +43,12 @@ The user interface was translated by: Serkan Tümbaş (Turkish), Hélène Martin
 
 _Send a message if you'd like to contribute! We use an easy web interface provided by [Transifex](https://www.transifex.com/projects/p/enketo-express/)._
 
--------
+---
 
 OpenClinica has a few [additional text strings](./locales/src/en/translation-additions.json) that can be translated separately.
 
---------
+---
+
 ### Releases
 
 1. Create release PR
@@ -75,7 +72,6 @@ OpenClinica has a few [additional text strings](./locales/src/en/translation-add
 
 The development of this application was funded by [KoBo Toolbox (Harvard Humanitarian Initiative)](http://www.kobotoolbox.org), [iMMAP](http://immap.org), [OpenClinica](https://openclinica.com), [London School of Hygiene and Tropical Medicine](https://opendatakit.lshtm.ac.uk/), [DIAL Open Source Center](https://www.osc.dial.community/) and [Enketo LLC](https://www.linkedin.com/company/enketo-llc). The [Enketo-core](https://github.com/enketo/enketo-core) library (the form engine + themes) used in this application obtained significant funding from [SEL (Columbia University)](http://modi.mech.columbia.edu/), the [Santa Fe Institute](http://www.santafe.edu/), [Ona](https://ona.io) and the [HRP project](http://www.who.int/reproductivehealth/topics/mhealth/en/).
 
-
 ### License
 
 See [the license document](https://github.com/enketo/enketo-express/blob/master/LICENSE) for this application's license.
@@ -85,7 +81,6 @@ Note that some of the libraries used in this app have a different license. In pa
 Note the 'Powered by Enketo' footer requirement as explained in [enketo-core](https://github.com/enketo/enketo-core#license). This requirement is applicable to all Enketo apps, including this one, unless an exemption was granted.
 
 The Enketo logo and Icons are trademarked by [Enketo LLC](https://www.linkedin.com/company/enketo-llc) and should only be used for the 'Powered by Enketo' requirement mentioned above (if applicable). To prevent infringement simply replace the logo images in [/public/images](https://github.com/enketo/enketo-express/blob/master/public/images) with your own or contact [Enketo LLC](mailto:info@enketo.org) to discuss the use inside your app.
-
 
 ### Change log
 

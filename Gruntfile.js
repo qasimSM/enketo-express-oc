@@ -1,12 +1,12 @@
 module.exports = (grunt) => {
-    const JS_INCLUDE = [
+    const eslintInclude = [
+        './*.md',
+        '{.github,app,tutorials}/**/*.md',
         '**/*.js',
-        '!**/offline-app-worker-partial.js',
+        '!.nyc_output',
         '!**/node_modules/**',
-        '!test/**/*.spec.js',
         '!test/client/forms/forms.js',
         '!public/js/build/*',
-        '!test/client/config/karma.conf.js',
         '!docs/**',
         '!test-coverage/**',
         '!**/redirect-IE.js',
@@ -170,13 +170,13 @@ module.exports = (grunt) => {
         },
         eslint: {
             check: {
-                src: JS_INCLUDE,
+                src: eslintInclude,
             },
             fix: {
                 options: {
                     fix: true,
                 },
-                src: JS_INCLUDE,
+                src: eslintInclude,
             },
         },
         // test server JS

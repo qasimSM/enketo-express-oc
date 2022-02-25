@@ -14,11 +14,11 @@
             "allow insecure transport": "false"
         }
     },
-    "ip filtering" : {
-	    "allowPrivateIPAddress": false,
-	    "allowMetaIPAddress": false,
-	    "allowIPAddressList": [],
-	    "denyIPAddressList": []
+    "ip filtering": {
+        "allowPrivateIPAddress": false,
+        "allowMetaIPAddress": false,
+        "allowIPAddressList": [],
+        "denyIPAddressList": []
     },
     "timeout": 300000,
     "expiry for record cache": 30000,
@@ -61,11 +61,13 @@
     "headless": {
         "timeout": 60000
     },
-    "maps": [ {
-        "name": "streets",
-        "tiles": [ "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" ],
-        "attribution": "© <a href=\"http://openstreetmap.org\">OpenStreetMap</a> | <a href=\"www.openstreetmap.org/copyright\">Terms</a>"
-    } ],
+    "maps": [
+        {
+            "name": "streets",
+            "tiles": ["https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"],
+            "attribution": "© <a href=\"http://openstreetmap.org\">OpenStreetMap</a> | <a href=\"www.openstreetmap.org/copyright\">Terms</a>"
+        }
+    ],
     "query parameter to pass to submission": "",
     "redis": {
         "main": {

@@ -71,7 +71,7 @@ module.exports = {
     input: [
         'public/js/src/**/*.js',
         'app/views/**/*.pug',
-        'app/lib/communicator/**/*.js',
+        'app/lib/communicator.js',
         'app/controllers/**/*.js',
         'app/models/**/*.js',
         'node_modules/enketo-core/src/**/*.js',
