@@ -28,13 +28,10 @@ repeatModule.confirmDelete = function (repeatEl) {
             '<p><label><input name="reason" type="text"/></label></p>';
 
         gui.prompt(texts, {}, inputs).then((values) => {
-            if (!values) {
-            } else if (!values.reason || !values.reason.trim()) {
-                // TODO: something
-            } else {
-                values.type = 'remove';
+            if (values && values.reason && values.reason.trim()) {
+                const obj = { ...values, type: 'remove' };
                 questions.forEach((q) =>
-                    q.dispatchEvent(events.ReasonChange(values))
+                    q.dispatchEvent(events.ReasonChange(obj))
                 );
                 that.remove($(repeatEl));
                 reasons.updateNumbering();

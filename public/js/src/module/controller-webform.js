@@ -499,7 +499,7 @@ function _confirmRecordName(recordName, errorMsg) {
  * @param {boolean} [confirmed]
  * @param {string} [errorMsg]
  */
-function _saveRecord(survey, draft = true, recordName, confirmed, errorMsg) {
+function _saveRecord(survey, draft, recordName, confirmed, errorMsg) {
     const include = { irrelevant: draft };
 
     // triggering "before-save" event to update possible "timeEnd" meta data in form

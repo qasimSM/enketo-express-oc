@@ -1,3 +1,4 @@
+/* eslint-disable class-methods-use-this */
 import Widget from 'enketo-core/src/js/widget';
 import { getSiblingElements } from 'enketo-core/src/js/dom-utils';
 import $ from 'jquery';
@@ -1125,7 +1126,7 @@ class Comment extends Widget {
             thread_id,
         };
 
-        if (thread_id === 'NULL') {
+        if (q.thread_id === 'NULL') {
             delete q.thread_id;
         }
 

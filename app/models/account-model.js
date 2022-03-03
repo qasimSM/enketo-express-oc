@@ -1,5 +1,3 @@
-/* global process */
-
 /**
  * @module account-model
  */

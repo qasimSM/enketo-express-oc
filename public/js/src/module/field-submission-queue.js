@@ -223,7 +223,7 @@ class FieldSubmissionQueue {
         return Promise.resolve();
     }
 
-    _submitOne(url, fd = null, method) {
+    _submitOne(url, fd = null, method = 'POST') {
         const that = this;
         let error;
 
@@ -254,7 +254,10 @@ class FieldSubmissionQueue {
                     error = new Error(jqXHR.statusText);
                     error.status = jqXHR.status;
                     if (jqXHR.status === 409) {
-                        that._showLockedMsg();
+                        gui.alert(
+                            t('fieldsubmission.alert.locked.msg'),
+                            t('fieldsubmission.alert.locked.heading')
+                        );
                     }
                     reject(error);
                 });
@@ -305,13 +308,6 @@ class FieldSubmissionQueue {
 
     _clearSubmissionInterval() {
         clearInterval(this.submissionInterval);
-    }
-
-    _showLockedMsg() {
-        gui.alert(
-            t('fieldsubmission.alert.locked.msg'),
-            t('fieldsubmission.alert.locked.heading')
-        );
     }
 
     _duplicateCheck(path, fragment) {

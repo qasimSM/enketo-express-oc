@@ -844,8 +844,7 @@ function _complete(bypassConfirmation = false, bypassChecks = false) {
                     if (Object.keys(fieldSubmissionQueue.get()).length === 0) {
                         instanceId = form.instanceID;
                         deprecatedId = form.deprecatedID;
-                        if (form.model.isMarkedComplete()) {
-                        } else {
+                        if (!form.model.isMarkedComplete()) {
                             return fieldSubmissionQueue.complete(
                                 instanceId,
                                 deprecatedId
@@ -1006,7 +1005,13 @@ function _submitRecord() {
         });
 }
 
-function _saveRecord(draft = true, recordName, confirmed, errorMsg) {
+/**
+ * @param {boolean} draft
+ * @param {string} [recordName]
+ * @param {boolean} [confirmed]
+ * @param {string} [errorMsg]
+ */
+function _saveRecord(draft, recordName, confirmed, errorMsg) {
     const include = { irrelevant: draft };
 
     // triggering "before-save" event to update possible "timeEnd" meta data in form
