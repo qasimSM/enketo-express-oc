@@ -298,6 +298,7 @@ function init(formEl, data, loadErrors = []) {
                     );
                 }
 
+                _setLanguageUiEventHandlers();
                 rc.setLogoutLinkVisibility();
 
                 const numberOfNotSoSeriousErrors =
@@ -1366,7 +1367,9 @@ function _setFormEventHandlers() {
                 return true;
             });
     }
+}
 
+function _setLanguageUiEventHandlers() {
     // This actually belongs in gui.js but that module doesn't have access to the form object.
     // Enketo core takes care of language switching of the form itself, i.e. all language strings in the form definition.
     // This handler does the UI around the form, as well as the UI inside the form that are part of the application.
