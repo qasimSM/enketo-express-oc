@@ -152,5 +152,8 @@
             "msg1_plural": "Please contact your support team with the link to this page and the messages below if you need further help.",
             "msg2_plural": ""
         }
+    },
+    "submission": {
+        "http500": "There was a problem with your submission. Please try again or contact the Study Team if this persists."
     }
 }
