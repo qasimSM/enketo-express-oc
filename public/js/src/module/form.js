@@ -236,7 +236,7 @@ Form.prototype.strictConstraintCheckHandler = function (evt, input) {
     const n = {
         path: this.input.getName(input),
         xmlType: this.input.getXmlType(input),
-        constraint: this.input.getConstraint(input),
+        constraint: this.input.getConstraint(input)[0],
         val: this.input.getVal(input),
     };
 
@@ -244,6 +244,7 @@ Form.prototype.strictConstraintCheckHandler = function (evt, input) {
     if (
         n.readonly ||
         n.inputType === 'hidden' ||
+        !n.constraint ||
         input.closest('.invalid-relevant')
     ) {
         return;
