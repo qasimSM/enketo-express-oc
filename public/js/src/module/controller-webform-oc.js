@@ -4,6 +4,7 @@
  * Field values are automatically submitted upon change to a special OpenClinica Field Submission API.
  */
 
+import downloadUtils from 'enketo-core/src/js/download-utils';
 import $ from 'jquery';
 import gui from './gui';
 import connection from './connection';
@@ -1522,6 +1523,49 @@ function _setButtonEventHandlers() {
             });
         }
 
+        $('.record-list__button-bar__button.upload').on('click', () => {
+            records.uploadQueue();
+        });
+
+        $('.record-list__button-bar__button.export').on('click', () => {
+            const downloadLink =
+                '<a class="vex-dialog-link" id="download-export" href="#">download</a>';
+
+            records
+                .exportToZip(form.surveyName)
+                .then((zipFile) => {
+                    gui.alert(
+                        t('alert.export.success.msg') + downloadLink,
+                        t('alert.export.success.heading'),
+                        'normal'
+                    );
+                    updateDownloadLinkAndClick(
+                        document.querySelector('#download-export'),
+                        zipFile
+                    );
+                })
+                .catch((error) => {
+                    let message = t('alert.export.error.msg', {
+                        errors: error.message,
+                        interpolation: {
+                            escapeValue: false,
+                        },
+                    });
+                    if (error.exportFile) {
+                        message += `<p>${t(
+                            'alert.export.error.filecreatedmsg'
+                        )}</p>${downloadLink}`;
+                    }
+                    gui.alert(message, t('alert.export.error.heading'));
+                    if (error.exportFile) {
+                        updateDownloadLinkAndClick(
+                            document.querySelector('#download-export'),
+                            error.exportFile
+                        );
+                    }
+                });
+        });
+
         $(document).on(
             'click',
             '.record-list__records__record[data-draft="true"]',
@@ -1573,6 +1617,14 @@ function _setButtonEventHandlers() {
             }
         };
     }
+}
+
+function updateDownloadLinkAndClick(anchor, file) {
+    const objectUrl = URL.createObjectURL(file);
+
+    anchor.textContent = file.name;
+    downloadUtils.updateDownloadLink(anchor, objectUrl, file.name);
+    anchor.click();
 }
 
 function postHeartbeat() {
