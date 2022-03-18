@@ -621,7 +621,7 @@ function _generateWebformUrls(id, req) {
                 req.parentWindowOriginParam,
                 req.jini,
             ]);
-            url = `${BASEURL}full/participant/${OFFLINEPATH}${idFullParticipant}${queryString}`;
+            url = `${BASEURL}${OFFLINEPATH}full/participant/${idFullParticipant}${queryString}`;
             break;
         }
         case 'view':

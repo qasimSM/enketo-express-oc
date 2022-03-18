@@ -408,7 +408,7 @@ describe('api', () => {
                 auth: true,
                 status: 200,
                 offline: true,
-                expected: /\/full\/participant\/x\/[A-z0-9]{32}\?/,
+                expected: /\/x\/full\/participant\/[A-z0-9]{32}\?/,
             });
         });
 

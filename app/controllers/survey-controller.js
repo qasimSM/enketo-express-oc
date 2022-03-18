@@ -79,7 +79,7 @@ router
     )
     .get('*', _setCloseButtonClass)
     .get(
-        `/full/participant${config['offline path']}/:encrypted_enketo_id_full_participant`,
+        `${config['offline path']}/full/participant/:encrypted_enketo_id_full_participant`,
         fullParticipantOffline
     )
     .get(`${config['offline path']}/:enketo_id`, offlineWebform)
