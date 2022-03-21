@@ -377,6 +377,10 @@ Form.prototype.isValid = function (node) {
 Form.prototype.updateValidityInUi = function (control, result) {
     const passed = result.requiredValid !== false;
 
+    if (result.constraintValid === null) {
+        result.constraintValid = Array.from(Array(21)).map(() => null);
+    }
+
     // Update UI
     if (result.requiredValid === false) {
         if (Array.isArray(result.constraintValid)) {
