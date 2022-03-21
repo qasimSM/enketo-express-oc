@@ -163,12 +163,13 @@ settings.strictViolationBlocksNavigation =
 settings.openSingleDnThreadAutomaticallyUponLoadAndGoToDn =
     !/\/fs\/dn\//.test(window.location.pathname) && !settings.reasonForChange;
 
-// For Participate only
-if (/\/participant\//.test(window.location.pathname)) {
-    settings.relevantIsStrict = true;
-}
 if (/\/full\//.test(window.location.pathname)) {
     settings.fullRecord = true;
+}
+
+// For non-anonymous Participate views only
+if (!settings.fullRecord && /\/participant\//.test(window.location.pathname)) {
+    settings.relevantIsStrict = true;
 }
 
 function _getAllQueryParams() {
