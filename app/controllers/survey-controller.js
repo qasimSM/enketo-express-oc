@@ -138,6 +138,7 @@ router
     .get('/xform/:encrypted_enketo_id_view_dnc', xform)
     .get('/xform/:encrypted_enketo_id_fs_c', xform)
     .get('/xform/:encrypted_enketo_id_fs_participant', xform)
+    .get('/xform/:encrypted_enketo_id_full_participant', xform)
     .get(/.*\/::[A-z0-9]{4,8}/, redirect);
 
 /**
