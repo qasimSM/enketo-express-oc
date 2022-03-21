@@ -1479,20 +1479,13 @@ function _setButtonEventHandlers() {
 
             form.validate()
                 .then((valid) => {
-                    if (!valid) {
-                        const strictViolations = form.view.html.querySelector(
-                            settings.strictViolationSelector
-                        );
-
-                        valid = !strictViolations;
-                    }
                     if (valid) {
                         if (settings.offline) {
                             return _saveRecord(false);
                         }
                         return _submitRecord();
                     }
-                    gui.alertStrictBlock();
+                    gui.alert(t('alert.validationerror.msg'));
                 })
                 .catch((e) => {
                     gui.alert(e.message);
