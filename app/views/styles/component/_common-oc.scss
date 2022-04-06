@@ -281,7 +281,7 @@ $secondary-color: #eeeeee;
     }
 }
 
-.pages~.form-footer {
+.pages ~ .form-footer {
     .form-footer {
         &__content {
             &__main-controls {
@@ -298,6 +298,11 @@ $secondary-color: #eeeeee;
 
                     .icon {
                         margin-left: 6px;
+                    }
+
+                    // show save-draft button on every page
+                    &#save-draft {
+                        display: inline-block;
                     }
                 }
 
