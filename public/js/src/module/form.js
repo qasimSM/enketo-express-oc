@@ -179,7 +179,9 @@ Form.prototype.validateInput = function (control) {
         if (
             result &&
             (!result.requiredValid ||
-                result.constraintValid.some((valid) => valid === false))
+                !result.constraintValid || // form.validateInput still returns true for hidden and disabled fields
+                (Array.isArray(result.constraintValid) &&
+                    result.constraintValid.some((valid) => valid === false)))
         ) {
             const question = control.closest('.question');
             if (question && question.classList.contains('invalid-relevant')) {
