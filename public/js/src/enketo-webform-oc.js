@@ -136,6 +136,9 @@ function _showErrorOrAuthenticate(error) {
         )}`;
     } else {
         gui.alert(error.message, t('alert.loaderror.heading'));
+        if (settings.headless) {
+            gui.showHeadlessResult({ error: error.message });
+        }
     }
 }
 

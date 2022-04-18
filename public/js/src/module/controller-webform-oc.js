@@ -348,15 +348,6 @@ function init(formEl, data, loadErrors = []) {
                     console.log('doing headless things');
                     gui.prompt = () => Promise.resolve(true);
                     gui.confirm = () => Promise.resolve(true);
-                    const resultFragment = document
-                        .createRange()
-                        .createContextualFragment(
-                            `<div
-                        id="headless-result"
-                        style="position: fixed; width: 100%; background: pink; top: 0; left: 0; border: 5px solid black; padding: 10px 20px; text-align:center;"
-                        ></div>`
-                        )
-                        .querySelector('#headless-result');
 
                     if (loadErrors.length) {
                         action = Promise.reject(new Error(loadErrors[0]));
@@ -374,30 +365,16 @@ function init(formEl, data, loadErrors = []) {
                         action = _closeRegular(true);
                     }
 
+                    const result = {};
+
                     return action
                         .catch((error) => {
-                            resultFragment.append(
-                                document
-                                    .createRange()
-                                    .createContextualFragment(
-                                        `<div id="error">${error.message}</div>`
-                                    )
-                            );
+                            result.error = error.message;
                         })
                         .finally(() => {
-                            const fieldsubmissions =
+                            result.fieldsubmissions =
                                 fieldSubmissionQueue.submittedCounter;
-                            resultFragment.append(
-                                document.createRange().createContextualFragment(
-                                    `<div
-                                id="fieldsubmissions"
-                                style="border: 5px dotted black; display: inline-block; padding: 10px 20px;"
-                            >${fieldsubmissions}</div>`
-                                )
-                            );
-                            document
-                                .querySelector('body')
-                                .append(resultFragment);
+                            gui.showHeadlessResult(result);
                         });
                 }
             })

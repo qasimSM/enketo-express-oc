@@ -20,6 +20,12 @@ let updateStatus;
 let feedbackBar;
 let formTheme;
 
+/**
+ * @typedef HeadlessResult
+ * @property { string= } error
+ * @property { number= } fieldSubmissions
+ */
+
 // Customize vex
 vex.registerPlugin(vexEnketoDialog);
 vex.defaultOptions.className = 'vex-theme-plain';
@@ -787,6 +793,45 @@ function getErrorResponseMsg(statusCode) {
     return msg;
 }
 
+/**
+ * Shows a form loading result that a headless API responder can parse.
+ *
+ * @param {HeadlessResult} result
+ */
+function showHeadlessResult(result) {
+    const resultFragment = document
+        .createRange()
+        .createContextualFragment(
+            `<div
+                id="headless-result"
+                style="position: fixed; width: 100%; background: pink; top: 0; left: 0;
+                    border: 5px solid black; padding: 10px 20px; text-align:center;"
+            ></div>`
+        )
+        .querySelector('#headless-result');
+
+    if (result.error) {
+        resultFragment.append(
+            document
+                .createRange()
+                .createContextualFragment(
+                    `<div id="error">${result.error}</div>`
+                )
+        );
+    } else {
+        resultFragment.append(
+            document.createRange().createContextualFragment(
+                `<div
+            id="fieldsubmissions"
+            style="border: 5px dotted black; display: inline-block; padding: 10px 20px;"
+        >${result.fieldsubmissions}</div>`
+            )
+        );
+    }
+
+    document.querySelector('body').append(resultFragment);
+}
+
 $(document).ready(() => {
     init();
 });
@@ -807,4 +852,5 @@ export default {
     getPrintDialogComponents,
     alertStrictError,
     alertStrictBlock,
+    showHeadlessResult,
 };
