@@ -312,7 +312,7 @@ function _init(formParts) {
                         modelStr: formParts.model,
                         instanceStr: formParts.instance,
                         external: formParts.externalData,
-                        instanceAttachments: formParts.instanceAttachments,
+                        survey: formParts,
                     },
                     formParts.loadErrors
                 )

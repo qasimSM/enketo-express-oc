@@ -20,6 +20,7 @@ import {
     getBrowserLanguage,
 } from './translator';
 import records from './records-queue';
+import formCache from './form-cache';
 import FieldSubmissionQueue from './field-submission-queue';
 import rc from './controller-webform';
 import reasons from './reasons';
@@ -36,6 +37,28 @@ const formOptions = {
 };
 const inputUpdateEventBuffer = [];
 const delayChangeEventBuffer = [];
+
+/**
+ * @typedef InstanceAttachment
+ * @property {string} filename
+ */
+
+/**
+ * @typedef ControllerWebformInitData
+ * @property {string} modelStr
+ * @property {string} instanceStr
+ * @property {Document[]} external
+ * @property {Survey} survey
+ * @property {InstanceAttachment[]} [instanceAttachments]
+ * @property {boolean} [isEditing]
+ */
+
+/**
+ * @param {Element} formEl
+ * @param {ControllerWebformInitData} data
+ * @param {string[]} [loadErrors]
+ * @return {Promise<Form>}
+ */
 
 function init(formEl, data, loadErrors = []) {
     formData = data;
@@ -257,7 +280,7 @@ function init(formEl, data, loadErrors = []) {
                     }
                 }
 
-                _setButtonEventHandlers();
+                _setButtonEventHandlers(data.survey);
 
                 // Remove loader. This will make the form visible.
                 // In order to aggregate regular loadErrors and GoTo loaderrors,
@@ -417,39 +440,39 @@ function _addFieldsubmissionsForModelNodes(model, modelNodes) {
 }
 
 /**
- * Controller function to reset to a blank form. Checks whether all changes have been saved first
+ * Controller function to reset to the initial state of a form.
  *
- * @param  {boolean=} confirmed - Whether unsaved changes can be discarded and lost forever
+ * That event listener has been removed in favor of calling `updateMedia` directly with
+ * the current state of `survey` in offline mode. This change is being called out in
+ * case the removal of that event listener impacts downstream forks.
+ *
+ * @param {Survey} survey
+ * @param {ResetFormOptions} [options]
  */
-function _resetForm(confirmed) {
-    let message;
+function _resetForm(survey, options = {}) {
+    const formEl = form.resetView();
+    form = new Form(
+        formEl,
+        {
+            modelStr: formData.modelStr,
+            external: formData.external,
+        },
+        formOptions
+    );
+    const loadErrors = form.init();
+    // formreset event will update the form media:
+    form.view.html.dispatchEvent(events.FormReset());
 
-    if (!confirmed && form.editStatus) {
-        message = t('confirm.save.msg');
-        gui.confirm(message).then((confirmed) => {
-            if (confirmed) {
-                _resetForm(true);
-            }
-        });
-    } else {
-        const formEl = form.resetView();
-        form = new Form(
-            formEl,
-            {
-                modelStr: formData.modelStr,
-                external: formData.external,
-            },
-            formOptions
-        );
-        const loadErrors = form.init();
-        // formreset event will update the form media:
-        form.view.html.dispatchEvent(events.FormReset());
-        if (records) {
-            records.setActive(null);
-        }
-        if (loadErrors.length > 0) {
-            gui.alertLoadErrors(loadErrors);
-        }
+    if (options.isOffline) {
+        formCache.updateMedia(survey);
+    }
+
+    if (records) {
+        records.setActive(null);
+    }
+
+    if (loadErrors.length > 0) {
+        gui.alertLoadErrors(loadErrors);
     }
 }
 
@@ -985,12 +1008,13 @@ function _submitRecord() {
 }
 
 /**
+ * @param {Survey} survey
  * @param {boolean} draft
  * @param {string} [recordName]
  * @param {boolean} [confirmed]
  * @param {string} [errorMsg]
  */
-function _saveRecord(draft, recordName, confirmed, errorMsg) {
+function _saveRecord(survey, draft, recordName, confirmed, errorMsg) {
     const include = { irrelevant: draft };
 
     // triggering "before-save" event to update possible "timeEnd" meta data in form
@@ -999,14 +1023,14 @@ function _saveRecord(draft, recordName, confirmed, errorMsg) {
     // check recordName
     if (!recordName) {
         return _getRecordName().then((name) =>
-            _saveRecord(draft, name, false, errorMsg)
+            _saveRecord(survey, draft, name, false, errorMsg)
         );
     }
 
     // check whether record name is confirmed if necessary
     if (draft && !confirmed) {
         return _confirmRecordName(recordName, errorMsg)
-            .then((name) => _saveRecord(draft, name, true))
+            .then((name) => _saveRecord(survey, draft, name, true))
             .catch(() => {});
     }
 
@@ -1044,7 +1068,7 @@ function _saveRecord(draft, recordName, confirmed, errorMsg) {
         })
         .then(() => {
             records.removeAutoSavedRecord();
-            _resetForm(true);
+            _resetForm(survey, { isOffline: true });
 
             if (draft) {
                 gui.alert(
@@ -1087,10 +1111,11 @@ function _saveRecord(draft, recordName, confirmed, errorMsg) {
 /**
  * Loads a record from storage
  *
- * @param  { string } instanceId - [description]
- * @param  {=boolean?} confirmed -  [description]
+ * @param {Survey} survey
+ * @param {string} instanceId - [description]
+ * @param {=boolean?} confirmed -  [description]
  */
-function _loadRecord(instanceId, confirmed) {
+function _loadRecord(survey, instanceId, confirmed) {
     let texts;
     let choices;
     let loadErrors;
@@ -1105,7 +1130,7 @@ function _loadRecord(instanceId, confirmed) {
         };
         gui.confirm(texts, choices).then((confirmed) => {
             if (confirmed) {
-                _loadRecord(instanceId, true);
+                _loadRecord(survey, instanceId, true);
             }
         });
     } else {
@@ -1128,8 +1153,11 @@ function _loadRecord(instanceId, confirmed) {
                     formOptions
                 );
                 loadErrors = form.init();
-                // formreset event will update the form media:
+
                 form.view.html.dispatchEvent(events.FormReset());
+
+                formCache.updateMedia(survey);
+
                 form.recordName = record.name;
                 records.setActive(record.instanceId);
 
@@ -1363,7 +1391,10 @@ function _setLanguageUiEventHandlers() {
     }
 }
 
-function _setButtonEventHandlers() {
+/**
+ * @param {Survey} survey
+ */
+function _setButtonEventHandlers(survey) {
     $('button#finish-form').click(function () {
         const $button = $(this).btnBusyState(true);
 
@@ -1458,7 +1489,7 @@ function _setButtonEventHandlers() {
                 .then((valid) => {
                     if (valid) {
                         if (settings.offline) {
-                            return _saveRecord(false);
+                            return _saveRecord(survey, false);
                         }
                         return _submitRecord();
                     }
@@ -1480,7 +1511,7 @@ function _setButtonEventHandlers() {
                 if (!event.target.matches('.save-draft-info')) {
                     const $button = $(draftButton).btnBusyState(true);
                     setTimeout(() => {
-                        _saveRecord(true)
+                        _saveRecord(survey, true)
                             .then(() => {
                                 $button.btnBusyState(false);
                             })
@@ -1540,7 +1571,7 @@ function _setButtonEventHandlers() {
             'click',
             '.record-list__records__record[data-draft="true"]',
             function () {
-                _loadRecord($(this).attr('data-id'), false);
+                _loadRecord(survey, $(this).attr('data-id'), false);
             }
         );
 
