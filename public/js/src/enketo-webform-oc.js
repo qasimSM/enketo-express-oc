@@ -158,7 +158,7 @@ function _setAppCacheEventHandlers() {
     document.addEventListener(events.ApplicationUpdated().type, () => {
         gui.feedback(
             t('alert.appupdated.msg'),
-            20,
+            null,
             t('alert.appupdated.heading')
         );
     });
@@ -168,7 +168,7 @@ function _setFormCacheEventHandlers(survey) {
     document.addEventListener(events.FormUpdated().type, () => {
         gui.feedback(
             t('alert.formupdated.msg'),
-            20,
+            null,
             t('alert.formupdated.heading')
         );
     });
