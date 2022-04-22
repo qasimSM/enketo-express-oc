@@ -1,6 +1,7 @@
 // Modify the Enketo Core input module.
 
 import inputModule from 'enketo-core/src/js/input';
+/* eslint import/no-cycle: "off" */
 import { Form } from './form';
 
 // Obtain multiple constraints

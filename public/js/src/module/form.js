@@ -416,4 +416,5 @@ Form.prototype.updateValidityInUi = function (control, result) {
     }
 };
 
+/* eslint import/prefer-default-export: "off" */
 export { Form };

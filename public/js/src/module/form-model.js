@@ -111,5 +111,5 @@ Model.prototype.isMarkedComplete = function () {
         false
     );
 };
-
+/* eslint import/prefer-default-export: "off" */
 export { Model as FormModel };
