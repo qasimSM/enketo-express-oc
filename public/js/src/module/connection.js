@@ -407,7 +407,7 @@ const getTransformURL = (basePath, enketoId) => {
  * @param {GetExternalDataOptions} [options]
  * @return {Promise<SurveyExternalData[]>}
  */
-const getExternalData = async (survey, model) => {
+const getExternalData = async (survey, model, options = {}) => {
     /** @type {Array<Promise<SurveyExternalData>>} */
     const tasks = [];
     const externalInstances = [
@@ -437,12 +437,11 @@ const getExternalData = async (survey, model) => {
             } catch (error) {
                 tasks.splice(index, 1);
 
-                // Custom OC: record all errors (including when using ?form= queryparameter)
-                // but store the messages for later to output as load errors without blocking
-                if (!survey.loadErrors) {
-                    survey.loadErrors = [];
+                if (options.isPreview) {
+                    return;
                 }
-                survey.loadErrors.push(error.message);
+
+                throw error;
             }
         };
 
