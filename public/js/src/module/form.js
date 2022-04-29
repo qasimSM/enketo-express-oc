@@ -377,8 +377,9 @@ Form.prototype.isValid = function (node) {
  * @param {*} result - result object obtained from Nodeset.validate
  */
 Form.prototype.updateValidityInUi = function (control, result) {
-    const passed = result.requiredValid !== false;
+    let passed = result.requiredValid !== false;
 
+    // if required === false, result.constraintValid returned by nodeset.validate is null
     if (result.constraintValid === null) {
         result.constraintValid = Array.from(Array(21)).map(() => null);
     }
@@ -396,17 +397,17 @@ Form.prototype.updateValidityInUi = function (control, result) {
         this.setInvalid(control, 'required');
     } else {
         this.setValid(control, 'required');
-        // if required === false, result.constraintValid returned by nodeset.validate is null
+
         if (Array.isArray(result.constraintValid)) {
             result.constraintValid.forEach((valid, index) => {
                 const cls = index === 0 ? 'constraint' : `constraint${index}`;
-                if (valid === true) {
-                    this.setValid(control, cls);
-                } else if (valid === false) {
-                    passed === false;
+                if (valid === false) {
+                    passed = false;
                     this.setInvalid(control, cls);
+                } else {
+                    // includes valid === undefined
+                    this.setValid(control, cls);
                 }
-                // no need to do anything if valid === undefined
             });
         }
     }
