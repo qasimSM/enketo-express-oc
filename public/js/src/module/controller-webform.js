@@ -760,7 +760,7 @@ function _setEventHandlers(survey) {
     });
 
     $('.record-list__button-bar__button.upload').on('click', () => {
-        records.uploadQueue();
+        records.uploadQueue(true);
     });
 
     $('.record-list__button-bar__button.export').on('click', () => {
