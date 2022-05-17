@@ -2,6 +2,7 @@
     "app name": "Enketo Smart Paper for KoBoCAT",
     "port": "8005",
     "account manager api key": "ocrocks",
+    "max processes": 16,
     "offline enabled": true,
     "id length": 8,
     "linked form and data server": {
