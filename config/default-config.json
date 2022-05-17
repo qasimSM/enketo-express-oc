@@ -91,6 +91,7 @@
     "validate page": true,
     "payload limit": "100kb",
     "text field character limit": 3999,
+    "csrf cookie name": "__csrf",
     "frameguard deny": false,
     "no sniff": false,
     "hsts": {
