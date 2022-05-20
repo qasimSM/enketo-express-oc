@@ -437,12 +437,12 @@ const getExternalData = async (survey, model, options = {}) => {
                 };
             } catch (error) {
                 tasks.splice(index, 1);
-
+                // OC fork: no difference between previews and non-previews,
+                // but to minimize diff with enketo/enketo-express
+                // and to avoid ESLINT errors, we keep, the options param and log something
                 if (options.isPreview) {
-                    return;
+                    console.log('failed to load', src);
                 }
-
-                throw error;
             }
         };
 
