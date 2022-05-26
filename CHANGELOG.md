@@ -3,7 +3,11 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-## 4.0.0 - 2022-05-17
+## 4.0.1 - 2022-05-18
+
+-   Fix: restore build in Dockerfile
+
+## 4.0.0 - 2022-05-18
 
 ### Changed
 
@@ -89,6 +93,9 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 -   [#332](https://github.com/enketo/enketo-express/pull/332) Form fails to load when no media manifest is provided
 -   [#335](https://github.com/enketo/enketo-express/pull/335) Ensure uploaded media with spaces load in edit mode
 -   [#321](https://github.com/enketo/enketo-express/pull/321) Defaults in the url query string will create deprecatedID for new submissions
+-   Fix: randomizing options is not working (enketo-core#821)
+-   Fix: question name collision when the same name is used in the same repeat but in a different group (enketo-core#815)
+-   Fix: itemset inside first repeat is not evaluated correctly (enketo-core#818)
 
 ## 3.0.1 - 2021-09-28
 
