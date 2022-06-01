@@ -23,6 +23,8 @@ const keys = {
     editRfc: `${config['less secure encryption key']}edit-rfc`,
     editRfcC: `${config['less secure encryption key']}edit-rfc-c`,
     editHeadless: `${config['less secure encryption key']}edit-headless`,
+    incRfc: `${config['less secure encryption key']}inc-rfc`,
+    incRfcC: `${config['less secure encryption key']}inc-rfc-c`,
 };
 
 /**
@@ -105,6 +107,14 @@ function encryptedEnketoIdEditRfcC(req, res, next, id) {
     _encryptedEnketoIdParam(req, res, next, id, keys.editRfcC);
 }
 
+function encryptedEnketoIdIncRfc(req, res, next, id) {
+    _encryptedEnketoIdParam(req, res, next, id, keys.incRfc);
+}
+
+function encryptedEnketoIdIncRfcC(req, res, next, id) {
+    _encryptedEnketoIdParam(req, res, next, id, keys.incRfcC);
+}
+
 function encryptedEnketoIdEditHeadless(req, res, next, id) {
     _encryptedEnketoIdParam(req, res, next, id, keys.editHeadless);
 }
@@ -158,6 +168,8 @@ module.exports = {
     encryptedEnketoIdFsC,
     encryptedEnketoIdEditRfc,
     encryptedEnketoIdEditRfcC,
+    encryptedEnketoIdIncRfc,
+    encryptedEnketoIdIncRfcC,
     encryptedEnketoIdEditHeadless,
     encryptedEnketoIdFullParticipant,
     encryptedEnketoIdFsParticipant,

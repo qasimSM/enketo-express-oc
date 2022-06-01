@@ -48,6 +48,14 @@ router.param(
     routerUtils.encryptedEnketoIdEditRfcC
 );
 router.param(
+    'encrypted_enketo_id_inc_rfc',
+    routerUtils.encryptedEnketoIdIncRfc
+);
+router.param(
+    'encrypted_enketo_id_inc_rfc_c',
+    routerUtils.encryptedEnketoIdIncRfcC
+);
+router.param(
     'encrypted_enketo_id_headless',
     routerUtils.encryptedEnketoIdEditHeadless
 );
@@ -74,7 +82,7 @@ router
     .get(/\/(single|edit)\/fs(\/rfc)?(\/c)?\/i/, _setJini)
     .get(/\/(single)\/fs(\/rfc)?(\/c)?\/i/, _setNextPrompt)
     .get(
-        /\/(edit|single)\/fs\/(?!(participant|rfc|dn|view))/,
+        /\/(edit|single)\/fs\/(\/inc)?(?!(participant|rfc|dn|view))/,
         _setCompleteButton
     )
     .get('*', _setCloseButtonClass)
@@ -101,6 +109,11 @@ router
     .get('/:mod/:enketo_id', webform)
     .get('/single/fs/:mod/:enketo_id', fieldSubmission)
     .get('/single/fs/c/:mod/:encrypted_enketo_id_fs_c', fieldSubmission)
+    .get('/single/fs/rfc/:mod/:encrypted_enketo_id_inc_rfc', fieldSubmission)
+    .get(
+        '/single/fs/rfc/c/:mod/:encrypted_enketo_id_inc_rfc_c',
+        fieldSubmission
+    )
     .get(
         '/single/fs/participant/:mod/:encrypted_enketo_id_fs_participant',
         fieldSubmission
@@ -119,6 +132,11 @@ router
     .get('/edit/:mod/:enketo_id', edit)
     .get('/edit/fs/rfc/:mod/:encrypted_enketo_id_rfc', fieldSubmission)
     .get('/edit/fs/rfc/c/:mod/:encrypted_enketo_id_rfc_c', fieldSubmission)
+    .get('/edit/fs/inc/rfc/:mod/:encrypted_enketo_id_inc_rfc', fieldSubmission)
+    .get(
+        '/edit/fs/inc/rfc/c/:mod/:encrypted_enketo_id_inc_rfc_c',
+        fieldSubmission
+    )
     .get('/edit/fs/:mod/:enketo_id', fieldSubmission)
     .get('/edit/fs/c/:mod/:encrypted_enketo_id_fs_c', fieldSubmission)
     .get('/edit/fs/dn/:mod/:encrypted_enketo_id_view_dn', fieldSubmission)
