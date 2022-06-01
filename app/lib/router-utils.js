@@ -15,7 +15,7 @@ const keys = {
     singleOnce: config['less secure encryption key'],
     view: `${config['less secure encryption key']}view`,
     viewDn: `${config['less secure encryption key']}view-dn`,
-    viewDnc: `${config['less secure encryption key']}view-dnc`,
+    viewDnC: `${config['less secure encryption key']}view-dnc`,
     preview: `${config['less secure encryption key']}preview-oc`,
     fsC: `${config['less secure encryption key']}fs-c`,
     fsParticipant: `${config['less secure encryption key']}fs-participant`,
@@ -83,8 +83,8 @@ function encryptedEnketoIdViewDn(req, res, next, id) {
     _encryptedEnketoIdParam(req, res, next, id, keys.viewDn);
 }
 
-function encryptedEnketoIdViewDnc(req, res, next, id) {
-    _encryptedEnketoIdParam(req, res, next, id, keys.viewDnc);
+function encryptedEnketoIdViewDnC(req, res, next, id) {
+    _encryptedEnketoIdParam(req, res, next, id, keys.viewDnC);
 }
 
 function encryptedEnketoIdFsC(req, res, next, id) {
@@ -164,7 +164,7 @@ module.exports = {
     encryptedEnketoIdView: encryptedEnketoIdParamView,
     encryptedEnketoIdPreview,
     encryptedEnketoIdViewDn,
-    encryptedEnketoIdViewDnc,
+    encryptedEnketoIdViewDnC,
     encryptedEnketoIdFsC,
     encryptedEnketoIdEditRfc,
     encryptedEnketoIdEditRfcC,

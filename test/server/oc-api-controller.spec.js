@@ -910,11 +910,15 @@ describe('api', () => {
             const endpoints = [
                 '/survey/collect',
                 '/survey/collect/c',
+                '/survey/collect/rfc',
+                '/survey/collect/rfc/c',
                 '/survey/view',
                 '/instance/edit',
                 '/instance/edit/c',
                 '/instance/edit/rfc',
                 '/instance/edit/rfc/c',
+                '/instance/edit/incomplete/rfc',
+                '/instance/edit/incomplete/rfc/c',
                 '/instance/view',
                 '/instance/note',
                 '/instance/note/c',
@@ -1020,6 +1024,8 @@ describe('api', () => {
                     '/instance/edit/c',
                     '/instance/edit/rfc',
                     '/instance/edit/rfc/c',
+                    '/instance/edit/incomplete/rfc',
+                    '/instance/edit/incomplete/rfc/c',
                     '/instance/view',
                     '/instance/note',
                     '/instance/note/c',
@@ -1082,6 +1088,8 @@ describe('api', () => {
                 '/instance/edit/c',
                 '/instance/edit/rfc',
                 '/instance/edit/rfc/c',
+                '/instance/edit/incomplete/rfc',
+                '/instance/edit/incomplete/rfc/c',
             ].forEach((endpoint) => {
                 const obj = {
                     version: 1,
