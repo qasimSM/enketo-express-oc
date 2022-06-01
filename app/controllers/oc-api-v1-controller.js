@@ -40,6 +40,10 @@ router
         req.dnClose = true;
         next();
     })
+    .post('*/incomplete/*', (req, res, next) => {
+        req.incomplete = true;
+        next();
+    })
     .post('/survey/view*', (req, res, next) => {
         req.webformType = 'view';
         next();
@@ -52,12 +56,12 @@ router
         req.webformType = 'pdf';
         next();
     })
-    .post('*/headless', (req, res, next) => {
+    .post('*/headless*', (req, res, next) => {
         req.webformType = 'headless';
         next();
     })
-    .post('*/headless/rfc', (req, res, next) => {
-        req.webformType = 'headless-rfc';
+    .post('*/rfc*', (req, res, next) => {
+        req.rfc = true;
         next();
     })
     .post('/instance/note*', (req, res, next) => {
@@ -80,12 +84,8 @@ router
             next(error);
         }
     })
-    .post('/instance/edit/rfc*', (req, res, next) => {
-        req.webformSubType = 'rfc';
-        next();
-    })
     .post('*/participant*', (req, res, next) => {
-        req.webformSubType = 'participant';
+        req.participant = true;
         next();
     })
     .delete('/survey/cache', emptySurveyCache)
@@ -113,6 +113,8 @@ router
     .post('/survey/view/pdf', getNewOrExistingSurvey)
     .post('/survey/collect', getNewOrExistingSurvey)
     .post('/survey/collect/c', getNewOrExistingSurvey)
+    .post('/survey/collect/rfc', getNewOrExistingSurvey)
+    .post('/survey/collect/rfc/c', getNewOrExistingSurvey)
     .post('/survey/collect/participant', getNewOrExistingSurvey)
     .post('/survey/collect/full/participant', getNewOrExistingSurvey)
     .post('/survey/collect/full/offline/participant', getNewOrExistingSurvey)
@@ -123,6 +125,8 @@ router
     .post('/instance/edit/c', cacheInstance)
     .post('/instance/edit/rfc', cacheInstance)
     .post('/instance/edit/rfc/c', cacheInstance)
+    .post('/instance/edit/incomplete/rfc', cacheInstance)
+    .post('/instance/edit/incomplete/rfc/c', cacheInstance)
     .post('/instance/note', cacheInstance)
     .post('/instance/note/c', cacheInstance)
     .post('/instance/edit/participant', cacheInstance)
@@ -495,9 +499,11 @@ function _generateWebformUrls(id, req) {
 
     let url;
 
-    const type = `${req.webformType || 'single'}${
-        req.webformSubType ? `-${req.webformSubType}` : ''
-    }`;
+    const type = [req.webformType || 'single']
+        .concat(
+            ['participant', 'incomplete', 'rfc'].filter((prop) => req[prop])
+        )
+        .join('-');
 
     switch (type) {
         case 'preview': {
