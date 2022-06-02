@@ -153,6 +153,7 @@ settings.printRelevantOnly = !(
 
 // Reason for change functionality
 settings.reasonForChange = /\/rfc\//.test(window.location.pathname);
+settings.incompleteAllowed = /\/inc\//.test(window.location.pathname);
 
 // Strict validation functionality (now true for everything but used to be specific to certain views)
 settings.strictViolationSelector =

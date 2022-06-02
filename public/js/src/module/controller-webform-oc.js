@@ -265,7 +265,10 @@ function init(formEl, data, loadErrors = []) {
                         if (regCloseButton) {
                             regCloseButton.id = 'close-form-complete';
                         }
-                    } else if (settings.reasonForChange) {
+                    } else if (
+                        settings.reasonForChange &&
+                        !settings.incompleteAllowed
+                    ) {
                         loadErrors.push(
                             'This record is not complete and cannot be used here.'
                         );
