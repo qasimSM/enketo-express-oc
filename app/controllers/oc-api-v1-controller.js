@@ -473,6 +473,7 @@ function _generateWebformUrls(id, req) {
     const OFFLINEPATH = 'x/';
     const incompletePart = req.incomplete ? 'inc/' : '';
     const dnClosePart = req.dnClose ? 'c/' : '';
+    const rfcPart = req.rfc ? 'rfc/' : '';
     const hash = req.goTo;
     const protocol = req.headers['x-forwarded-proto'] || req.protocol;
     const BASEURL = `${protocol}://${req.headers.host}${req.app.get(
@@ -480,6 +481,8 @@ function _generateWebformUrls(id, req) {
     )}/`;
     const idView = `${utils.insecureAes192Encrypt(id, keys.view)}`;
     const idViewDn = `${utils.insecureAes192Encrypt(id, keys.viewDn)}`;
+    const idEditRfc = `${utils.insecureAes192Encrypt(id, keys.editRfc)}`;
+    const idEditRfcC = `${utils.insecureAes192Encrypt(id, keys.editRfcC)}`;
     const idViewDnC = `${utils.insecureAes192Encrypt(id, keys.viewDnC)}`;
     const idFsC = `${utils.insecureAes192Encrypt(id, keys.fsC)}`;
     const idFsParticipant = `${utils.insecureAes192Encrypt(
@@ -495,6 +498,8 @@ function _generateWebformUrls(id, req) {
         keys.editHeadless
     )}`;
     const idPreview = utils.insecureAes192Encrypt(id, keys.preview);
+    const idIncompleteRfc = utils.insecureAes192Encrypt(id, keys.incRfc);
+    const idIncompleteRfcC = utils.insecureAes192Encrypt(id, keys.incRfcC);
 
     let url;
 
@@ -525,27 +530,17 @@ function _generateWebformUrls(id, req) {
             url = `${BASEURL}preview/participant/${IFRAMEPATH}${idFsParticipant}${queryString}${hash}`;
             break;
         }
-        case 'edit': {
-            const editId = dnClosePart ? idFsC : id;
-            const queryString = _generateQueryString([
-                req.ecid,
-                req.pid,
-                `instance_id=${req.body.instance_id}`,
-                req.parentWindowOriginParam,
-                req.returnQueryParam,
-                req.goToErrorUrl,
-                req.interfaceQueryParam,
-                req.jini,
-            ]);
-            url = `${BASEURL}edit/${FSPATH}${dnClosePart}${IFRAMEPATH}${editId}${queryString}${hash}`;
-            break;
-        }
+        case 'edit':
         case 'edit-rfc':
         case 'edit-incomplete-rfc': {
-            const keyName = `${req.incomplete ? 'inc' : 'edit'}Rfc${
-                req.dnClose ? 'C' : ''
-            }`;
-            const rfcId = utils.insecureAes192Encrypt(id, keys[keyName]);
+            let idToUse;
+            if (!req.rfc) {
+                idToUse = req.dnClose ? idFsC : id;
+            } else if (req.incomplete) {
+                idToUse = req.dnClose ? idIncompleteRfcC : idIncompleteRfc;
+            } else {
+                idToUse = req.dnClose ? idEditRfcC : idEditRfc;
+            }
             // TODO add tests that check that the Enketo ID generated is the correct one
             const queryString = _generateQueryString([
                 req.ecid,
@@ -557,22 +552,27 @@ function _generateWebformUrls(id, req) {
                 req.interfaceQueryParam,
                 req.jini,
             ]);
-            url = `${BASEURL}edit/${FSPATH}${incompletePart}rfc/${dnClosePart}${IFRAMEPATH}${rfcId}${queryString}${hash}`;
+            url = `${BASEURL}edit/${FSPATH}${incompletePart}${rfcPart}${dnClosePart}${IFRAMEPATH}${idToUse}${queryString}${hash}`;
             break;
         }
         case 'headless':
         case 'headless-rfc': {
-            const rfcPath = req.webformType === 'headless-rfc' ? 'rfc/' : '';
             const queryString = _generateQueryString([
                 req.ecid,
                 `instance_id=${req.body.instance_id}`,
                 req.interfaceQueryParam,
             ]);
-            url = `${BASEURL}edit/${FSPATH}${rfcPath}headless/${idEditHeadless}${queryString}`;
+            url = `${BASEURL}edit/${FSPATH}${rfcPart}headless/${idEditHeadless}${queryString}`;
             break;
         }
-        case 'single': {
-            const idToUse = dnClosePart ? idFsC : id;
+        case 'single':
+        case 'single-rfc': {
+            let idToUse;
+            if (req.rfc) {
+                idToUse = req.dnClose ? idIncompleteRfcC : idIncompleteRfc;
+            } else {
+                idToUse = req.dnClose ? idFsC : id;
+            }
 
             const queryString = _generateQueryString([
                 req.ecid,
@@ -583,7 +583,7 @@ function _generateWebformUrls(id, req) {
                 req.jini,
                 req.nextPromptParam,
             ]);
-            url = `${BASEURL}single/${FSPATH}${dnClosePart}${IFRAMEPATH}${idToUse}${queryString}`;
+            url = `${BASEURL}single/${FSPATH}${rfcPart}${dnClosePart}${IFRAMEPATH}${idToUse}${queryString}`;
             break;
         }
         case 'single-participant': {
