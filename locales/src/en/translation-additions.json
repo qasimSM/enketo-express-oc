@@ -148,11 +148,11 @@
     "alert": {
         "appupdated": {
             "heading": "Please refresh",
-            "msg": "A new version of this application has been downloaded. Refresh this page to load the updated version."
+            "msg": "Please refresh this webpage to use the form offline (ref: application)"
         },
         "formupdated": {
             "heading": "Please refresh",
-            "msg": "A new version of this form has been downloaded. Refresh this page to load the updated version."
+            "msg": "Please refresh this webpage to use the form offline (ref: definition)"
         },
         "goto": {
             "irrelevant": "The item you are trying to access is currently hidden.",
