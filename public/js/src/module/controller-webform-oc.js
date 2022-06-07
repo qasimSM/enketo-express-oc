@@ -1353,11 +1353,6 @@ function _setButtonEventHandlers(survey) {
         const $button = $(this).btnBusyState(true);
 
         _complete()
-            .then((again) => {
-                if (again) {
-                    return _complete(again);
-                }
-            })
             .catch((e) => {
                 gui.alert(e.message);
             })
@@ -1371,12 +1366,7 @@ function _setButtonEventHandlers(survey) {
     $('button#close-form-regular').click(function () {
         const $button = $(this).btnBusyState(true);
 
-        _close()
-            .then((again) => {
-                if (again) {
-                    return _close({ autoQueries: true });
-                }
-            })
+        _close({ autoQueries: true })
             .catch((e) => {
                 console.error(e);
             })
