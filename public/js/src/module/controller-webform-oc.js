@@ -60,6 +60,13 @@ const delayChangeEventBuffer = [];
  * @return {Promise<Form>}
  */
 
+/**
+ * @typedef closeOptions
+ * @property { boolean } autoQueries offer auto queries
+ * @property { reasons } reasons reason-for-change
+ * @property { strict } strict strict validation
+ */
+
 function init(formEl, data, loadErrors = []) {
     formData = data;
     formprogress = document.querySelector('.form-progress');
@@ -126,7 +133,7 @@ function init(formEl, data, loadErrors = []) {
                     events.InputUpdate().type,
                     _addToInputUpdateEventBuffer
                 );
-                // Delay firing change events that were the result of DN autoqueries during load
+                // Delay firing change events that were the result of DN auto queries during load
                 // These events have not yet updated the model and triggered fieldsubmissions because widgets are not
                 // supposed to change values during initialization and no event handlers are in place at that time.
                 form.view.html.addEventListener(
@@ -231,7 +238,7 @@ function init(formEl, data, loadErrors = []) {
                     _addFieldsubmissionsForModelNodes(m, staticDefaultNodes);
                 }
 
-                // Fire change events for any autoqueries that were generated during form initialization,
+                // Fire change events for any auto queries that were generated during form initialization,
                 // https://github.com/OpenClinica/enketo-express-oc/issues/393
                 form.view.html.removeEventListener(
                     events.DelayChange().type,
@@ -386,7 +393,7 @@ function init(formEl, data, loadErrors = []) {
                             action = _closeCompletedRecord(true);
                         }
                     } else {
-                        action = _closeRegular(true);
+                        action = _close({ autoQueries: true });
                     }
 
                     const result = {};
@@ -480,17 +487,19 @@ function _resetForm(survey, options = {}) {
 /**
  * Closes the form after checking that the queue is empty.
  *
- * @param offerAutoqueries
+ * @param {closeOptions} options
  * @return {Promise} [description]
  */
-function _closeRegular(offerAutoqueries = true) {
+function _close(
+    options = { autoQueries: false, reasons: false, strict: false }
+) {
     return form.validate().then(() => {
         let msg = '';
         const tAlertCloseMsg = t('fieldsubmission.alert.close.msg1');
         const tAlertCloseHeading = t('fieldsubmission.alert.close.heading1');
         const authLink = `<a href="/login" target="_blank">${t('here')}</a>`;
 
-        if (offerAutoqueries) {
+        if (options.autoQueries) {
             const violated = [
                 ...form.view.html.querySelectorAll(
                     '.invalid-constraint, .invalid-relevant'
@@ -531,7 +540,7 @@ function _closeRegular(offerAutoqueries = true) {
                         }
                         _autoAddQueries(violated);
 
-                        return _closeRegular(false);
+                        return _close();
                     });
             }
         }
@@ -598,76 +607,6 @@ function _closeRegular(offerAutoqueries = true) {
                 }
                 if (settings.headless) {
                     throw new Error(errorMsg);
-                }
-            });
-    });
-}
-
-function _closeSimple() {
-    return form.validate().then(() => {
-        let msg = '';
-        const tAlertCloseMsg = t('fieldsubmission.alert.close.msg1');
-        const tAlertCloseHeading = t('fieldsubmission.alert.close.heading1');
-        const authLink = `<a href="/login" target="_blank">${t('here')}</a>`;
-
-        // Start with actually closing, but only proceed once the queue is emptied.
-        gui.alert(
-            `${tAlertCloseMsg}<br/><div class="loader-animation-small" style="margin: 40px auto 0 auto;"/>`,
-            tAlertCloseHeading,
-            'bare'
-        );
-
-        return fieldSubmissionQueue
-            .submitAll()
-            .then(() => {
-                if (
-                    fieldSubmissionQueue.enabled &&
-                    Object.keys(fieldSubmissionQueue.get()).length > 0
-                ) {
-                    throw new Error(t('fieldsubmission.alert.close.msg2'));
-                } else {
-                    // this event is used in communicating back to iframe parent window
-                    document.dispatchEvent(events.Close());
-
-                    msg += t('alert.submissionsuccess.redirectmsg');
-                    gui.alert(
-                        msg,
-                        t('alert.submissionsuccess.heading'),
-                        'success'
-                    );
-                    _redirect();
-                }
-            })
-            .catch((error) => {
-                let errorMsg;
-                error = error || {};
-
-                if (error.status === 401) {
-                    errorMsg = t('alert.submissionerror.authrequiredmsg', {
-                        here: authLink,
-                    });
-                    gui.alert(errorMsg, t('alert.submissionerror.heading'));
-                } else {
-                    errorMsg =
-                        error.message || gui.getErrorResponseMsg(error.status);
-                    gui.confirm(
-                        {
-                            heading: t('alert.default.heading'),
-                            errorMsg,
-                            msg: t('fieldsubmission.confirm.leaveanyway.msg'),
-                        },
-                        {
-                            posButton: t('confirm.default.negButton'),
-                            negButton: t(
-                                'fieldsubmission.confirm.leaveanyway.button'
-                            ),
-                        }
-                    ).then((confirmed) => {
-                        if (!confirmed) {
-                            document.dispatchEvent(events.Close());
-                            _redirect(100);
-                        }
-                    });
                 }
             });
     });
@@ -769,7 +708,7 @@ function _closeParticipant() {
             valid = !strictViolations;
         }
         if (valid) {
-            return _closeSimple();
+            return _close();
         }
         gui.alertStrictBlock();
     });
@@ -1199,7 +1138,7 @@ function _loadRecord(survey, instanceId, confirmed) {
 }
 
 /**
- * Triggers autoqueries.
+ * Triggers auto queries.
  *
  * @param {*} $questions
  * @param questions
@@ -1432,10 +1371,10 @@ function _setButtonEventHandlers(survey) {
     $('button#close-form-regular').click(function () {
         const $button = $(this).btnBusyState(true);
 
-        _closeRegular()
+        _close()
             .then((again) => {
                 if (again) {
-                    return _closeRegular(true);
+                    return _close({ autoQueries: true });
                 }
             })
             .catch((e) => {
@@ -1469,7 +1408,7 @@ function _setButtonEventHandlers(survey) {
     $('button#close-form-read').click(function () {
         const $button = $(this).btnBusyState(true);
 
-        _closeSimple()
+        _close()
             .catch((e) => {
                 gui.alert(e.message);
             })
@@ -1617,7 +1556,7 @@ function _setButtonEventHandlers(survey) {
     if (settings.type !== 'view') {
         window.onbeforeunload = () => {
             if (!ignoreBeforeUnload) {
-                // Do not add autoqueries for note-only views
+                // Do not add auto queries for note-only views
                 if (!/\/fs\/dn\//.test(window.location.pathname)) {
                     _autoAddQueries(
                         form.view.html.querySelectorAll('.invalid-constraint')
