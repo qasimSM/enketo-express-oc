@@ -183,7 +183,7 @@ Otherwise, use as POST /instance/edit.
 
 ### POST /instance/edit/rfc
 
-Returns a url that points to webform fieldsubmission view with an existing record **and a reason-for-change UI**. No Close button present in the Discrepancy Note widget.
+Returns a url that points to webform fieldsubmission view with an existing record **and a reason-for-change UI**. No Close button present in the Discrepancy Note widget. The record has to be marked as complete.
 
 -   Has a **required** `ecid` parameter with string value..
 -   Has an optional `pid` parameter.

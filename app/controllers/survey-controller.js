@@ -82,7 +82,7 @@ router
     .get(/\/(single|edit)\/fs(\/rfc)?(\/c)?\/i/, _setJini)
     .get(/\/(single)\/fs(\/rfc)?(\/c)?\/i/, _setNextPrompt)
     .get(
-        /\/(edit|single)\/fs\/(\/inc)?(?!(participant|rfc|dn|view))/,
+        /\/(edit|single)\/fs(\/inc)?\/(?!(participant|dn|view))/,
         _setCompleteButton
     )
     .get('*', _setCloseButtonClass)

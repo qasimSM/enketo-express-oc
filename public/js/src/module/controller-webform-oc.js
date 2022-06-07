@@ -251,7 +251,8 @@ function init(formEl, data, loadErrors = []) {
                     el.dispatchEvent(events.FakeInputUpdate())
                 );
 
-                // Check if record is marked complete, before setting button event handlers.
+                // Make button changes based on record completeness
+                // before setting button event handlers.
                 if (data.instanceStr) {
                     const regCloseButton = document.querySelector(
                         'button#close-form-regular'
@@ -272,9 +273,6 @@ function init(formEl, data, loadErrors = []) {
                         loadErrors.push(
                             'This record is not complete and cannot be used here.'
                         );
-                        if (regCloseButton) {
-                            regCloseButton.remove();
-                        }
                     }
                     if (!settings.headless) {
                         form.specialOcLoadValidate(
