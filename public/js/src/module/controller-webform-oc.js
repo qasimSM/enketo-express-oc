@@ -493,11 +493,43 @@ function _resetForm(survey, options = {}) {
 function _close(
     options = { autoQueries: false, reasons: false, strict: false }
 ) {
-    return form.validate().then(() => {
-        let msg = '';
-        const tAlertCloseMsg = t('fieldsubmission.alert.close.msg1');
-        const tAlertCloseHeading = t('fieldsubmission.alert.close.heading1');
-        const authLink = `<a href="/login" target="_blank">${t('here')}</a>`;
+    // If the form is untouched, and has not loaded a record, allow closing it without any checks.
+    // TODO: can we ignore calculations?
+    // TODO: this was originally only for Participate forms. It may have to remain so.
+    if (
+        settings.type !== 'edit' &&
+        (Object.keys(fieldSubmissionQueue.get()).length === 0 ||
+            !fieldSubmissionQueue.enabled) &&
+        fieldSubmissionQueue.submittedCounter === 0
+    ) {
+        return Promise.resolve().then(() => {
+            gui.alert(
+                t('alert.submissionsuccess.redirectmsg'),
+                null,
+                'success'
+            );
+            // this event is used in communicating back to iframe parent window
+            document.dispatchEvent(events.Close());
+            _redirect(600);
+        });
+    }
+
+    return form.validate().then((valid) => {
+        if (options.strict) {
+            if (!valid) {
+                const strictViolations = form.view.html.querySelector(
+                    settings.strictViolationSelector
+                );
+
+                valid = !strictViolations;
+            }
+            if (!valid) {
+                gui.alertStrictBlock();
+                return;
+            }
+        }
+
+        // TODO add RFC check (for new non-complete-record RFC views)
 
         if (options.autoQueries) {
             const violated = [
@@ -536,7 +568,7 @@ function _close(
                     )
                     .then((confirmed) => {
                         if (!confirmed) {
-                            return false;
+                            return;
                         }
                         _autoAddQueries(violated);
 
@@ -545,12 +577,18 @@ function _close(
             }
         }
 
+        const tAlertCloseMsg = t('fieldsubmission.alert.close.msg1');
+        const tAlertCloseHeading = t('fieldsubmission.alert.close.heading1');
+        const authLink = `<a href="/login" target="_blank">${t('here')}</a>`;
+
         // Start with actually closing, but only proceed once the queue is emptied.
         gui.alert(
             `${tAlertCloseMsg}<br/><div class="loader-animation-small" style="margin: 40px auto 0 auto;"/>`,
             tAlertCloseHeading,
             'bare'
         );
+
+        let msg = '';
 
         return fieldSubmissionQueue
             .submitAll()
@@ -675,42 +713,6 @@ function _closeCompletedRecord(offerAutoqueries = true) {
             return _complete(true, true);
         }
         return _complete(true, true);
-    });
-}
-
-function _closeParticipant() {
-    // If the form is untouched, and has not loaded a record, allow closing it without any checks.
-    // TODO: can we ignore calculations?
-    if (
-        settings.type !== 'edit' &&
-        (Object.keys(fieldSubmissionQueue.get()).length === 0 ||
-            !fieldSubmissionQueue.enabled) &&
-        fieldSubmissionQueue.submittedCounter === 0
-    ) {
-        return Promise.resolve().then(() => {
-            gui.alert(
-                t('alert.submissionsuccess.redirectmsg'),
-                null,
-                'success'
-            );
-            // this event is used in communicating back to iframe parent window
-            document.dispatchEvent(events.Close());
-            _redirect(600);
-        });
-    }
-
-    return form.validate().then((valid) => {
-        if (!valid) {
-            const strictViolations = form.view.html.querySelector(
-                settings.strictViolationSelector
-            );
-
-            valid = !strictViolations;
-        }
-        if (valid) {
-            return _close();
-        }
-        gui.alertStrictBlock();
     });
 }
 
@@ -1413,7 +1415,7 @@ function _setButtonEventHandlers(survey) {
     $('button#close-form-participant').click(function () {
         const $button = $(this).btnBusyState(true);
 
-        _closeParticipant()
+        _close({ strict: true })
             .catch((e) => {
                 gui.alert(e.message);
             })
