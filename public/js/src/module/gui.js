@@ -412,7 +412,7 @@ function alertHomeScreenGuidance() {
 }
 
 function confirmAutoQueries() {
-    confirm(
+    return confirm(
         {
             heading: t('alert.default.heading'),
             errorMsg: t('fieldsubmission.confirm.autoquery.msg1'),

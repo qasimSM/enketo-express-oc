@@ -551,7 +551,7 @@ function _close(
 
             // First check if any constraints have been violated and prompt option to generate automatic queries
             if (violations.length) {
-                return gui.confirmAutoQueries.then((confirmed) => {
+                return gui.confirmAutoQueries().then((confirmed) => {
                     if (!confirmed) {
                         return;
                     }
@@ -699,7 +699,7 @@ function _complete(
                 );
 
                 if (violations.length) {
-                    return gui.confirmAutoQueries.then((confirmed) => {
+                    return gui.confirmAutoQueries().then((confirmed) => {
                         if (!confirmed) {
                             return;
                         }
