@@ -259,14 +259,17 @@ function init(formEl, data, loadErrors = []) {
                 );
 
                 if (data.instanceStr) {
-                    if (
-                        settings.reasonForChange &&
-                        !settings.incompleteAllowed &&
-                        !form.model.isMarkedComplete()
-                    ) {
-                        loadErrors.push(
-                            'This record is not complete and cannot be used here.'
-                        );
+                    if (settings.reasonForChange) {
+                        const complete = form.model.isMarkedComplete();
+                        if (!settings.incompleteAllowed && !complete) {
+                            loadErrors.push(
+                                'This record is not complete and cannot be used here.'
+                            );
+                        } else if (settings.incompleteAllowed && complete) {
+                            loadErrors.push(
+                                'This record is complete and cannot be used here.'
+                            );
+                        }
                     }
                     if (!settings.headless) {
                         form.specialOcLoadValidate(
