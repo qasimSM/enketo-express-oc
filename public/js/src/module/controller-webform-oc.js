@@ -517,6 +517,21 @@ function _close(
         });
     }
 
+    if (options.reasons) {
+        if (!reasons.validate()) {
+            const firstInvalidInput = reasons.getFirstInvalidField();
+            const msg = t(
+                'fieldsubmission.alert.reasonforchangevalidationerror.msg'
+            );
+            gui.alert(msg);
+            firstInvalidInput.scrollIntoView();
+            firstInvalidInput.focus();
+
+            return Promise.reject(new Error(msg));
+        }
+        reasons.clearAll();
+    }
+
     return form.validate().then((valid) => {
         if (options.strict) {
             if (!valid) {
