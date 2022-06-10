@@ -62,7 +62,7 @@ const delayChangeEventBuffer = [];
 
 /**
  * @typedef closeOptions
- * @property { boolean } autoQueries offer auto queries
+ * @property { boolean } autoqueries offer auto queries
  * @property { reasons } reasons reason-for-change
  * @property { strict } strict strict validation
  */
@@ -258,24 +258,11 @@ function init(formEl, data, loadErrors = []) {
                     el.dispatchEvent(events.FakeInputUpdate())
                 );
 
-                // Make button changes based on record completeness
-                // before setting button event handlers.
                 if (data.instanceStr) {
-                    const regCloseButton = document.querySelector(
-                        'button#close-form-regular'
-                    );
-                    if (form.model.isMarkedComplete()) {
-                        const finishButton =
-                            document.querySelector('button#finish-form');
-                        if (finishButton) {
-                            finishButton.remove();
-                        }
-                        if (regCloseButton) {
-                            regCloseButton.id = 'close-form-complete';
-                        }
-                    } else if (
+                    if (
                         settings.reasonForChange &&
-                        !settings.incompleteAllowed
+                        !settings.incompleteAllowed &&
+                        !form.model.isMarkedComplete()
                     ) {
                         loadErrors.push(
                             'This record is not complete and cannot be used here.'
@@ -391,12 +378,12 @@ function init(formEl, data, loadErrors = []) {
                             );
                         } else {
                             action = _complete(true, {
-                                autoQueries: true,
+                                autoqueries: true,
                                 reasons: true,
                             });
                         }
                     } else {
-                        action = _close({ autoQueries: true });
+                        action = _close({ autoqueries: true });
                     }
 
                     const result = {};
@@ -494,7 +481,7 @@ function _resetForm(survey, options = {}) {
  * @return {Promise} [description]
  */
 function _close(
-    options = { autoQueries: false, reasons: false, strict: false }
+    options = { autoqueries: false, reasons: false, strict: false }
 ) {
     // If the form is untouched, and has not loaded a record, allow closing it without any checks.
     // TODO: can we ignore calculations?
@@ -547,9 +534,7 @@ function _close(
             }
         }
 
-        // TODO add RFC check (for new non-complete-record RFC views)
-
-        if (options.autoQueries) {
+        if (options.autoqueries) {
             const violations = [
                 ...form.view.html.querySelectorAll(
                     '.invalid-constraint, .invalid-relevant'
@@ -670,9 +655,10 @@ function _redirect(msec) {
  */
 function _complete(
     bypassConfirmation = false,
-    options = { autoQueries: false, reasons: false, strict: false }
+    options = { autoqueries: false, reasons: false, strict: false }
 ) {
     if (!bypassConfirmation) {
+        // TODO: look into when this confirmation is necessary. Close doesn't have it.
         return gui.confirm({
             heading: t('fieldsubmission.confirm.complete.heading'),
             msg: t('fieldsubmission.confirm.complete.msg'),
@@ -697,7 +683,7 @@ function _complete(
     // form.validate() will trigger fieldsubmissions for timeEnd before it resolves
     return form.validate().then((valid) => {
         if (!valid) {
-            if (options.autoQueries) {
+            if (options.autoqueries) {
                 // Note that unlike _close, this function also looks at .invalid-required.
                 const violations = [
                     ...form.view.html.querySelectorAll(
@@ -720,7 +706,7 @@ function _complete(
                         }
                         _autoAddQueries(violations);
                         const newOptions = { ...options };
-                        newOptions.autoQueries = false;
+                        newOptions.autoqueries = false;
 
                         return _complete(true, newOptions);
                     });
@@ -1300,7 +1286,9 @@ function _setFormEventHandlers() {
             });
         });
     } else {
-        console.log('offline-capable so not setting fieldsubmission  handlers');
+        console.info(
+            'offline-capable so not setting fieldsubmission  handlers'
+        );
     }
 
     // Before repeat removal from view and model
@@ -1341,84 +1329,69 @@ function _setLanguageUiEventHandlers() {
  * @param {Survey} survey
  */
 function _setButtonEventHandlers(survey) {
-    $('button#finish-form').click(function () {
-        const $button = $(this).btnBusyState(true);
+    // TODO: if 'complete' is necessary, hook it up as it is not working currently
+    [
+        'complete',
+        'complete-autoqueries',
+        'complete-autoqueries-reasons',
+    ].forEach((id) => {
+        const button = document.querySelector(`button#${id}`);
 
-        _complete()
-            .then((again) => {
-                if (again) {
-                    return _complete(again);
-                }
-            })
-            .catch((e) => {
-                gui.alert(e.message);
-            })
-            .then(() => {
-                $button.btnBusyState(false);
+        if (button) {
+            const options = Object.fromEntries(
+                id
+                    .split('-')
+                    .slice(1)
+                    .map((prop) => [prop, true])
+            );
+            button.addEventListener('click', () => {
+                const $button = $(button).btnBusyState(true);
+                _complete(false, options)
+                    .then((again) => {
+                        if (again) {
+                            return _complete(true, options);
+                        }
+                    })
+                    .catch((e) => {
+                        gui.alert(e.message);
+                    })
+                    .then(() => {
+                        $button.btnBusyState(false);
+                    });
+
+                return false;
             });
-
-        return false;
+        }
     });
 
-    $('button#close-form-regular').click(function () {
-        const $button = $(this).btnBusyState(true);
+    [
+        'close',
+        'close-autoqueries',
+        'close-autoqueries-reasons',
+        'close-strict',
+    ].forEach((id) => {
+        const button = document.querySelector(`button#${id}`);
 
-        _close({ autoQueries: true })
-            .catch((e) => {
-                console.error(e);
-            })
-            .then(() => {
-                $button.btnBusyState(false);
+        if (button) {
+            const options = Object.fromEntries(
+                id
+                    .split('-')
+                    .slice(1)
+                    .map((prop) => [prop, true])
+            );
+            button.addEventListener('click', () => {
+                const $button = $(button).btnBusyState(true);
+                _close(options)
+                    .catch((e) => {
+                        gui.alert(e.message);
+                    })
+                    .then(() => {
+                        $button.btnBusyState(false);
+                    });
+
+                return false;
             });
-
-        return false;
-    });
-
-    // This is for closing a record that was marked as final. It's quite different
-    // from Complete or the regular Close.
-    $('button#close-form-complete').click(function () {
-        const $button = $(this).btnBusyState(true);
-
-        // form.validate() will trigger fieldsubmissions for timeEnd before it resolves
-        _complete(false, { autoQueries: true, reasons: true })
-            .catch((e) => {
-                gui.alert(e.message);
-            })
-            .then(() => {
-                $button.btnBusyState(false);
-            });
-
-        return false;
-    });
-
-    // This is for closing a record in a readonly or note-only view.
-    $('button#close-form-read').click(function () {
-        const $button = $(this).btnBusyState(true);
-
-        _close()
-            .catch((e) => {
-                gui.alert(e.message);
-            })
-            .then(() => {
-                $button.btnBusyState(false);
-            });
-
-        return false;
-    });
-
-    // This is for closing a participant fieldsubmission view.
-    $('button#close-form-participant').click(function () {
-        const $button = $(this).btnBusyState(true);
-
-        _close({ strict: true })
-            .catch((e) => {
-                gui.alert(e.message);
-            })
-            .then(() => {
-                $button.btnBusyState(false);
-            });
-
-        return false;
+        }
     });
 
     // Participant views that submit the whole record (i.e. not fieldsubmissions).

@@ -81,11 +81,9 @@ router
     .get('/preview*', _setNextPrompt)
     .get(/\/(single|edit)\/fs(\/rfc)?(\/c)?\/i/, _setJini)
     .get(/\/(single)\/fs(\/rfc)?(\/c)?\/i/, _setNextPrompt)
-    .get(
-        /\/(edit|single)\/fs(\/inc)?\/(?!(participant|dn|view))/,
-        _setCompleteButton
-    )
-    .get('*', _setCloseButtonClass)
+    .get('*', _setCloseButton)
+    .get('*', _setCompleteButton)
+    .get('*', _setButtonIdSuffix)
     .get(
         `${config['offline path']}/full/participant/:encrypted_enketo_id_full_participant`,
         fullParticipantOffline
@@ -227,18 +225,30 @@ function _setNextPrompt(req, res, next) {
     next();
 }
 
-function _setCompleteButton(req, res, next) {
-    req.completeButton = true;
+function _setCloseButton(req, res, next) {
+    // only RFC edit views that require a COMPLETED record do not
+    // have a Close button
+    req.closeButton = !/\/edit\/fs\/rfc/.test(req.originalUrl);
     next();
 }
 
-function _setCloseButtonClass(req, res, next) {
+function _setCompleteButton(req, res, next) {
+    req.completeButton =
+        /\/(edit|single)\/fs(\/inc)?\/(?!(participant|dn|view))/.test(
+            req.originalUrl
+        );
+    next();
+}
+
+function _setButtonIdSuffix(req, res, next) {
     if (/\/(view|dn)\//.test(req.originalUrl)) {
-        req.closeButtonIdSuffix = 'read';
-    } else if (/participant/.test(req.originalUrl)) {
-        req.closeButtonIdSuffix = 'participant';
+        req.buttonIdSuffix = '';
+    } else if (/\/participant/.test(req.originalUrl)) {
+        req.buttonIdSuffix = '-strict';
+    } else if (/\/rfc/.test(req.originalUrl)) {
+        req.buttonIdSuffix = '-autoqueries-reasons';
     } else {
-        req.closeButtonIdSuffix = 'regular';
+        req.buttonIdSuffix = '-autoqueries';
     }
     next();
 }
@@ -256,7 +266,8 @@ function fieldSubmission(req, res, next) {
         jini: req.jini,
         nojump: req.participant,
         completeButton: req.completeButton,
-        closeButtonIdSuffix: req.closeButtonIdSuffix,
+        closeButton: req.closeButton,
+        buttonIdSuffix: req.buttonIdSuffix,
         nextPrompt: req.nextPrompt,
         headless: !!req.headless,
     };
@@ -268,7 +279,6 @@ function fullParticipant(req, res, next) {
     const options = {
         type: 'full',
         nojump: req.participant,
-        closeButtonIdSuffix: req.closeButtonIdSuffix,
     };
 
     _renderWebform(req, res, next, options);
@@ -278,7 +288,6 @@ function fullParticipantOffline(req, res, next) {
     const options = {
         type: 'full',
         nojump: req.participant,
-        closeButtonIdSuffix: req.closeButtonIdSuffix,
         offlinePath: config['offline path'],
     };
 
