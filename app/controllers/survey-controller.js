@@ -241,10 +241,8 @@ function _setCompleteButton(req, res, next) {
 }
 
 function _setButtonIdSuffix(req, res, next) {
-    if (/\/(view|dn)\//.test(req.originalUrl)) {
+    if (/\/(view|dn|participant)\//.test(req.originalUrl)) {
         req.buttonIdSuffix = '';
-    } else if (/\/participant/.test(req.originalUrl)) {
-        req.buttonIdSuffix = '-strict';
     } else if (/\/rfc/.test(req.originalUrl)) {
         req.buttonIdSuffix = '-autoqueries-reasons';
     } else {

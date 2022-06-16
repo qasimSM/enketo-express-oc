@@ -488,7 +488,6 @@ function _close(
 ) {
     // If the form is untouched, and has not loaded a record, allow closing it without any checks.
     // TODO: can we ignore calculations?
-    // TODO: this was originally only for Participate forms. It may have to remain so.
     if (
         settings.type !== 'edit' &&
         (Object.keys(fieldSubmissionQueue.get()).length === 0 ||
@@ -523,45 +522,46 @@ function _close(
     }
 
     return form.validate().then((valid) => {
-        if (options.strict) {
-            if (!valid) {
-                const strictViolations = form.view.html.querySelector(
-                    settings.strictViolationSelector
+        if (!valid) {
+            if (options.autoqueries) {
+                const violations = [
+                    ...form.view.html.querySelectorAll(
+                        '.invalid-constraint, .invalid-relevant'
+                    ),
+                ].filter(
+                    (question) =>
+                        !question.querySelector(
+                            '.btn-comment.new, .btn-comment.updated'
+                        ) ||
+                        question.matches(
+                            '.or-group.invalid-relevant, .or-group-data.invalid-relevant'
+                        )
                 );
 
-                valid = !strictViolations;
-            }
-            if (!valid) {
-                gui.alertStrictBlock();
-                return;
-            }
-        }
+                // First check if any constraints have been violated and prompt option to generate automatic queries
+                if (violations.length) {
+                    return gui.confirmAutoQueries().then((confirmed) => {
+                        if (!confirmed) {
+                            return;
+                        }
+                        _autoAddQueries(violations);
+                        const newOptions = { ...options };
+                        newOptions.autoqueries = false;
 
-        if (options.autoqueries) {
-            const violations = [
-                ...form.view.html.querySelectorAll(
-                    '.invalid-constraint, .invalid-relevant'
-                ),
-            ].filter(
-                (question) =>
-                    !question.querySelector(
-                        '.btn-comment.new, .btn-comment.updated'
-                    ) ||
-                    question.matches(
-                        '.or-group.invalid-relevant, .or-group-data.invalid-relevant'
-                    )
+                        return _close(options);
+                    });
+                }
+            }
+            // Note, if _close is called with options.autoqueries,
+            // the autoqueries should have fixed these violations when close is called again.
+            const strictViolations = form.view.html.querySelector(
+                settings.strictViolationSelector
             );
 
-            // First check if any constraints have been violated and prompt option to generate automatic queries
-            if (violations.length) {
-                return gui.confirmAutoQueries().then((confirmed) => {
-                    if (!confirmed) {
-                        return;
-                    }
-                    _autoAddQueries(violations);
-
-                    return _close();
-                });
+            if (strictViolations) {
+                throw new Error(
+                    t('fieldsubmission.alert.participanterror.msg')
+                );
             }
         }
 
@@ -686,8 +686,22 @@ function _complete(
     // form.validate() will trigger fieldsubmissions for timeEnd before it resolves
     return form.validate().then((valid) => {
         if (!valid) {
+            const strictViolations = form.view.html.querySelector(
+                settings.strictViolationSelector
+            );
+            if (strictViolations) {
+                throw new Error(
+                    t('fieldsubmission.alert.participanterror.msg')
+                );
+            } else if (form.view.html.querySelector('.invalid-relevant')) {
+                const msg = t(
+                    'fieldsubmission.alert.relevantvalidationerror.msg'
+                );
+                throw new Error(msg);
+            }
+
             if (options.autoqueries) {
-                // Note that unlike _close, this function also looks at .invalid-required.
+                // Note that unlike in _close, this function also looks at .invalid-required.
                 const violations = [
                     ...form.view.html.querySelectorAll(
                         '.invalid-constraint, .invalid-required, .invalid-relevant'
@@ -714,34 +728,9 @@ function _complete(
                         return _complete(true, newOptions);
                     });
                 }
-            } else if (options.strict) {
-                const strictViolations = form.view.html.querySelector(
-                    settings.strictViolationSelector
-                );
-                if (strictViolations) {
-                    // TODO: looks like the first modal is immediately overriden
-                    // by the exception which will show another modal
-                    // gui.alertStrictBlock();
-                    throw new Error(
-                        t('fieldsubmission.alert.participanterror.msg')
-                    );
-                } else if (form.view.html.querySelector('.invalid-relevant')) {
-                    const msg = t(
-                        'fieldsubmission.alert.relevantvalidationerror.msg'
-                    );
-                    // TODO: looks like the first modal is immediately overriden
-                    // by the exception which will show another modal
-                    // gui.alert(msg);
-                    throw new Error(msg);
-                } else {
-                    const msg = t('fieldsubmission.alert.validationerror.msg');
-                    // TODO: looks like the first modal is immediately overriden
-                    // by the exception which will show another modal
-                    // gui.alert(msg);
-                    throw new Error(msg);
-                }
             } else {
-                console.error('unknown option for complete function');
+                const msg = t('fieldsubmission.alert.validationerror.msg');
+                throw new Error(msg);
             }
         } else {
             let beforeMsg;
@@ -1332,7 +1321,6 @@ function _setLanguageUiEventHandlers() {
  * @param {Survey} survey
  */
 function _setButtonEventHandlers(survey) {
-    // TODO: if 'complete' is necessary, hook it up as it is not working currently
     [
         'complete',
         'complete-autoqueries',
@@ -1367,35 +1355,32 @@ function _setButtonEventHandlers(survey) {
         }
     });
 
-    [
-        'close',
-        'close-autoqueries',
-        'close-autoqueries-reasons',
-        'close-strict',
-    ].forEach((id) => {
-        const button = document.querySelector(`button#${id}`);
+    ['close', 'close-autoqueries', 'close-autoqueries-reasons'].forEach(
+        (id) => {
+            const button = document.querySelector(`button#${id}`);
 
-        if (button) {
-            const options = Object.fromEntries(
-                id
-                    .split('-')
-                    .slice(1)
-                    .map((prop) => [prop, true])
-            );
-            button.addEventListener('click', () => {
-                const $button = $(button).btnBusyState(true);
-                _close(options)
-                    .catch((e) => {
-                        gui.alert(e.message);
-                    })
-                    .then(() => {
-                        $button.btnBusyState(false);
-                    });
+            if (button) {
+                const options = Object.fromEntries(
+                    id
+                        .split('-')
+                        .slice(1)
+                        .map((prop) => [prop, true])
+                );
+                button.addEventListener('click', () => {
+                    const $button = $(button).btnBusyState(true);
+                    _close(options)
+                        .catch((e) => {
+                            gui.alert(e.message);
+                        })
+                        .then(() => {
+                            $button.btnBusyState(false);
+                        });
 
-                return false;
-            });
+                    return false;
+                });
+            }
         }
-    });
+    );
 
     // Participant views that submit the whole record (i.e. not fieldsubmissions).
     if (settings.fullRecord) {
