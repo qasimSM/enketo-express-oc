@@ -243,7 +243,7 @@ function _setCompleteButton(req, res, next) {
 function _setButtonIdSuffix(req, res, next) {
     if (/\/(view|dn|participant)\//.test(req.originalUrl)) {
         req.buttonIdSuffix = '';
-    } else if (/\/rfc/.test(req.originalUrl)) {
+    } else if (/\/rfc(\/.*)?$/.test(req.originalUrl)) {
         req.buttonIdSuffix = '-autoqueries-reasons';
     } else {
         req.buttonIdSuffix = '-autoqueries';
