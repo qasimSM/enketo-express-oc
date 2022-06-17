@@ -155,6 +155,8 @@ settings.printRelevantOnly = !(
 settings.reasonForChange = /\/rfc\//.test(window.location.pathname);
 settings.incompleteAllowed = /\/inc\//.test(window.location.pathname);
 
+settings.participant = /\/participant\//.test(window.location.pathname);
+
 // Strict validation functionality (now true for everything but used to be specific to certain views)
 settings.strictViolationSelector =
     '.oc-strict-constraint.invalid-constraint, .oc-strict-required.invalid-required, .oc-strict-relevant.invalid-relevant';
@@ -173,7 +175,7 @@ if (/\/full\//.test(window.location.pathname)) {
 }
 
 // For non-anonymous Participate views only
-if (!settings.fullRecord && /\/participant\//.test(window.location.pathname)) {
+if (!settings.fullRecord && settings.participant) {
     settings.relevantIsStrict = true;
 }
 

@@ -27,7 +27,7 @@ section.form-footer
                 input.ignore(type='checkbox', name='next-prompt')
                 span.option-label #{nextPrompt}
           if closeButton
-            button(id="close-form", class=`btn ${completeButton ? 'btn-default' : 'btn-primary'}`, data-i18n='alert.default.button')= t('alert.default.button')
+            button(id="close-form", class=`btn ${completeButton ? 'btn-default' : 'btn-primary'} ${participant ? 'participant' : ''}`, data-i18n='alert.default.button')= t('alert.default.button')
           if completeButton
             button(id="complete-form", class=`btn btn-primary`)
               i.icon.icon-check= ' '

@@ -253,9 +253,9 @@ function fieldSubmission(req, res, next) {
         nojump: req.participant,
         completeButton: req.completeButton,
         closeButton: req.closeButton,
-        buttonIdSuffix: req.buttonIdSuffix,
         nextPrompt: req.nextPrompt,
         headless: !!req.headless,
+        participant: req.participant,
     };
 
     _renderWebform(req, res, next, options);

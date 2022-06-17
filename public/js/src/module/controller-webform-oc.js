@@ -141,21 +141,18 @@ function init(formEl, data, loadErrors = []) {
                 );
 
                 // For Participant empty-form view in order to show Close button on all pages
-                if (
-                    settings.strictViolationSelector &&
-                    settings.type !== 'edit'
-                ) {
+                if (settings.participant && settings.type !== 'edit') {
                     form.view.html.classList.add('empty-untouched');
                 }
-                // For all Participant views, use a hacky solution to change the default relevant message
-                if (settings.strictViolationSelector) {
-                    const list = form.view.html.querySelectorAll(
-                        '[data-i18n="constraint.relevant"]'
-                    );
-                    for (let i = 0; i < list.length; i++) {
-                        const relevantErrorMsg = t('constraint.relevant');
-                        list[i].textContent = relevantErrorMsg;
-                    }
+
+                // Used in Participant views:
+                // a hacky solution to change the default relevant message
+                const list = form.view.html.querySelectorAll(
+                    '[data-i18n="constraint.relevant"]'
+                );
+                for (let i = 0; i < list.length; i++) {
+                    const relevantErrorMsg = t('constraint.relevant');
+                    list[i].textContent = relevantErrorMsg;
                 }
 
                 // set form eventhandlers before initializing form

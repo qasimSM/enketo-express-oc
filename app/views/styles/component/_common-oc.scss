@@ -144,8 +144,8 @@ $secondary-color: #eeeeee;
 // regular non-pages-mode webform
 .form-footer .form-footer__content__main-controls {
 
-    #finish-form,
-    [id^="close-form-"] {
+    #complete-form,
+    #close-form {
         display: block;
         margin-left: auto;
         margin-right: auto;
@@ -307,15 +307,15 @@ $secondary-color: #eeeeee;
                 }
 
                 .previous-page,
-                [id^="close-form-"],
+                #close-form,
                 .next-page {
                     margin-left: $marg;
                     margin-right: $marg;
                     max-width: calc(33% - (2 * #{$marg}));
                 }
 
-                #finish-form,
-                [id^="close-form-"] {
+                #complete-form,
+                #close-form {
                     min-width: 140px;
                 }
 
@@ -334,19 +334,19 @@ $secondary-color: #eeeeee;
                     }
                 }
 
-                [id^="close-form-"],
-                [id="save-draft"],
+                #close-form,
+                #save-draft,
                 #submit-form,
                 #validate-form {
                     order: 2;
                 }
 
-                [id^="close-form-"] {
+                #close-form {
                     display: block;
                 }
 
-                #finish-form,
-                #close-form-participant {
+                #close-form.participant,
+                #complete-form {
                     visibility: hidden;
                 }
 
@@ -365,7 +365,7 @@ $secondary-color: #eeeeee;
                     }
                 }
 
-                #finish-form {
+                #complete-form {
                     display: block;
                     margin: 0 30% 20px 30%;
                     order: 4;
@@ -384,9 +384,9 @@ $secondary-color: #eeeeee;
 
     &.end {
 
-        #finish-form,
+        #complete-form,
         #submit-form,
-        #close-form-participant,
+        #close-form.participant,
         #validate-form {
             visibility: visible;
         }
@@ -433,13 +433,12 @@ form:not(.pages)~.form-footer {
 .pages.empty-untouched~.form-footer {
     .form-footer__content {
         &__main-controls {
-            #close-form-participant {
+            #close-form.participant {
                 visibility: visible;
             }
         }
     }
 }
-
 
 @media screen and (max-width: 430px) {
     .fieldsubmission-status {
