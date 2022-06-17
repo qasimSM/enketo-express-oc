@@ -661,11 +661,16 @@ function _complete(
     options = { autoqueries: false, reasons: false, strict: false }
 ) {
     if (!bypassConfirmation) {
-        // TODO: look into when this confirmation is necessary. Close doesn't have it.
-        return gui.confirm({
-            heading: t('fieldsubmission.confirm.complete.heading'),
-            msg: t('fieldsubmission.confirm.complete.msg'),
-        });
+        return gui
+            .confirm({
+                heading: t('fieldsubmission.confirm.complete.heading'),
+                msg: t('fieldsubmission.confirm.complete.msg'),
+            })
+            .then((again) => {
+                if (again) {
+                    return _complete(true, options);
+                }
+            });
     }
 
     if (options.reasons) {
@@ -1338,11 +1343,6 @@ function _setButtonEventHandlers(survey) {
             button.addEventListener('click', () => {
                 const $button = $(button).btnBusyState(true);
                 _complete(false, options)
-                    .then((again) => {
-                        if (again) {
-                            return _complete(true, options);
-                        }
-                    })
                     .catch((e) => {
                         gui.alert(e.message);
                     })
