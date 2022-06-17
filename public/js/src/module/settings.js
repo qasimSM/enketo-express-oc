@@ -164,6 +164,10 @@ settings.strictViolationBlocksNavigation =
 settings.openSingleDnThreadAutomaticallyUponLoadAndGoToDn =
     !/\/fs\/dn\//.test(window.location.pathname) && !settings.reasonForChange;
 
+settings.autoQueries =
+    settings.reasonForChange ||
+    !/\/(view|dn|participant)\//.test(window.location.pathname);
+
 if (/\/full\//.test(window.location.pathname)) {
     settings.fullRecord = true;
 }

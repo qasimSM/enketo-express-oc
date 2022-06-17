@@ -83,7 +83,6 @@ router
     .get(/\/(single)\/fs(\/rfc)?(\/c)?\/i/, _setNextPrompt)
     .get('*', _setCloseButton)
     .get('*', _setCompleteButton)
-    .get('*', _setButtonIdSuffix)
     .get(
         `${config['offline path']}/full/participant/:encrypted_enketo_id_full_participant`,
         fullParticipantOffline
@@ -237,17 +236,6 @@ function _setCompleteButton(req, res, next) {
         /\/(edit|single)\/fs(\/inc)?\/(?!(participant|dn|view))/.test(
             req.originalUrl
         );
-    next();
-}
-
-function _setButtonIdSuffix(req, res, next) {
-    if (/\/(view|dn|participant)\//.test(req.originalUrl)) {
-        req.buttonIdSuffix = '';
-    } else if (/\/rfc(\/.*)?$/.test(req.originalUrl)) {
-        req.buttonIdSuffix = '-autoqueries-reasons';
-    } else {
-        req.buttonIdSuffix = '-autoqueries';
-    }
     next();
 }
 

@@ -62,9 +62,8 @@ const delayChangeEventBuffer = [];
 
 /**
  * @typedef closeOptions
- * @property { boolean } autoqueries offer auto queries
+ * @property { boolean } autoQueries offer auto queries
  * @property { reasons } reasons reason-for-change
- * @property { strict } strict strict validation
  */
 
 function init(formEl, data, loadErrors = []) {
@@ -141,7 +140,7 @@ function init(formEl, data, loadErrors = []) {
                     _addToDelayChangeEventBuffer
                 );
 
-                // For Participant emtpy-form view in order to show Close button on all pages
+                // For Participant empty-form view in order to show Close button on all pages
                 if (
                     settings.strictViolationSelector &&
                     settings.type !== 'edit'
@@ -381,12 +380,12 @@ function init(formEl, data, loadErrors = []) {
                             );
                         } else {
                             action = _complete(true, {
-                                autoqueries: true,
+                                autoQueries: true,
                                 reasons: true,
                             });
                         }
                     } else {
-                        action = _close({ autoqueries: true });
+                        action = _close({ autoQueries: true });
                     }
 
                     const result = {};
@@ -483,9 +482,7 @@ function _resetForm(survey, options = {}) {
  * @param {closeOptions} options
  * @return {Promise} [description]
  */
-function _close(
-    options = { autoqueries: false, reasons: false, strict: false }
-) {
+function _close(options = { autoQueries: false, reasons: false }) {
     // If the form is untouched, and has not loaded a record, allow closing it without any checks.
     // TODO: can we ignore calculations?
     if (
@@ -523,7 +520,7 @@ function _close(
 
     return form.validate().then((valid) => {
         if (!valid) {
-            if (options.autoqueries) {
+            if (options.autoQueries) {
                 const violations = [
                     ...form.view.html.querySelectorAll(
                         '.invalid-constraint, .invalid-relevant'
@@ -546,14 +543,14 @@ function _close(
                         }
                         _autoAddQueries(violations);
                         const newOptions = { ...options };
-                        newOptions.autoqueries = false;
+                        newOptions.autoQueries = false;
 
                         return _close(options);
                     });
                 }
             }
-            // Note, if _close is called with options.autoqueries,
-            // the autoqueries should have fixed these violations when close is called again.
+            // Note, if _close is called with options.autoQueries,
+            // the autoQueries should have fixed these violations when close is called again.
             const strictViolations = form.view.html.querySelector(
                 settings.strictViolationSelector
             );
@@ -658,7 +655,7 @@ function _redirect(msec) {
  */
 function _complete(
     bypassConfirmation = false,
-    options = { autoqueries: false, reasons: false, strict: false }
+    options = { autoQueries: false, reasons: false }
 ) {
     if (!bypassConfirmation) {
         return gui
@@ -705,7 +702,7 @@ function _complete(
                 throw new Error(msg);
             }
 
-            if (options.autoqueries) {
+            if (options.autoQueries) {
                 // Note that unlike in _close, this function also looks at .invalid-required.
                 const violations = [
                     ...form.view.html.querySelectorAll(
@@ -728,7 +725,7 @@ function _complete(
                         }
                         _autoAddQueries(violations);
                         const newOptions = { ...options };
-                        newOptions.autoqueries = false;
+                        newOptions.autoQueries = false;
 
                         return _complete(true, newOptions);
                     });
@@ -1326,61 +1323,45 @@ function _setLanguageUiEventHandlers() {
  * @param {Survey} survey
  */
 function _setButtonEventHandlers(survey) {
-    [
-        'complete',
-        'complete-autoqueries',
-        'complete-autoqueries-reasons',
-    ].forEach((id) => {
-        const button = document.querySelector(`button#${id}`);
-
-        if (button) {
-            const options = Object.fromEntries(
-                id
-                    .split('-')
-                    .slice(1)
-                    .map((prop) => [prop, true])
-            );
-            button.addEventListener('click', () => {
-                const $button = $(button).btnBusyState(true);
-                _complete(false, options)
-                    .catch((e) => {
-                        gui.alert(e.message);
-                    })
-                    .then(() => {
-                        $button.btnBusyState(false);
-                    });
-
-                return false;
-            });
-        }
-    });
-
-    ['close', 'close-autoqueries', 'close-autoqueries-reasons'].forEach(
-        (id) => {
-            const button = document.querySelector(`button#${id}`);
-
-            if (button) {
-                const options = Object.fromEntries(
-                    id
-                        .split('-')
-                        .slice(1)
-                        .map((prop) => [prop, true])
-                );
-                button.addEventListener('click', () => {
-                    const $button = $(button).btnBusyState(true);
-                    _close(options)
-                        .catch((e) => {
-                            gui.alert(e.message);
-                        })
-                        .then(() => {
-                            $button.btnBusyState(false);
-                        });
-
-                    return false;
+    const completeButton = document.querySelector('button#complete-form');
+    if (completeButton) {
+        const options = {
+            autoQueries: settings.autoQueries,
+            reasons: settings.reasonForChange,
+        };
+        completeButton.addEventListener('click', () => {
+            const $button = $(completeButton).btnBusyState(true);
+            _complete(false, options)
+                .catch((e) => {
+                    gui.alert(e.message);
+                })
+                .then(() => {
+                    $button.btnBusyState(false);
                 });
-            }
-        }
-    );
+
+            return false;
+        });
+    }
+
+    const closeButton = document.querySelector('button#close-form');
+    if (closeButton) {
+        const options = {
+            autoQueries: settings.autoQueries,
+            reasons: settings.reasonForChange,
+        };
+        closeButton.addEventListener('click', () => {
+            const $button = $(closeButton).btnBusyState(true);
+            _close(options)
+                .catch((e) => {
+                    gui.alert(e.message);
+                })
+                .then(() => {
+                    $button.btnBusyState(false);
+                });
+
+            return false;
+        });
+    }
 
     // Participant views that submit the whole record (i.e. not fieldsubmissions).
     if (settings.fullRecord) {
