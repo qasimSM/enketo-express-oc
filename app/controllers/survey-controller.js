@@ -26,8 +26,8 @@ router.param(
     routerUtils.encryptedEnketoIdViewDn
 );
 router.param(
-    'encrypted_enketo_id_view_dnc',
-    routerUtils.encryptedEnketoIdViewDnc
+    'encrypted_enketo_id_view_dn_c',
+    routerUtils.encryptedEnketoIdViewDnC
 );
 router.param(
     'encrypted_enketo_id_preview',
@@ -46,6 +46,14 @@ router.param('encrypted_enketo_id_rfc', routerUtils.encryptedEnketoIdEditRfc);
 router.param(
     'encrypted_enketo_id_rfc_c',
     routerUtils.encryptedEnketoIdEditRfcC
+);
+router.param(
+    'encrypted_enketo_id_inc_rfc',
+    routerUtils.encryptedEnketoIdIncRfc
+);
+router.param(
+    'encrypted_enketo_id_inc_rfc_c',
+    routerUtils.encryptedEnketoIdIncRfcC
 );
 router.param(
     'encrypted_enketo_id_headless',
@@ -73,11 +81,8 @@ router
     .get('/preview*', _setNextPrompt)
     .get(/\/(single|edit)\/fs(\/rfc)?(\/c)?\/i/, _setJini)
     .get(/\/(single)\/fs(\/rfc)?(\/c)?\/i/, _setNextPrompt)
-    .get(
-        /\/(edit|single)\/fs\/(?!(participant|rfc|dn|view))/,
-        _setCompleteButton
-    )
-    .get('*', _setCloseButtonClass)
+    .get('*', _setCloseButton)
+    .get('*', _setCompleteButton)
     .get(
         `${config['offline path']}/full/participant/:encrypted_enketo_id_full_participant`,
         fullParticipantOffline
@@ -101,6 +106,11 @@ router
     .get('/:mod/:enketo_id', webform)
     .get('/single/fs/:mod/:enketo_id', fieldSubmission)
     .get('/single/fs/c/:mod/:encrypted_enketo_id_fs_c', fieldSubmission)
+    .get('/single/fs/rfc/:mod/:encrypted_enketo_id_inc_rfc', fieldSubmission)
+    .get(
+        '/single/fs/rfc/c/:mod/:encrypted_enketo_id_inc_rfc_c',
+        fieldSubmission
+    )
     .get(
         '/single/fs/participant/:mod/:encrypted_enketo_id_fs_participant',
         fieldSubmission
@@ -119,10 +129,15 @@ router
     .get('/edit/:mod/:enketo_id', edit)
     .get('/edit/fs/rfc/:mod/:encrypted_enketo_id_rfc', fieldSubmission)
     .get('/edit/fs/rfc/c/:mod/:encrypted_enketo_id_rfc_c', fieldSubmission)
+    .get('/edit/fs/inc/rfc/:mod/:encrypted_enketo_id_inc_rfc', fieldSubmission)
+    .get(
+        '/edit/fs/inc/rfc/c/:mod/:encrypted_enketo_id_inc_rfc_c',
+        fieldSubmission
+    )
     .get('/edit/fs/:mod/:enketo_id', fieldSubmission)
     .get('/edit/fs/c/:mod/:encrypted_enketo_id_fs_c', fieldSubmission)
     .get('/edit/fs/dn/:mod/:encrypted_enketo_id_view_dn', fieldSubmission)
-    .get('/edit/fs/dn/c/:mod/:encrypted_enketo_id_view_dnc', fieldSubmission)
+    .get('/edit/fs/dn/c/:mod/:encrypted_enketo_id_view_dn_c', fieldSubmission)
     .get(
         '/edit/fs/participant/:mod/:encrypted_enketo_id_fs_participant',
         fieldSubmission
@@ -135,7 +150,7 @@ router
     .get('/xform/:encrypted_enketo_id_single', xform)
     .get('/xform/:encrypted_enketo_id_view', xform)
     .get('/xform/:encrypted_enketo_id_view_dn', xform)
-    .get('/xform/:encrypted_enketo_id_view_dnc', xform)
+    .get('/xform/:encrypted_enketo_id_view_dn_c', xform)
     .get('/xform/:encrypted_enketo_id_fs_c', xform)
     .get('/xform/:encrypted_enketo_id_fs_participant', xform)
     .get('/xform/:encrypted_enketo_id_full_participant', xform)
@@ -209,19 +224,18 @@ function _setNextPrompt(req, res, next) {
     next();
 }
 
-function _setCompleteButton(req, res, next) {
-    req.completeButton = true;
+function _setCloseButton(req, res, next) {
+    // only RFC edit views that require a COMPLETED record do not
+    // have a Close button
+    req.closeButton = !/\/edit\/fs\/rfc/.test(req.originalUrl);
     next();
 }
 
-function _setCloseButtonClass(req, res, next) {
-    if (/\/(view|dn)\//.test(req.originalUrl)) {
-        req.closeButtonIdSuffix = 'read';
-    } else if (/participant/.test(req.originalUrl)) {
-        req.closeButtonIdSuffix = 'participant';
-    } else {
-        req.closeButtonIdSuffix = 'regular';
-    }
+function _setCompleteButton(req, res, next) {
+    req.completeButton =
+        /\/(edit|single)\/fs(\/inc)?\/(?!(participant|dn|view))/.test(
+            req.originalUrl
+        );
     next();
 }
 
@@ -238,9 +252,10 @@ function fieldSubmission(req, res, next) {
         jini: req.jini,
         nojump: req.participant,
         completeButton: req.completeButton,
-        closeButtonIdSuffix: req.closeButtonIdSuffix,
+        closeButton: req.closeButton,
         nextPrompt: req.nextPrompt,
         headless: !!req.headless,
+        participant: req.participant,
     };
 
     _renderWebform(req, res, next, options);
@@ -250,7 +265,6 @@ function fullParticipant(req, res, next) {
     const options = {
         type: 'full',
         nojump: req.participant,
-        closeButtonIdSuffix: req.closeButtonIdSuffix,
     };
 
     _renderWebform(req, res, next, options);
@@ -260,7 +274,6 @@ function fullParticipantOffline(req, res, next) {
     const options = {
         type: 'full',
         nojump: req.participant,
-        closeButtonIdSuffix: req.closeButtonIdSuffix,
         offlinePath: config['offline path'],
     };
 

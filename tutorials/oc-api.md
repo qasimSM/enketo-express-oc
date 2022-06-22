@@ -56,6 +56,28 @@ Returns a URL that points to a regular fieldsubmission view to collect a new rec
 
 Otherwise, use exactly as POST /survey/collect.
 
+### POST /survey/collect/rfc
+
+Returns a URL that points to a fieldsubmission view to collect a new record **and a reason-for-change UI**.
+
+-   Has a **required** `ecid` parameter with string value.
+-   Has an optional `pid` parameter.
+-   Has an optional `jini` parameter with string value `"true"` or `"false"`. Defaults to `"false"`. Only works if jini was configured in config.json.
+-   Has an optional `next_prompt` parameter that will add a tickbox with the `next_prompt` value (URL-decoded) above close button (on last page only).
+
+Otherwise, use exactly as POST /survey/collect.
+
+### POST /survey/collect/rfc/c
+
+Returns a URL that points to a fieldsubmission view to collect a new record **and a reason-for-change UI**. This view has a **Close button** in the Discrepancy Note Widget.
+
+-   Has a **required** `ecid` parameter with string value.
+-   Has an optional `pid` parameter.
+-   Has an optional `jini` parameter with string value `"true"` or `"false"`. Defaults to `"false"`. Only works if jini was configured in config.json.
+-   Has an optional `next_prompt` parameter that will add a tickbox with the `next_prompt` value (URL-decoded) above close button (on last page only).
+
+Otherwise, use exactly as POST /survey/collect.
+
 ### POST /survey/collect/participant
 
 Returns a URL that points to a special "Participate" view to collect a new record.
@@ -161,7 +183,7 @@ Otherwise, use as POST /instance/edit.
 
 ### POST /instance/edit/rfc
 
-Returns a url that points to webform fieldsubmission view with an existing record **and a reason-for-change UI**. No Close button present in the Discrepancy Note widget.
+Returns a url that points to webform fieldsubmission view with an existing record **and a reason-for-change UI**. No Close button present in the Discrepancy Note widget. The record has to be marked as complete.
 
 -   Has a **required** `ecid` parameter with string value..
 -   Has an optional `pid` parameter.
@@ -175,6 +197,14 @@ Otherwise, use exactly as [POST /instance/iframe](http://apidocs.enketo.org/v2/#
 ### POST /instance/edit/rfc/c
 
 Same as POST /instance/edit/rfc except that this view has a **Close button** in the Discrepancy Note Widget.
+
+### POST /instance/edit/incomplete/rfc
+
+Same as POST /instance/edit/rfc except that this view works with records that are incomplete.
+
+### POST /instance/edit/incomplete/rfc/c
+
+Same as POST /instance/edit/incomplete/rfc except that this view has a **Close button** in the Discrepancy Note Widget.
 
 ### POST /instance/view
 

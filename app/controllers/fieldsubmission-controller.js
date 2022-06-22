@@ -19,8 +19,8 @@ router.param(
     routerUtils.encryptedEnketoIdViewDn
 );
 router.param(
-    'encrypted_enketo_id_view_dnc',
-    routerUtils.encryptedEnketoIdViewDnc
+    'encrypted_enketo_id_view_dn_c',
+    routerUtils.encryptedEnketoIdViewDnC
 );
 router.param('encrypted_enketo_id_fs_c', routerUtils.encryptedEnketoIdFsC);
 router.param(
@@ -48,14 +48,14 @@ router
     .post('/complete/:enketo_id', complete)
     .post('/complete/:encrypted_enketo_id_fs_c', complete)
     .post('/:encrypted_enketo_id_view_dn', submit)
-    .post('/:encrypted_enketo_id_view_dnc', submit)
+    .post('/:encrypted_enketo_id_view_dn_c', submit)
     .post('/:encrypted_enketo_id_rfc', submit)
     .post('/:encrypted_enketo_id_rfc_c', submit)
     .post('/:encrypted_enketo_id_headless', submit)
     .put('/complete/:enketo_id', complete)
     .put('/complete/:encrypted_enketo_id_fs_c', complete)
     .put('/complete/:encrypted_enketo_id_view_dn', complete)
-    .put('/complete/:encrypted_enketo_id_view_dnc', complete)
+    .put('/complete/:encrypted_enketo_id_view_dn_c', complete)
     .put('/complete/:encrypted_enketo_id_rfc', complete)
     .put('/complete/:encrypted_enketo_id_rfc_c', complete)
     .put('/complete/:encrypted_enketo_id_headless', complete)

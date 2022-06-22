@@ -32,7 +32,7 @@ router
         req.webformType = 'preview';
         next();
     })
-    .post('/instance*', (req, res, next) => {
+    .post('/instance(/*)?', (req, res, next) => {
         req.webformType = 'edit';
         next();
     })
@@ -40,11 +40,15 @@ router
         req.dnClose = true;
         next();
     })
-    .post('/survey/view*', (req, res, next) => {
+    .post('*/incomplete/*', (req, res, next) => {
+        req.incomplete = true;
+        next();
+    })
+    .post('/survey/view(/*)?', (req, res, next) => {
         req.webformType = 'view';
         next();
     })
-    .post('/instance/view*', (req, res, next) => {
+    .post('/instance/view(/*)?', (req, res, next) => {
         req.webformType = 'view-instance';
         next();
     })
@@ -52,15 +56,15 @@ router
         req.webformType = 'pdf';
         next();
     })
-    .post('*/headless', (req, res, next) => {
+    .post('*/headless(/*)?', (req, res, next) => {
         req.webformType = 'headless';
         next();
     })
-    .post('*/headless/rfc', (req, res, next) => {
-        req.webformType = 'headless-rfc';
+    .post('*/rfc(/*)?', (req, res, next) => {
+        req.rfc = true;
         next();
     })
-    .post('/instance/note*', (req, res, next) => {
+    .post('/instance/note(/*)?', (req, res, next) => {
         req.webformType = 'note-instance';
         next();
     })
@@ -80,12 +84,8 @@ router
             next(error);
         }
     })
-    .post('/instance/edit/rfc*', (req, res, next) => {
-        req.webformSubType = 'rfc';
-        next();
-    })
-    .post('*/participant*', (req, res, next) => {
-        req.webformSubType = 'participant';
+    .post('*/participant(/*)?', (req, res, next) => {
+        req.participant = true;
         next();
     })
     .delete('/survey/cache', emptySurveyCache)
@@ -113,6 +113,8 @@ router
     .post('/survey/view/pdf', getNewOrExistingSurvey)
     .post('/survey/collect', getNewOrExistingSurvey)
     .post('/survey/collect/c', getNewOrExistingSurvey)
+    .post('/survey/collect/rfc', getNewOrExistingSurvey)
+    .post('/survey/collect/rfc/c', getNewOrExistingSurvey)
     .post('/survey/collect/participant', getNewOrExistingSurvey)
     .post('/survey/collect/full/participant', getNewOrExistingSurvey)
     .post('/survey/collect/full/offline/participant', getNewOrExistingSurvey)
@@ -123,6 +125,8 @@ router
     .post('/instance/edit/c', cacheInstance)
     .post('/instance/edit/rfc', cacheInstance)
     .post('/instance/edit/rfc/c', cacheInstance)
+    .post('/instance/edit/incomplete/rfc', cacheInstance)
+    .post('/instance/edit/incomplete/rfc/c', cacheInstance)
     .post('/instance/note', cacheInstance)
     .post('/instance/note/c', cacheInstance)
     .post('/instance/edit/participant', cacheInstance)
@@ -467,7 +471,9 @@ function _generateWebformUrls(id, req) {
     const IFRAMEPATH = 'i/';
     const FSPATH = 'fs/';
     const OFFLINEPATH = 'x/';
+    const incompletePart = req.incomplete ? 'inc/' : '';
     const dnClosePart = req.dnClose ? 'c/' : '';
+    const rfcPart = req.rfc ? 'rfc/' : '';
     const hash = req.goTo;
     const protocol = req.headers['x-forwarded-proto'] || req.protocol;
     const BASEURL = `${protocol}://${req.headers.host}${req.app.get(
@@ -475,9 +481,9 @@ function _generateWebformUrls(id, req) {
     )}/`;
     const idView = `${utils.insecureAes192Encrypt(id, keys.view)}`;
     const idViewDn = `${utils.insecureAes192Encrypt(id, keys.viewDn)}`;
-    const idViewDnc = `${utils.insecureAes192Encrypt(id, keys.viewDnc)}`;
     const idEditRfc = `${utils.insecureAes192Encrypt(id, keys.editRfc)}`;
     const idEditRfcC = `${utils.insecureAes192Encrypt(id, keys.editRfcC)}`;
+    const idViewDnC = `${utils.insecureAes192Encrypt(id, keys.viewDnC)}`;
     const idFsC = `${utils.insecureAes192Encrypt(id, keys.fsC)}`;
     const idFsParticipant = `${utils.insecureAes192Encrypt(
         id,
@@ -492,12 +498,16 @@ function _generateWebformUrls(id, req) {
         keys.editHeadless
     )}`;
     const idPreview = utils.insecureAes192Encrypt(id, keys.preview);
+    const idIncompleteRfc = utils.insecureAes192Encrypt(id, keys.incRfc);
+    const idIncompleteRfcC = utils.insecureAes192Encrypt(id, keys.incRfcC);
 
     let url;
 
-    const type = `${req.webformType || 'single'}${
-        req.webformSubType ? `-${req.webformSubType}` : ''
-    }`;
+    const type = [req.webformType || 'single']
+        .concat(
+            ['participant', 'incomplete', 'rfc'].filter((prop) => req[prop])
+        )
+        .join('-');
 
     switch (type) {
         case 'preview': {
@@ -520,8 +530,18 @@ function _generateWebformUrls(id, req) {
             url = `${BASEURL}preview/participant/${IFRAMEPATH}${idFsParticipant}${queryString}${hash}`;
             break;
         }
-        case 'edit': {
-            const editId = dnClosePart ? idFsC : id;
+        case 'edit':
+        case 'edit-rfc':
+        case 'edit-incomplete-rfc': {
+            let idToUse;
+            if (!req.rfc) {
+                idToUse = req.dnClose ? idFsC : id;
+            } else if (req.incomplete) {
+                idToUse = req.dnClose ? idIncompleteRfcC : idIncompleteRfc;
+            } else {
+                idToUse = req.dnClose ? idEditRfcC : idEditRfc;
+            }
+            // TODO add tests that check that the Enketo ID generated is the correct one
             const queryString = _generateQueryString([
                 req.ecid,
                 req.pid,
@@ -532,37 +552,28 @@ function _generateWebformUrls(id, req) {
                 req.interfaceQueryParam,
                 req.jini,
             ]);
-            url = `${BASEURL}edit/${FSPATH}${dnClosePart}${IFRAMEPATH}${editId}${queryString}${hash}`;
-            break;
-        }
-        case 'edit-rfc': {
-            const rfcId = dnClosePart ? idEditRfcC : idEditRfc;
-            const queryString = _generateQueryString([
-                req.ecid,
-                req.pid,
-                `instance_id=${req.body.instance_id}`,
-                req.parentWindowOriginParam,
-                req.returnQueryParam,
-                req.goToErrorUrl,
-                req.interfaceQueryParam,
-                req.jini,
-            ]);
-            url = `${BASEURL}edit/${FSPATH}rfc/${dnClosePart}${IFRAMEPATH}${rfcId}${queryString}${hash}`;
+            url = `${BASEURL}edit/${FSPATH}${incompletePart}${rfcPart}${dnClosePart}${IFRAMEPATH}${idToUse}${queryString}${hash}`;
             break;
         }
         case 'headless':
         case 'headless-rfc': {
-            const rfcPath = req.webformType === 'headless-rfc' ? 'rfc/' : '';
             const queryString = _generateQueryString([
                 req.ecid,
                 `instance_id=${req.body.instance_id}`,
                 req.interfaceQueryParam,
             ]);
-            url = `${BASEURL}edit/${FSPATH}${rfcPath}headless/${idEditHeadless}${queryString}`;
+            url = `${BASEURL}edit/${FSPATH}${rfcPart}headless/${idEditHeadless}${queryString}`;
             break;
         }
-        case 'single': {
-            const idToUse = dnClosePart ? idFsC : id;
+        case 'single':
+        case 'single-rfc': {
+            let idToUse;
+            if (req.rfc) {
+                idToUse = req.dnClose ? idIncompleteRfcC : idIncompleteRfc;
+            } else {
+                idToUse = req.dnClose ? idFsC : id;
+            }
+
             const queryString = _generateQueryString([
                 req.ecid,
                 req.pid,
@@ -572,7 +583,7 @@ function _generateWebformUrls(id, req) {
                 req.jini,
                 req.nextPromptParam,
             ]);
-            url = `${BASEURL}single/${FSPATH}${dnClosePart}${IFRAMEPATH}${idToUse}${queryString}`;
+            url = `${BASEURL}single/${FSPATH}${rfcPart}${dnClosePart}${IFRAMEPATH}${idToUse}${queryString}`;
             break;
         }
         case 'single-participant': {
@@ -643,7 +654,7 @@ function _generateWebformUrls(id, req) {
             break;
         }
         case 'note-instance': {
-            const viewId = dnClosePart ? idViewDnc : idViewDn;
+            const viewId = dnClosePart ? idViewDnC : idViewDn;
             const queryString = _generateQueryString([
                 req.ecid,
                 req.pid,

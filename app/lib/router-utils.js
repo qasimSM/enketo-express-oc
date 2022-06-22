@@ -15,7 +15,7 @@ const keys = {
     singleOnce: config['less secure encryption key'],
     view: `${config['less secure encryption key']}view`,
     viewDn: `${config['less secure encryption key']}view-dn`,
-    viewDnc: `${config['less secure encryption key']}view-dnc`,
+    viewDnC: `${config['less secure encryption key']}view-dnc`,
     preview: `${config['less secure encryption key']}preview-oc`,
     fsC: `${config['less secure encryption key']}fs-c`,
     fsParticipant: `${config['less secure encryption key']}fs-participant`,
@@ -23,6 +23,8 @@ const keys = {
     editRfc: `${config['less secure encryption key']}edit-rfc`,
     editRfcC: `${config['less secure encryption key']}edit-rfc-c`,
     editHeadless: `${config['less secure encryption key']}edit-headless`,
+    incRfc: `${config['less secure encryption key']}inc-rfc`,
+    incRfcC: `${config['less secure encryption key']}inc-rfc-c`,
 };
 
 /**
@@ -81,8 +83,8 @@ function encryptedEnketoIdViewDn(req, res, next, id) {
     _encryptedEnketoIdParam(req, res, next, id, keys.viewDn);
 }
 
-function encryptedEnketoIdViewDnc(req, res, next, id) {
-    _encryptedEnketoIdParam(req, res, next, id, keys.viewDnc);
+function encryptedEnketoIdViewDnC(req, res, next, id) {
+    _encryptedEnketoIdParam(req, res, next, id, keys.viewDnC);
 }
 
 function encryptedEnketoIdFsC(req, res, next, id) {
@@ -103,6 +105,14 @@ function encryptedEnketoIdEditRfc(req, res, next, id) {
 
 function encryptedEnketoIdEditRfcC(req, res, next, id) {
     _encryptedEnketoIdParam(req, res, next, id, keys.editRfcC);
+}
+
+function encryptedEnketoIdIncRfc(req, res, next, id) {
+    _encryptedEnketoIdParam(req, res, next, id, keys.incRfc);
+}
+
+function encryptedEnketoIdIncRfcC(req, res, next, id) {
+    _encryptedEnketoIdParam(req, res, next, id, keys.incRfcC);
 }
 
 function encryptedEnketoIdEditHeadless(req, res, next, id) {
@@ -154,10 +164,12 @@ module.exports = {
     encryptedEnketoIdView: encryptedEnketoIdParamView,
     encryptedEnketoIdPreview,
     encryptedEnketoIdViewDn,
-    encryptedEnketoIdViewDnc,
+    encryptedEnketoIdViewDnC,
     encryptedEnketoIdFsC,
     encryptedEnketoIdEditRfc,
     encryptedEnketoIdEditRfcC,
+    encryptedEnketoIdIncRfc,
+    encryptedEnketoIdIncRfcC,
     encryptedEnketoIdEditHeadless,
     encryptedEnketoIdFullParticipant,
     encryptedEnketoIdFsParticipant,

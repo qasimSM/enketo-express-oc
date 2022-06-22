@@ -60,6 +60,12 @@ const delayChangeEventBuffer = [];
  * @return {Promise<Form>}
  */
 
+/**
+ * @typedef closeOptions
+ * @property { boolean } autoQueries offer auto queries
+ * @property { reasons } reasons reason-for-change
+ */
+
 function init(formEl, data, loadErrors = []) {
     formData = data;
     formprogress = document.querySelector('.form-progress');
@@ -126,7 +132,7 @@ function init(formEl, data, loadErrors = []) {
                     events.InputUpdate().type,
                     _addToInputUpdateEventBuffer
                 );
-                // Delay firing change events that were the result of DN autoqueries during load
+                // Delay firing change events that were the result of DN auto queries during load
                 // These events have not yet updated the model and triggered fieldsubmissions because widgets are not
                 // supposed to change values during initialization and no event handlers are in place at that time.
                 form.view.html.addEventListener(
@@ -134,22 +140,19 @@ function init(formEl, data, loadErrors = []) {
                     _addToDelayChangeEventBuffer
                 );
 
-                // For Participant emtpy-form view in order to show Close button on all pages
-                if (
-                    settings.strictViolationSelector &&
-                    settings.type !== 'edit'
-                ) {
+                // For Participant empty-form view in order to show Close button on all pages
+                if (settings.participant && settings.type !== 'edit') {
                     form.view.html.classList.add('empty-untouched');
                 }
-                // For all Participant views, use a hacky solution to change the default relevant message
-                if (settings.strictViolationSelector) {
-                    const list = form.view.html.querySelectorAll(
-                        '[data-i18n="constraint.relevant"]'
-                    );
-                    for (let i = 0; i < list.length; i++) {
-                        const relevantErrorMsg = t('constraint.relevant');
-                        list[i].textContent = relevantErrorMsg;
-                    }
+
+                // Used in Participant views:
+                // a hacky solution to change the default relevant message
+                const list = form.view.html.querySelectorAll(
+                    '[data-i18n="constraint.relevant"]'
+                );
+                for (let i = 0; i < list.length; i++) {
+                    const relevantErrorMsg = t('constraint.relevant');
+                    list[i].textContent = relevantErrorMsg;
                 }
 
                 // set form eventhandlers before initializing form
@@ -231,7 +234,7 @@ function init(formEl, data, loadErrors = []) {
                     _addFieldsubmissionsForModelNodes(m, staticDefaultNodes);
                 }
 
-                // Fire change events for any autoqueries that were generated during form initialization,
+                // Fire change events for any auto queries that were generated during form initialization,
                 // https://github.com/OpenClinica/enketo-express-oc/issues/393
                 form.view.html.removeEventListener(
                     events.DelayChange().type,
@@ -251,26 +254,17 @@ function init(formEl, data, loadErrors = []) {
                     el.dispatchEvent(events.FakeInputUpdate())
                 );
 
-                // Check if record is marked complete, before setting button event handlers.
                 if (data.instanceStr) {
-                    const regCloseButton = document.querySelector(
-                        'button#close-form-regular'
-                    );
-                    if (form.model.isMarkedComplete()) {
-                        const finishButton =
-                            document.querySelector('button#finish-form');
-                        if (finishButton) {
-                            finishButton.remove();
-                        }
-                        if (regCloseButton) {
-                            regCloseButton.id = 'close-form-complete';
-                        }
-                    } else if (settings.reasonForChange) {
-                        loadErrors.push(
-                            'This record is not complete and cannot be used here.'
-                        );
-                        if (regCloseButton) {
-                            regCloseButton.remove();
+                    if (settings.reasonForChange) {
+                        const complete = form.model.isMarkedComplete();
+                        if (!settings.incompleteAllowed && !complete) {
+                            loadErrors.push(
+                                'This record is not complete and cannot be used here.'
+                            );
+                        } else if (settings.incompleteAllowed && complete) {
+                            loadErrors.push(
+                                'This record is complete and cannot be used here.'
+                            );
                         }
                     }
                     if (!settings.headless) {
@@ -382,10 +376,13 @@ function init(formEl, data, loadErrors = []) {
                                 )
                             );
                         } else {
-                            action = _closeCompletedRecord(true);
+                            action = _complete(true, {
+                                autoQueries: true,
+                                reasons: true,
+                            });
                         }
                     } else {
-                        action = _closeRegular(true);
+                        action = _close({ autoQueries: true });
                     }
 
                     const result = {};
@@ -479,61 +476,92 @@ function _resetForm(survey, options = {}) {
 /**
  * Closes the form after checking that the queue is empty.
  *
- * @param offerAutoqueries
+ * @param {closeOptions} options
  * @return {Promise} [description]
  */
-function _closeRegular(offerAutoqueries = true) {
-    return form.validate().then(() => {
-        let msg = '';
+function _close(options = { autoQueries: false, reasons: false }) {
+    // If the form is untouched, and has not loaded a record, allow closing it without any checks.
+    // TODO: can we ignore calculations?
+    if (
+        settings.type !== 'edit' &&
+        (Object.keys(fieldSubmissionQueue.get()).length === 0 ||
+            !fieldSubmissionQueue.enabled) &&
+        fieldSubmissionQueue.submittedCounter === 0
+    ) {
+        return Promise.resolve().then(() => {
+            gui.alert(
+                t('alert.submissionsuccess.redirectmsg'),
+                null,
+                'success'
+            );
+            // this event is used in communicating back to iframe parent window
+            document.dispatchEvent(events.Close());
+            _redirect(600);
+        });
+    }
+
+    if (options.reasons) {
+        if (!reasons.validate()) {
+            const firstInvalidInput = reasons.getFirstInvalidField();
+            const msg = t(
+                'fieldsubmission.alert.reasonforchangevalidationerror.msg'
+            );
+            gui.alert(msg);
+            firstInvalidInput.scrollIntoView();
+            firstInvalidInput.focus();
+
+            return Promise.reject(new Error(msg));
+        }
+        reasons.clearAll();
+    }
+
+    return form.validate().then((valid) => {
+        if (!valid) {
+            if (options.autoQueries) {
+                const violations = [
+                    ...form.view.html.querySelectorAll(
+                        '.invalid-constraint, .invalid-relevant'
+                    ),
+                ].filter(
+                    (question) =>
+                        !question.querySelector(
+                            '.btn-comment.new, .btn-comment.updated'
+                        ) ||
+                        question.matches(
+                            '.or-group.invalid-relevant, .or-group-data.invalid-relevant'
+                        )
+                );
+
+                // First check if any constraints have been violated and prompt option to generate automatic queries
+                if (violations.length) {
+                    return gui.confirmAutoQueries().then((confirmed) => {
+                        if (!confirmed) {
+                            return;
+                        }
+                        _autoAddQueries(violations);
+                        const newOptions = { ...options };
+                        newOptions.autoQueries = false;
+
+                        return _close(options);
+                    });
+                }
+            }
+            // Note, if _close is called with options.autoQueries,
+            // the autoQueries should have fixed these violations when close is called again.
+            const strictViolations = form.view.html.querySelector(
+                settings.strictViolationSelector
+            );
+
+            if (strictViolations) {
+                throw new Error(
+                    t('fieldsubmission.alert.participanterror.msg')
+                );
+            }
+        }
+
         const tAlertCloseMsg = t('fieldsubmission.alert.close.msg1');
         const tAlertCloseHeading = t('fieldsubmission.alert.close.heading1');
         const authLink = `<a href="/login" target="_blank">${t('here')}</a>`;
-
-        if (offerAutoqueries) {
-            const violated = [
-                ...form.view.html.querySelectorAll(
-                    '.invalid-constraint, .invalid-relevant'
-                ),
-            ].filter(
-                (question) =>
-                    !question.querySelector(
-                        '.btn-comment.new, .btn-comment.updated'
-                    ) ||
-                    question.matches(
-                        '.or-group.invalid-relevant, .or-group-data.invalid-relevant'
-                    )
-            );
-
-            // First check if any constraints have been violated and prompt option to generate automatic queries
-            if (violated.length) {
-                return gui
-                    .confirm(
-                        {
-                            heading: t('alert.default.heading'),
-                            errorMsg: t(
-                                'fieldsubmission.confirm.autoquery.msg1'
-                            ),
-                            msg: t('fieldsubmission.confirm.autoquery.msg2'),
-                        },
-                        {
-                            posButton: t(
-                                'fieldsubmission.confirm.autoquery.automatic'
-                            ),
-                            negButton: t(
-                                'fieldsubmission.confirm.autoquery.manual'
-                            ),
-                        }
-                    )
-                    .then((confirmed) => {
-                        if (!confirmed) {
-                            return false;
-                        }
-                        _autoAddQueries(violated);
-
-                        return _closeRegular(false);
-                    });
-            }
-        }
 
         // Start with actually closing, but only proceed once the queue is emptied.
         gui.alert(
@@ -541,6 +569,8 @@ function _closeRegular(offerAutoqueries = true) {
             tAlertCloseHeading,
             'bare'
         );
+
+        let msg = '';
 
         return fieldSubmissionQueue
             .submitAll()
@@ -602,178 +632,6 @@ function _closeRegular(offerAutoqueries = true) {
     });
 }
 
-function _closeSimple() {
-    return form.validate().then(() => {
-        let msg = '';
-        const tAlertCloseMsg = t('fieldsubmission.alert.close.msg1');
-        const tAlertCloseHeading = t('fieldsubmission.alert.close.heading1');
-        const authLink = `<a href="/login" target="_blank">${t('here')}</a>`;
-
-        // Start with actually closing, but only proceed once the queue is emptied.
-        gui.alert(
-            `${tAlertCloseMsg}<br/><div class="loader-animation-small" style="margin: 40px auto 0 auto;"/>`,
-            tAlertCloseHeading,
-            'bare'
-        );
-
-        return fieldSubmissionQueue
-            .submitAll()
-            .then(() => {
-                if (
-                    fieldSubmissionQueue.enabled &&
-                    Object.keys(fieldSubmissionQueue.get()).length > 0
-                ) {
-                    throw new Error(t('fieldsubmission.alert.close.msg2'));
-                } else {
-                    // this event is used in communicating back to iframe parent window
-                    document.dispatchEvent(events.Close());
-
-                    msg += t('alert.submissionsuccess.redirectmsg');
-                    gui.alert(
-                        msg,
-                        t('alert.submissionsuccess.heading'),
-                        'success'
-                    );
-                    _redirect();
-                }
-            })
-            .catch((error) => {
-                let errorMsg;
-                error = error || {};
-
-                if (error.status === 401) {
-                    errorMsg = t('alert.submissionerror.authrequiredmsg', {
-                        here: authLink,
-                    });
-                    gui.alert(errorMsg, t('alert.submissionerror.heading'));
-                } else {
-                    errorMsg =
-                        error.message || gui.getErrorResponseMsg(error.status);
-                    gui.confirm(
-                        {
-                            heading: t('alert.default.heading'),
-                            errorMsg,
-                            msg: t('fieldsubmission.confirm.leaveanyway.msg'),
-                        },
-                        {
-                            posButton: t('confirm.default.negButton'),
-                            negButton: t(
-                                'fieldsubmission.confirm.leaveanyway.button'
-                            ),
-                        }
-                    ).then((confirmed) => {
-                        if (!confirmed) {
-                            document.dispatchEvent(events.Close());
-                            _redirect(100);
-                        }
-                    });
-                }
-            });
-    });
-}
-
-// This is conceptually a Complete function that has some pre-processing.
-function _closeCompletedRecord(offerAutoqueries = true) {
-    if (!reasons.validate()) {
-        const firstInvalidInput = reasons.getFirstInvalidField();
-        const msg = t(
-            'fieldsubmission.alert.reasonforchangevalidationerror.msg'
-        );
-        gui.alert(msg);
-        firstInvalidInput.scrollIntoView();
-        firstInvalidInput.focus();
-
-        return Promise.reject(new Error(msg));
-    }
-    reasons.clearAll();
-
-    return form.validate().then((valid) => {
-        if (!valid && offerAutoqueries) {
-            const violations = [
-                ...form.view.html.querySelectorAll(
-                    '.invalid-constraint, .invalid-required, .invalid-relevant'
-                ),
-            ].filter(
-                (question) =>
-                    !question.querySelector(
-                        '.btn-comment.new, .btn-comment.updated'
-                    ) ||
-                    question.matches(
-                        '.or-group.invalid-relevant, .or-group-data.invalid-relevant'
-                    )
-            );
-
-            // Note that unlike _close this also looks at .invalid-required.
-            if (violations.length) {
-                return gui
-                    .confirm(
-                        {
-                            heading: t('alert.default.heading'),
-                            errorMsg: t(
-                                'fieldsubmission.confirm.autoquery.msg1'
-                            ),
-                            msg: t('fieldsubmission.confirm.autoquery.msg2'),
-                        },
-                        {
-                            posButton: t(
-                                'fieldsubmission.confirm.autoquery.automatic'
-                            ),
-                            negButton: t(
-                                'fieldsubmission.confirm.autoquery.manual'
-                            ),
-                        }
-                    )
-                    .then((confirmed) => {
-                        if (!confirmed) {
-                            return false;
-                        }
-                        _autoAddQueries(violations);
-
-                        return _closeCompletedRecord(false);
-                    });
-            }
-            return _complete(true, true);
-        }
-        return _complete(true, true);
-    });
-}
-
-function _closeParticipant() {
-    // If the form is untouched, and has not loaded a record, allow closing it without any checks.
-    // TODO: can we ignore calculations?
-    if (
-        settings.type !== 'edit' &&
-        (Object.keys(fieldSubmissionQueue.get()).length === 0 ||
-            !fieldSubmissionQueue.enabled) &&
-        fieldSubmissionQueue.submittedCounter === 0
-    ) {
-        return Promise.resolve().then(() => {
-            gui.alert(
-                t('alert.submissionsuccess.redirectmsg'),
-                null,
-                'success'
-            );
-            // this event is used in communicating back to iframe parent window
-            document.dispatchEvent(events.Close());
-            _redirect(600);
-        });
-    }
-
-    return form.validate().then((valid) => {
-        if (!valid) {
-            const strictViolations = form.view.html.querySelector(
-                settings.strictViolationSelector
-            );
-
-            valid = !strictViolations;
-        }
-        if (valid) {
-            return _closeSimple();
-        }
-        gui.alertStrictBlock();
-    });
-}
-
 function _redirect(msec) {
     if (settings.headless) {
         return true;
@@ -789,25 +647,48 @@ function _redirect(msec) {
 /**
  * Finishes a submission
  *
- * @param bypassConfirmation
- * @param bypassChecks
+ * @param {boolean} bypassConfirmation
+ * @param {closeOptions} options
  */
-function _complete(bypassConfirmation = false, bypassChecks = false) {
+function _complete(
+    bypassConfirmation = false,
+    options = { autoQueries: false, reasons: false }
+) {
     if (!bypassConfirmation) {
-        return gui.confirm({
-            heading: t('fieldsubmission.confirm.complete.heading'),
-            msg: t('fieldsubmission.confirm.complete.msg'),
-        });
+        return gui
+            .confirm({
+                heading: t('fieldsubmission.confirm.complete.heading'),
+                msg: t('fieldsubmission.confirm.complete.msg'),
+            })
+            .then((again) => {
+                if (again) {
+                    return _complete(true, options);
+                }
+            });
+    }
+
+    if (options.reasons) {
+        if (!reasons.validate()) {
+            const firstInvalidInput = reasons.getFirstInvalidField();
+            const msg = t(
+                'fieldsubmission.alert.reasonforchangevalidationerror.msg'
+            );
+            gui.alert(msg);
+            firstInvalidInput.scrollIntoView();
+            firstInvalidInput.focus();
+
+            return Promise.reject(new Error(msg));
+        }
+        reasons.clearAll();
     }
 
     // form.validate() will trigger fieldsubmissions for timeEnd before it resolves
     return form.validate().then((valid) => {
-        if (!valid && !bypassChecks) {
+        if (!valid) {
             const strictViolations = form.view.html.querySelector(
                 settings.strictViolationSelector
             );
             if (strictViolations) {
-                gui.alertStrictBlock();
                 throw new Error(
                     t('fieldsubmission.alert.participanterror.msg')
                 );
@@ -815,11 +696,39 @@ function _complete(bypassConfirmation = false, bypassChecks = false) {
                 const msg = t(
                     'fieldsubmission.alert.relevantvalidationerror.msg'
                 );
-                gui.alert(msg);
                 throw new Error(msg);
+            }
+
+            if (options.autoQueries) {
+                // Note that unlike in _close, this function also looks at .invalid-required.
+                const violations = [
+                    ...form.view.html.querySelectorAll(
+                        '.invalid-constraint, .invalid-required, .invalid-relevant'
+                    ),
+                ].filter(
+                    (question) =>
+                        !question.querySelector(
+                            '.btn-comment.new, .btn-comment.updated'
+                        ) ||
+                        question.matches(
+                            '.or-group.invalid-relevant, .or-group-data.invalid-relevant'
+                        )
+                );
+
+                if (violations.length) {
+                    return gui.confirmAutoQueries().then((confirmed) => {
+                        if (!confirmed) {
+                            return;
+                        }
+                        _autoAddQueries(violations);
+                        const newOptions = { ...options };
+                        newOptions.autoQueries = false;
+
+                        return _complete(true, newOptions);
+                    });
+                }
             } else {
                 const msg = t('fieldsubmission.alert.validationerror.msg');
-                gui.alert(msg);
                 throw new Error(msg);
             }
         } else {
@@ -1198,7 +1107,7 @@ function _loadRecord(survey, instanceId, confirmed) {
 }
 
 /**
- * Triggers autoqueries.
+ * Triggers auto queries.
  *
  * @param {*} $questions
  * @param questions
@@ -1368,7 +1277,9 @@ function _setFormEventHandlers() {
             });
         });
     } else {
-        console.log('offline-capable so not setting fieldsubmission  handlers');
+        console.info(
+            'offline-capable so not setting fieldsubmission  handlers'
+        );
     }
 
     // Before repeat removal from view and model
@@ -1409,90 +1320,45 @@ function _setLanguageUiEventHandlers() {
  * @param {Survey} survey
  */
 function _setButtonEventHandlers(survey) {
-    $('button#finish-form').click(function () {
-        const $button = $(this).btnBusyState(true);
+    const completeButton = document.querySelector('button#complete-form');
+    if (completeButton) {
+        const options = {
+            autoQueries: settings.autoQueries,
+            reasons: settings.reasonForChange,
+        };
+        completeButton.addEventListener('click', () => {
+            const $button = $(completeButton).btnBusyState(true);
+            _complete(false, options)
+                .catch((e) => {
+                    gui.alert(e.message);
+                })
+                .then(() => {
+                    $button.btnBusyState(false);
+                });
 
-        _complete()
-            .then((again) => {
-                if (again) {
-                    return _complete(again);
-                }
-            })
-            .catch((e) => {
-                gui.alert(e.message);
-            })
-            .then(() => {
-                $button.btnBusyState(false);
-            });
+            return false;
+        });
+    }
 
-        return false;
-    });
+    const closeButton = document.querySelector('button#close-form');
+    if (closeButton) {
+        const options = {
+            autoQueries: settings.autoQueries,
+            reasons: settings.reasonForChange,
+        };
+        closeButton.addEventListener('click', () => {
+            const $button = $(closeButton).btnBusyState(true);
+            _close(options)
+                .catch((e) => {
+                    gui.alert(e.message);
+                })
+                .then(() => {
+                    $button.btnBusyState(false);
+                });
 
-    $('button#close-form-regular').click(function () {
-        const $button = $(this).btnBusyState(true);
-
-        _closeRegular()
-            .then((again) => {
-                if (again) {
-                    return _closeRegular(true);
-                }
-            })
-            .catch((e) => {
-                console.error(e);
-            })
-            .then(() => {
-                $button.btnBusyState(false);
-            });
-
-        return false;
-    });
-
-    // This is for closing a record that was marked as final. It's quite different
-    // from Complete or the regular Close.
-    $('button#close-form-complete').click(function () {
-        const $button = $(this).btnBusyState(true);
-
-        // form.validate() will trigger fieldsubmissions for timeEnd before it resolves
-        _closeCompletedRecord()
-            .catch((e) => {
-                gui.alert(e.message);
-            })
-            .then(() => {
-                $button.btnBusyState(false);
-            });
-
-        return false;
-    });
-
-    // This is for closing a record in a readonly or note-only view.
-    $('button#close-form-read').click(function () {
-        const $button = $(this).btnBusyState(true);
-
-        _closeSimple()
-            .catch((e) => {
-                gui.alert(e.message);
-            })
-            .then(() => {
-                $button.btnBusyState(false);
-            });
-
-        return false;
-    });
-
-    // This is for closing a participant fieldsubmission view.
-    $('button#close-form-participant').click(function () {
-        const $button = $(this).btnBusyState(true);
-
-        _closeParticipant()
-            .catch((e) => {
-                gui.alert(e.message);
-            })
-            .then(() => {
-                $button.btnBusyState(false);
-            });
-
-        return false;
-    });
+            return false;
+        });
+    }
 
     // Participant views that submit the whole record (i.e. not fieldsubmissions).
     if (settings.fullRecord) {
@@ -1616,7 +1482,7 @@ function _setButtonEventHandlers(survey) {
     if (settings.type !== 'view') {
         window.onbeforeunload = () => {
             if (!ignoreBeforeUnload) {
-                // Do not add autoqueries for note-only views
+                // Do not add auto queries for note-only views
                 if (!/\/fs\/dn\//.test(window.location.pathname)) {
                     _autoAddQueries(
                         form.view.html.querySelectorAll('.invalid-constraint')

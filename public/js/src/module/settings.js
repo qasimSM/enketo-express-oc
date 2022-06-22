@@ -153,6 +153,9 @@ settings.printRelevantOnly = !(
 
 // Reason for change functionality
 settings.reasonForChange = /\/rfc\//.test(window.location.pathname);
+settings.incompleteAllowed = /\/inc\//.test(window.location.pathname);
+
+settings.participant = /\/participant\//.test(window.location.pathname);
 
 // Strict validation functionality (now true for everything but used to be specific to certain views)
 settings.strictViolationSelector =
@@ -163,12 +166,16 @@ settings.strictViolationBlocksNavigation =
 settings.openSingleDnThreadAutomaticallyUponLoadAndGoToDn =
     !/\/fs\/dn\//.test(window.location.pathname) && !settings.reasonForChange;
 
+settings.autoQueries =
+    settings.reasonForChange ||
+    !/\/(view|dn|participant)\//.test(window.location.pathname);
+
 if (/\/full\//.test(window.location.pathname)) {
     settings.fullRecord = true;
 }
 
 // For non-anonymous Participate views only
-if (!settings.fullRecord && /\/participant\//.test(window.location.pathname)) {
+if (!settings.fullRecord && settings.participant) {
     settings.relevantIsStrict = true;
 }
 

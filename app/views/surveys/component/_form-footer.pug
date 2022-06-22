@@ -26,11 +26,15 @@ section.form-footer
               .option-wrapper: label
                 input.ignore(type='checkbox', name='next-prompt')
                 span.option-label #{nextPrompt}
-          button(id=`close-form-${closeButtonIdSuffix}`, class=`btn ${completeButton ? 'btn-default' : 'btn-primary'}`, data-i18n='alert.default.button')= t('alert.default.button')
+          if closeButton
+            button(id="close-form", class=`btn ${completeButton ? 'btn-default' : 'btn-primary'} ${participant ? 'participant' : ''}`, data-i18n='alert.default.button')= t('alert.default.button')
           if completeButton
-            button#finish-form.btn.btn-primary
+            button(id="complete-form", class=`btn btn-primary`)
               i.icon.icon-check= ' '
-              span(data-i18n='formfooter.complete.btn')= t('formfooter.complete.btn')
+              if !closeButton
+                span(data-i18n='alert.default.button')= t('alert.default.button')
+              else
+                span(data-i18n='formfooter.complete.btn')= t('formfooter.complete.btn')
         a.btn.btn-primary.next-page(href="#")
           i.icon.icon-arrow-right
           span(data-i18n='form.pages.next')= t('form.pages.next')

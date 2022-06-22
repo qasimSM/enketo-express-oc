@@ -411,6 +411,20 @@ function alertHomeScreenGuidance() {
     );
 }
 
+function confirmAutoQueries() {
+    return confirm(
+        {
+            heading: t('alert.default.heading'),
+            errorMsg: t('fieldsubmission.confirm.autoquery.msg1'),
+            msg: t('fieldsubmission.confirm.autoquery.msg2'),
+        },
+        {
+            posButton: t('fieldsubmission.confirm.autoquery.automatic'),
+            negButton: t('fieldsubmission.confirm.autoquery.manual'),
+        }
+    );
+}
+
 function _getHomeScreenGuidance() {
     let imageClass1;
     const { browser } = sniffer;
@@ -805,6 +819,7 @@ export default {
     confirmLogin,
     alertLoadErrors: alertLoadErrorsOc,
     alertCacheUnsupported,
+    confirmAutoQueries,
     getErrorResponseMsg,
     applyPrintStyle,
     getPrintDialogComponents,
