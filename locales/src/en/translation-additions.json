@@ -73,6 +73,12 @@
             },
             "participanterror": {
                 "msg": [ "It looks like some fields need attention", "Please review them before proceeding." ]
+            },
+            "signatureservicenotavailable": {
+                "msg": "Signature service is currently not available. The question has been unchecked."
+            },
+            "signatureservicefailed":{
+                "msg": "Signature not received. The question has been unchecked."
             }
         },
         "confirm": {

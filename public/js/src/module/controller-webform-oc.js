@@ -1144,7 +1144,8 @@ function _doNotSubmit(fullPath) {
     const pathWithoutPositions = fullPath.replace(/\[[0-9]+\]/g, '');
 
     return !!form.view.html.querySelector(
-        `input[data-oc-external="clinicaldata"][name="${pathWithoutPositions}"]`
+        `input[data-oc-external="clinicaldata"][name="${pathWithoutPositions}"],
+         input[data-oc-external="signature"][name="${pathWithoutPositions}"]`
     );
 }
 
@@ -1281,6 +1282,67 @@ function _setFormEventHandlers() {
             'offline-capable so not setting fieldsubmission  handlers'
         );
     }
+
+    form.view.html.addEventListener(
+        events.SignatureRequested().type,
+        (event) => {
+            const resetQuestion = () => {
+                event.target.checked = false;
+                event.target.dispatchEvent(events.Change());
+            };
+
+            form.validate().then((valid) => {
+                if (valid) {
+                    let timeoutId;
+                    const receiveMessage = (evt) => {
+                        if (evt.origin === settings.parentWindowOrigin) {
+                            const msg = JSON.parse(evt.data);
+                            if (msg.event === 'signature-request-received') {
+                                clearTimeout(timeoutId);
+                                // Note: there is no mechanism to clear the event handler
+                                // in this case, because if no signature-request-failed message
+                                // is received, the Enketo form will never be shown to the user again
+                            } else if (
+                                msg.event === 'signature-request-failed'
+                            ) {
+                                resetQuestion();
+                                gui.alert(
+                                    t(
+                                        'fieldsubmission.alert.signatureservicefailed.msg'
+                                    )
+                                );
+                                window.removeEventListener(
+                                    'message',
+                                    receiveMessage
+                                );
+                            }
+                        } else {
+                            console.error(
+                                'message received from untrusted source'
+                            );
+                        }
+                    };
+                    const failHandler = () => {
+                        resetQuestion();
+                        window.removeEventListener('message', receiveMessage);
+                        gui.alert(
+                            t(
+                                'fieldsubmission.alert.signatureservicenotavailable.msg'
+                            )
+                        );
+                    };
+                    timeoutId = setTimeout(failHandler, 3 * 1000);
+                    window.addEventListener('message', receiveMessage, false);
+                    rc.postEventAsMessageToParentWindow(event);
+                } else {
+                    // If this logic becomes complex, with autoqueries, rfc e.g., consider using
+                    // code in the _complete or _close functions to avoid duplication
+                    resetQuestion();
+                    gui.alert(t('fieldsubmission.alert.participanterror.msg'));
+                }
+            });
+        }
+    );
 
     // Before repeat removal from view and model
     if (settings.reasonForChange) {
