@@ -3,35 +3,55 @@ const config = require('../models/config-model').server;
 const { timeout } = config.headless;
 const puppeteer = require('puppeteer');
 
+const args = ['--no-startup-window'];
+
+const launchBrowser = puppeteer.launch({
+    headless: true,
+    devtools: false,
+    args,
+});
+
 async function run(url) {
     if (!url) {
         throw new Error('No url provided');
     }
-
-    const browser = await puppeteer.launch({ headless: true, devtools: false });
+    const browser = await launchBrowser;
     const page = await browser.newPage();
+
+    // Turns request interceptor on
+    await page.setRequestInterception(true);
+
+    // Ignore certain resources
+    const ignoreTypes = ['image', 'stylesheet', 'media', 'font'];
+    page.on('request', (request) => {
+        if (ignoreTypes.includes(request.resourceType())) {
+            request.abort();
+        } else {
+            request.continue();
+        }
+    });
+
     let fieldsubmissions;
 
     try {
         page.on('pageerror', (e) => {
-            // I have not been able to actually reach this code.
+            // Martijn has not been able to actually reach this code.
             e.status = 400;
             throw e;
         });
 
         page.on('requestfailed', (e) => {
-            // I have not been able to actually reach this code.
+            // Martijn has not been able to actually reach this code.
             e.status = 400;
             throw e;
         });
 
         await page.goto(url).catch((e) => {
-            // I have not been able to actually reach this code.
+            // Martijn has not been able to actually reach this code.
             e.status = 400;
             throw e;
         });
 
-        // await page.evaluate( () => { throw new Error( 'js throw some error' ); } );
         const element = await page
             .waitForSelector('#headless-result', { timeout })
             .catch((e) => {
@@ -60,7 +80,6 @@ async function run(url) {
     }
 
     await page.close();
-    await browser.close();
 
     return fieldsubmissions;
 }
