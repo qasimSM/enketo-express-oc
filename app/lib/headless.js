@@ -1,14 +1,16 @@
+const puppeteer = require('puppeteer');
 const config = require('../models/config-model').server;
 
 const { timeout } = config.headless;
-const puppeteer = require('puppeteer');
 
 const args = ['--no-startup-window'];
+const userDataDir = './chromium-cache';
 
 const launchBrowser = puppeteer.launch({
     headless: true,
     devtools: false,
     args,
+    userDataDir,
 });
 
 async function run(url) {
