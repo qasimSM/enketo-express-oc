@@ -6,19 +6,43 @@ const { timeout } = config.headless;
 const args = ['--no-startup-window'];
 const userDataDir = './chromium-cache';
 
-const launchBrowser = puppeteer.launch({
-    headless: true,
-    devtools: false,
-    args,
-    userDataDir,
-});
+class BrowserHandler {
+    constructor() {
+        const launchBrowser = async () => {
+            this.browser = false;
+            this.browser = await puppeteer.launch({
+                headless: true,
+                devtools: false,
+                args,
+                userDataDir,
+            });
+            this.browser.on('disconnected', launchBrowser);
+        };
+
+        (async () => {
+            await launchBrowser();
+        })();
+    }
+}
+const browserHandler = new BrowserHandler();
+const getBrowser = (handler) =>
+    new Promise((resolve, reject) => {
+        const browserCheck = setInterval(() => {
+            if (handler.browser !== false) {
+                clearInterval(browserCheck);
+                resolve(handler.browser);
+            }
+        }, 100);
+    });
 
 async function run(url) {
     if (!url) {
         throw new Error('No url provided');
     }
-    const browser = await launchBrowser;
+    const browser = await getBrowser(browserHandler);
+    const start = Date.now();
     const page = await browser.newPage();
+    console.log('TIME', (Date.now() - start) / 1000);
 
     // Turns request interceptor on
     await page.setRequestInterception(true);
