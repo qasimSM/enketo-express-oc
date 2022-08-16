@@ -24,7 +24,7 @@ This is a fork of [enketo/enketo-express](https://github.com/enketo/enketo-expre
 OpenClinica users, in addition to the configuration documentation linked above, may want to take special note of these recommended settings:
 
 0. Set a secret value for `"account manager api key"`.
-1. The `"linked form and data server"` should have a non-empty value for `"server url"` to avoid bypassing the Account Manager API. E.g. leave the default value.
+1. The `"linked form and data server"` object should not have `"server url"` and `"api key"` properties (OC uses an Account Manager API instead).
 2. Set `"disable save as draft": true`
 3. Set `"repeat ordinals": true`. [This feature](./doc/ordinals.md) is required for the fieldsubmission webform views.
 4. Set `"query parameter to pass to submission": "ecid"`

@@ -146,7 +146,7 @@ describe('OC Account Model', () => {
             ]);
         });
 
-        it('returns the edited account object when succesful and called via update()', () => {
+        it('returns the edited account object when successful and called via update()', () => {
             const account = {
                 key: 'test',
                 linkedServer: 'https://octest1.com/client5',
@@ -215,14 +215,10 @@ describe('OC Account Model', () => {
                 key: 'test',
                 linkedServer: 'https://octest1.com/client3',
             };
-            const hardcodedAccounts = [config['linked form and data server']];
             const promise = model.set(account).then(model.getList);
 
             return Promise.all([
-                expect(hardcodedAccounts).to.have.length(1),
-                expect(promise).to.eventually.have.length(
-                    hardcodedAccounts.length + 1
-                ),
+                expect(promise).to.eventually.have.length(1),
                 expect(promise).to.eventually.satisfy((accounts) =>
                     accounts.every(
                         (account) => account.linkedServer && account.key

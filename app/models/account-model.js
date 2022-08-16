@@ -353,10 +353,11 @@ function check(survey) {
  */
 function _isAllowed(account, serverUrl) {
     return (
-        account.linkedServer === '' ||
-        new RegExp(`https?://${_stripProtocol(account.linkedServer)}`).test(
-            serverUrl
-        )
+        account &&
+        (account.linkedServer === '' ||
+            new RegExp(`https?://${_stripProtocol(account.linkedServer)}`).test(
+                serverUrl
+            ))
     );
 }
 
@@ -388,7 +389,7 @@ function _stripProtocol(url) {
 function _getAccount(serverUrl) {
     const hardcodedAccount = _getHardcodedAccount();
 
-    if (_isAllowed(hardcodedAccount, serverUrl)) {
+    if (hardcodedAccount && _isAllowed(hardcodedAccount, serverUrl)) {
         return Promise.resolve(hardcodedAccount);
     }
 
@@ -432,6 +433,7 @@ function _getHardcodedAccount() {
 
     // check if configuration is acceptable
     if (
+        config['account manager api key'] ||
         !linkedServer ||
         typeof linkedServer['server url'] === 'undefined' ||
         typeof linkedServer['api key'] === 'undefined'
