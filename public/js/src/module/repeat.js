@@ -41,3 +41,5 @@ repeatModule.confirmDelete = function (repeatEl) {
         this.originalConfirmDelete.call(this, repeatEl);
     }
 };
+
+export default repeatModule;

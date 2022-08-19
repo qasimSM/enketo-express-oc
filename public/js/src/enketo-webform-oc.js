@@ -13,6 +13,7 @@ import {
 } from './module/translator';
 import store from './module/store';
 import relevantModule from './module/relevant';
+import repeatModule from './module/repeat';
 import events from './module/event';
 import formCache from './module/form-cache';
 import applicationCache from './module/application-cache';
@@ -242,6 +243,10 @@ function _convertToReadonly(formParts, notesEnabled) {
     // Disable clearing (and submissions) of non-relevant readonly values
     console.info('Clearing of non-relevant values disabled.');
     relevantModule.clear = () => {};
+
+    // Disable removing repeats (in case model contains more repeats than repeat count number)
+    console.info('Disabling repeat removal');
+    repeatModule.remove = () => {};
 
     // change status message
     const msg = notesEnabled
