@@ -26,7 +26,7 @@ class BrowserHandler {
 }
 const browserHandler = new BrowserHandler();
 const getBrowser = (handler) =>
-    new Promise((resolve, reject) => {
+    new Promise((resolve) => {
         const browserCheck = setInterval(() => {
             if (handler.browser !== false) {
                 clearInterval(browserCheck);
@@ -40,9 +40,7 @@ async function run(url) {
         throw new Error('No url provided');
     }
     const browser = await getBrowser(browserHandler);
-    const start = Date.now();
     const page = await browser.newPage();
-    console.log('TIME', (Date.now() - start) / 1000);
 
     // Turns request interceptor on
     await page.setRequestInterception(true);
