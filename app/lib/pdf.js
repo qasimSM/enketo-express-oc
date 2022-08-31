@@ -4,7 +4,7 @@
 const config = require('../models/config-model').server;
 
 const { timeout } = config.headless;
-const puppeteer = require('puppeteer');
+const { BrowserHandler, getBrowser } = require('./headless');
 const { URL } = require('url');
 
 /**
@@ -26,6 +26,8 @@ const DEFAULTS = {
     LANDSCAPE: false,
     SCALE: 1,
 };
+
+const browserHandler = new BrowserHandler();
 
 /**
  * Asynchronously gets pdf from url using Puppeteer.
@@ -51,7 +53,7 @@ async function get(url, options = {}) {
     urlObj.searchParams.append('landscape', options.landscape);
     urlObj.searchParams.append('scale', options.scale);
 
-    const browser = await puppeteer.launch({ headless: true });
+    const browser = await getBrowser(browserHandler);
     const page = await browser.newPage();
 
     let pdf;
@@ -75,6 +77,7 @@ async function get(url, options = {}) {
             },
             scale: options.scale,
             printBackground: true,
+            timeout,
         });
     } catch (e) {
         e.status = e.status || 400;
@@ -83,7 +86,6 @@ async function get(url, options = {}) {
     }
 
     await page.close();
-    await browser.close();
 
     return pdf;
 }

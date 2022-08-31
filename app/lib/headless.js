@@ -15,6 +15,7 @@ class BrowserHandler {
                 devtools: false,
                 args,
                 userDataDir,
+                timeout,
             });
             this.browser.on('disconnected', launchBrowser);
         };
@@ -108,4 +109,4 @@ async function run(url) {
     return fieldsubmissions;
 }
 
-module.exports = { run };
+module.exports = { run, BrowserHandler, getBrowser };
