@@ -1,4 +1,4 @@
-![coverage-shield-badge-1](https://img.shields.io/badge/coverage-79.1%25-yellow.svg)
+![coverage-shield-badge-1](https://img.shields.io/badge/coverage-79.27%25-yellow.svg)
 
 ![Build Status](https://github.com/OpenClinica/enketo-express-oc/actions/workflows/ci.yml/badge.svg)
 
