@@ -59,7 +59,7 @@
         "enketo-core": "github:enketo/enketo-core#a0a7719b8f5c86144afd0ed04a4a620f30568042",
         "enketo-transformer": "2.1.5",
         "enketo-xpath-extensions-oc": "github:OpenClinica/enketo-xpath-extensions-oc#727803c",
-        "enketo-xpathjs": "^1.9.4",
+        "enketo-xpathjs": "^1.9.5",
         "evp_bytestokey": "^1.0.3",
         "express": "^4.18.1",
         "express-cls-hooked": "^0.3.8",
