@@ -24,6 +24,7 @@ import formCache from './form-cache';
 import FieldSubmissionQueue from './field-submission-queue';
 import rc from './controller-webform';
 import reasons from './reasons';
+import { replaceMediaSources, replaceModelMediaSources } from './media';
 
 let fieldSubmissionQueue;
 const DEFAULT_THANKS_URL = '/thanks';
@@ -67,6 +68,15 @@ const delayChangeEventBuffer = [];
  */
 
 function init(formEl, data, loadErrors = []) {
+    const media = {
+        ...data.survey.media,
+        ...data.instanceAttachments,
+    };
+
+    replaceMediaSources(formEl, media, {
+        isOffline: settings.offline,
+    });
+
     formData = data;
     formprogress = document.querySelector('.form-progress');
 
@@ -123,6 +133,7 @@ function init(formEl, data, loadErrors = []) {
                     );
                 }
                 form = new Form(formEl, data, formOptions);
+                replaceModelMediaSources(form, media);
 
                 fieldSubmissionQueue = new FieldSubmissionQueue();
 
@@ -456,6 +467,9 @@ function _resetForm(survey, options = {}) {
         },
         formOptions
     );
+
+    replaceModelMediaSources(form, survey.media);
+
     const loadErrors = form.init();
     // formreset event will update the form media:
     form.view.html.dispatchEvent(events.FormReset());
