@@ -125,8 +125,7 @@ module.exports = (grunt) => {
                 command: 'rm -f public/js/build/* && rm -f public/js/*.js',
             },
             'clean-temp-ie11-js': {
-                command:
-                    'rm -f public/js/build/*ie11-browserify.js public/js/build/*ie11-babel.js public/js/build/*ie11-src.js',
+                command: 'rm -f public/js/build/*ie11-*.js',
             },
             translation: {
                 command:
