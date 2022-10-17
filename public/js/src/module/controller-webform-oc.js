@@ -1331,6 +1331,8 @@ function _setFormEventHandlers() {
                                 );
                             }
                         } else {
+                            console.log( 'evt.origin : ', evt.origin );
+                            console.log( 'settings.parentWindowOrigin : ', settings.parentWindowOrigin );
                             console.error(
                                 'message received from untrusted source'
                             );
