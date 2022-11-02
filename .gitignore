@@ -26,3 +26,4 @@ test-coverage
 coverage.shield.badge.md
 _drafts
 chromium-cache
+/tools/.redis-repl.history
