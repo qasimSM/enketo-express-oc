@@ -1309,16 +1309,19 @@ function _setFormEventHandlers() {
                 if (valid) {
                     let timeoutId;
                     const receiveMessage = (evt) => {
+                        // TODO: remove this temporary logging
+                        console.log(
+                            `evt.origin: ${evt.origin}, settings.parentWindowOrigin: ${settings.parentWindowOrigin}`
+                        );
+                        console.log('msg received: ', JSON.parse(evt.data));
                         if (evt.origin === settings.parentWindowOrigin) {
                             const msg = JSON.parse(evt.data);
                             if (msg.event === 'signature-request-received') {
                                 clearTimeout(timeoutId);
-                                // Note: there is no mechanism to clear the event handler
-                                // in this case, because if no signature-request-failed message
-                                // is received, the Enketo form will never be shown to the user again
                             } else if (
                                 msg.event === 'signature-request-failed'
                             ) {
+                                clearTimeout(timeoutId);
                                 resetQuestion();
                                 gui.alert(
                                     t(
@@ -1331,8 +1334,6 @@ function _setFormEventHandlers() {
                                 );
                             }
                         } else {
-                            console.log( 'evt.origin : ', evt.origin );
-                            console.log( 'settings.parentWindowOrigin : ', settings.parentWindowOrigin );
                             console.error(
                                 'message received from untrusted source'
                             );
