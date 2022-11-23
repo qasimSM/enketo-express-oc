@@ -52,13 +52,6 @@ router
     .post('/:encrypted_enketo_id_rfc', submit)
     .post('/:encrypted_enketo_id_rfc_c', submit)
     .post('/:encrypted_enketo_id_headless', submit)
-    .put('/complete/:enketo_id', complete)
-    .put('/complete/:encrypted_enketo_id_fs_c', complete)
-    .put('/complete/:encrypted_enketo_id_view_dn', complete)
-    .put('/complete/:encrypted_enketo_id_view_dn_c', complete)
-    .put('/complete/:encrypted_enketo_id_rfc', complete)
-    .put('/complete/:encrypted_enketo_id_rfc_c', complete)
-    .put('/complete/:encrypted_enketo_id_headless', complete)
     .delete('/:enketo_id/*', del) // fieldsubmission API 2.0.0
     .delete('/:encrypted_enketo_id_fs_c/*', del) // fieldsubmission API 2.0.0
     .delete('/:encrypted_enketo_id_rfc/*', del) // fieldsubmission API 2.0.0
