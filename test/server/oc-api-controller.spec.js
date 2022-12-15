@@ -138,6 +138,7 @@ describe('api', () => {
         const interfce =
             typeof test.interface === 'undefined' ? false : test.interface;
         const offlineEnabled = !!test.offline;
+        const lang = typeof test.lang === 'undefined' ? false : test.lang;
 
         it(
             `${test.method.toUpperCase()} /oc/api/v${version}${endpoint} with ${authDesc} authentication ` +
@@ -145,7 +146,7 @@ describe('api', () => {
                 `parentWindowOrigin: ${
                     test.parentWindowOrigin
                 }, defaults: ${JSON.stringify(test.defaults)}, ` +
-                `interface:${interfce}, pid:${pid}, ecid:${ecid}, jini:${test.jini} responds with ${test.status}`,
+                `interface:${interfce}, pid:${pid}, lang: ${lang}, ecid:${ecid}, jini:${test.jini} responds with ${test.status}`,
             (done) => {
                 app.set('offline enabled', offlineEnabled);
 
@@ -157,6 +158,7 @@ describe('api', () => {
                         form_id: id,
                         ecid,
                         pid,
+                        lang,
                         instance,
                         instance_id: instanceId,
                         return_url: ret,
@@ -980,6 +982,23 @@ describe('api', () => {
                     status: 400,
                 };
                 obj.ecid = '';
+                testResponse(obj);
+            });
+
+            // lang
+            ecidEndpoints.forEach((endpoint) => {
+                const obj = {
+                    version,
+                    auth: true,
+                    method: 'post',
+                    endpoint,
+                    instanceId: true,
+                    instance: true,
+                    offline: true,
+                    lang: 'fr',
+                    status: endpoint.startsWith('/instance') ? 201 : 200,
+                };
+                obj.expected = /.+(\?|&)lang=fr/;
                 testResponse(obj);
             });
 

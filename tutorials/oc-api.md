@@ -42,6 +42,7 @@ Returns a URL that points to a regular fieldsubmission view to collect a new rec
 -   Has an optional `pid` parameter.
 -   Has an optional `jini` parameter with string value `"true"` or `"false"`. Defaults to `"false"`. Only works if jini was configured in config.json.
 -   Has an optional `next_prompt` parameter that will add a tickbox with the `next_prompt` value (URL-decoded) above close button (on last page only).
+-   Has an optional `lang` parameter to override the default form language.
 
 Otherwise, use exactly as [POST /survey/single/iframe](https://apidocs.enketo.org/v2#/post-survey-single-iframe)
 
@@ -53,8 +54,25 @@ Returns a URL that points to a regular fieldsubmission view to collect a new rec
 -   Has an optional `pid` parameter.
 -   Has an optional `jini` parameter with string value `"true"` or `"false"`. Defaults to `"false"`. Only works if jini was configured in config.json.
 -   Has an optional `next_prompt` parameter that will add a tickbox with the `next_prompt` value (URL-decoded) above close button (on last page only).
+-   Has an optional `lang` parameter to override the default form language.
 
 Otherwise, use exactly as POST /survey/collect.
+
+### POST /survey/collect/rfc
+
+Returns a URL that points to a fieldsubmission view to collect a new record **and a reason-for-change UI**.
+
+-   Has a **required** `ecid` parameter with string value.
+-   Has an optional `pid` parameter.
+-   Has an optional `jini` parameter with string value `"true"` or `"false"`. Defaults to `"false"`. Only works if jini was configured in config.json.
+-   Has an optional `next_prompt` parameter that will add a tickbox with the `next_prompt` value (URL-decoded) above close button (on last page only).
+-   Has an optional `lang` parameter to override the default form language.
+
+Otherwise, use exactly as POST /survey/collect.
+
+### POST /survey/collect/rfc/c
+
+Same as POST /survey/collect/rfc except that this view has a **Close button** in the Discrepancy Note Widget.
 
 ### POST /survey/collect/participant
 
@@ -93,6 +111,7 @@ Returns a URL that points to an **empty readonly** form.
 -   Has an optional `load_warning` parameter for a string value to be displayed in a modal dialog upon load.
 -   Has an optional `go_to` parameter with a string value consisting of the absolute path of the question. A fragment identifier (#hash) can be added to point to a specific discrepancy note thread_id. E.g. `go_to=/path/to/node_comment#345saUDfg`.
 -   Has an optional `go_to_error_url` parameter that in conjunction with `go_to` will prompt the user to redirect to a _mini form_ if the go_to target is not available or hidden.
+-   Has an optional `lang` parameter to override the default form language.
 
 Otherwise, use exactly as [POST /survey/view/iframe](http://apidocs.enketo.org/v2/#/post-survey-view-iframe)
 
@@ -102,6 +121,7 @@ Returns a PDF of an empty form or a JSON error response.
 
 -   Has a **required** `ecid` parameter with string value.
 -   Has an optional `pid` parameter.
+-   Has an optional `lang` parameter to override the default form language.
 
 Otherwise, use exactly as [POST /survey/view/pdf](https://apidocs.enketo.org/v2#/post-survey-view-pdf)
 
@@ -113,6 +133,7 @@ Returns a URL that points to an **empty** form preview.
 -   Has an optional `go_to` parameter with a string value consisting of the absolute path of the question. A fragment identifier (#hash) can be added to point to a specific discrepancy note thread_id. E.g. `go_to=/path/to/node_comment#345saUDfg`.
 -   Has an optional `go_to_error_url` parameter that in conjunction with `go_to` will prompt the user to redirect to a _mini form_ if the go_to target is not available or hidden.
 -   Has an optional `next_prompt` parameter that will add a tickbox with the `next_prompt` value (URL-decoded) above close button (on last page only).
+-   Has an optional `lang` parameter to override the default form language.
 
 Otherwise, use exactly as [POST /survey/preview/iframe](http://apidocs.enketo.org/v2/#/post-survey-preview-iframe)
 
@@ -122,6 +143,7 @@ Returns a URL that points to an **empty** "Participant" form preview.
 
 -   Has an optional `go_to` parameter with a string value consisting of the absolute path of the question. A fragment identifier (#hash) can be added to point to a specific discrepancy note thread_id. E.g. `go_to=/path/to/node_comment#345saUDfg`.
 -   Has an optional `go_to_error_url` parameter that in conjunction with `go_to` will prompt the user to redirect to a _mini form_ if the go_to target is not available or hidden.
+-   Has an optional `lang` parameter to override the default form language.
 
 Otherwise, use exactly as [POST /survey/preview/iframe](http://apidocs.enketo.org/v2/#/post-survey-preview-iframe)
 
@@ -141,6 +163,7 @@ Returns a URL that points to a regular webform fieldsubmission view with an **ex
 -   Has an optional `go_to` parameter with a string value consisting of the absolute path of the question. A fragment identifier (#hash) can be added to point to a specific discrepancy note thread_id. E.g. `go_to=/path/to/node_comment#345saUDfg`.
 -   Has an optional `go_to_error_url` parameter that in conjunction with `go_to` will prompt the user to redirect to a _mini form_ if the go_to target is not available or hidden.
 -   Has an optional `interface` parameter with a string value of either `"default"`, `"queries"`, or `"sdv"` that results in tweaked error messages.
+-   Has an optional `lang` parameter to override the default form language.
 
 Otherwise, use exactly as [POST /instance/iframe](http://apidocs.enketo.org/v2/#/post-instance-iframe)
 
@@ -156,6 +179,7 @@ Returns a URL that points to a special "Participate" webform fieldsubmission vie
 -   Has an optional `go_to` parameter with a string value consisting of the absolute path of the question. A fragment identifier (#hash) can be added to point to a specific discrepancy note thread_id. E.g. `go_to=/path/to/node_comment#345saUDfg`.
 -   Has an optional `go_to_error_url` parameter that in conjunction with `go_to` will prompt the user to redirect to a _mini form_ if the go_to target is not available or hidden.
 -   Has an optional `interface` parameter with a string value of either `"default"`, `"queries"`, or `"sdv"` that results in tweaked error messages.
+-   Has an optional `lang` parameter to override the default form language.
 
 Otherwise, use as POST /instance/edit.
 
@@ -169,6 +193,7 @@ Returns a url that points to webform fieldsubmission view with an existing recor
 -   Has an optional `go_to` parameter with a string value consisting of the absolute path of the question. A fragment identifier (#hash) can be added to point to a specific discrepancy note thread_id. E.g. `go_to=/path/to/node_comment#345saUDfg`.
 -   Has an optional `go_to_error_url` parameter that in conjunction with `go_to` will prompt the user to redirect to a _mini form_ if the go_to target is not available or hidden.
 -   Has an optional `interface` parameter with a string value of either `"default"`, `"queries"`, or `"sdv"` that results in tweaked error messages.
+-   Has an optional `lang` parameter to override the default form language.
 
 Otherwise, use exactly as [POST /instance/iframe](http://apidocs.enketo.org/v2/#/post-instance-iframe)
 
@@ -186,6 +211,7 @@ Returns a url that points to a **readonly** form with a record loaded into it.
 -   Has an optional `go_to` parameter with a string value consisting of the absolute path of the question. A fragment identifier (#hash) can be added to point to a specific discrepancy note thread_id. E.g. `go_to=/path/to/node_comment#345saUDfg`.
 -   Has an optional `go_to_error_url` parameter that in conjunction with `go_to` will prompt the user to redirect to a _mini form_ if the go_to target is not available or hidden.
 -   Has an optional `interface` parameter with a string value of either `"default"`, `"queries"`, or `"sdv"` that results in tweaked error messages.
+-   Has an optional `lang` parameter to override the default form language.
 
 Otherwise, use exactly as [POST /instance/view/iframe](https://apidocs.enketo.org/v2#/post-instance-view-iframe)
 
@@ -208,6 +234,7 @@ Returns a url that points to a readonly view of an existing record where **only 
 -   Has an optional `go_to` parameter with a string value consisting of the absolute path of the question. A fragment identifier (#hash) can be added to point to a specific discrepancy note thread_id. E.g. `go_to=/path/to/node_comment#345saUDfg`.
 -   Has an optional `go_to_error_url` parameter that in conjunction with `go_to` will prompt the user to redirect to a _mini form_ if the go_to target is not available or hidden.
 -   Has an optional `interface` parameter with a string value of either `"default"`, `"queries"`, or `"sdv"` that results in tweaked error messages.
+-   Has an optional `lang` parameter to override the default form language.
 
 Otherwise, use exactly as [POST /instance/view/iframe](https://apidocs.enketo.org/v2#/post-instance-view-iframe)
 
