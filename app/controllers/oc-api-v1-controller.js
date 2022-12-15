@@ -17,6 +17,8 @@ module.exports = (app) => {
     app.use(`${app.get('base path')}/oc/api/v1`, router);
 };
 
+// TODO: use URL object and searchParams.append to build URLs
+
 router
     .get('/', (req, res) => {
         res.redirect(
@@ -92,6 +94,7 @@ router
     .delete('/instance/', removeInstance)
     // check and set parameters, return error if required parameter is missing
     .post('*', _setDefaultsQueryParam)
+    .post('*', _setLangQueryParam)
     .post('*', _setReturnQueryParam) // is this actually used by OC?
     .post('*', _setGoTo)
     .post('*', _setParentWindow)
@@ -366,6 +369,18 @@ function _setDefaultsQueryParam(req, res, next) {
     next();
 }
 
+function _setLangQueryParam(req, res, next) {
+    const { lang } = req.body;
+
+    if (lang) {
+        req.langQueryParam = `lang=${encodeURIComponent(lang)}`;
+    } else {
+        req.langQueryParam = ``;
+    }
+
+    next();
+}
+
 function _setInterfaceQueryParam(req, res, next) {
     if (req.body.interface) {
         if (!['default', 'queries', 'sdv'].includes(req.body.interface)) {
@@ -517,6 +532,7 @@ function _generateWebformUrls(id, req) {
                 req.goToErrorUrl,
                 req.jini,
                 req.nextPromptParam,
+                req.langQueryParam,
             ]);
             url = `${BASEURL}preview/${IFRAMEPATH}${idPreview}${queryString}${hash}`;
             break;
@@ -526,6 +542,7 @@ function _generateWebformUrls(id, req) {
                 req.defaultsQueryParam,
                 req.parentWindowOriginParam,
                 req.goToErrorUrl,
+                req.langQueryParam,
             ]);
             url = `${BASEURL}preview/participant/${IFRAMEPATH}${idFsParticipant}${queryString}${hash}`;
             break;
@@ -551,6 +568,7 @@ function _generateWebformUrls(id, req) {
                 req.goToErrorUrl,
                 req.interfaceQueryParam,
                 req.jini,
+                req.langQueryParam,
             ]);
             url = `${BASEURL}edit/${FSPATH}${incompletePart}${rfcPart}${dnClosePart}${IFRAMEPATH}${idToUse}${queryString}${hash}`;
             break;
@@ -561,6 +579,7 @@ function _generateWebformUrls(id, req) {
                 req.ecid,
                 `instance_id=${req.body.instance_id}`,
                 req.interfaceQueryParam,
+                req.langQueryParam,
             ]);
             url = `${BASEURL}edit/${FSPATH}${rfcPart}headless/${idEditHeadless}${queryString}`;
             break;
@@ -582,6 +601,7 @@ function _generateWebformUrls(id, req) {
                 req.parentWindowOriginParam,
                 req.jini,
                 req.nextPromptParam,
+                req.langQueryParam,
             ]);
             url = `${BASEURL}single/${FSPATH}${rfcPart}${dnClosePart}${IFRAMEPATH}${idToUse}${queryString}`;
             break;
@@ -594,6 +614,7 @@ function _generateWebformUrls(id, req) {
                 req.returnQueryParam,
                 req.parentWindowOriginParam,
                 req.jini,
+                req.langQueryParam,
             ]);
             url = `${BASEURL}single/${FSPATH}participant/${IFRAMEPATH}${idFsParticipant}${queryString}`;
             break;
@@ -607,6 +628,7 @@ function _generateWebformUrls(id, req) {
                 req.returnQueryParam,
                 req.parentWindowOriginParam,
                 req.interfaceQueryParam,
+                req.langQueryParam,
             ]);
             url = `${BASEURL}edit/${FSPATH}participant/${IFRAMEPATH}${idFsParticipant}${queryString}${hash}`;
             break;
@@ -619,6 +641,7 @@ function _generateWebformUrls(id, req) {
                 req.returnQueryParam,
                 req.parentWindowOriginParam,
                 req.jini,
+                req.langQueryParam,
             ]);
             url = `${BASEURL}single/full/participant/${idFullParticipant}${queryString}`;
             break;
@@ -631,6 +654,7 @@ function _generateWebformUrls(id, req) {
                 req.returnQueryParam,
                 req.parentWindowOriginParam,
                 req.jini,
+                req.langQueryParam,
             ]);
             url = `${BASEURL}${OFFLINEPATH}full/participant/${idFullParticipant}${queryString}`;
             break;
@@ -645,6 +669,7 @@ function _generateWebformUrls(id, req) {
                 req.loadWarning,
                 req.goToErrorUrl,
                 req.interfaceQueryParam,
+                req.langQueryParam,
             ];
             if (req.webformType === 'view-instance') {
                 queryParts.unshift(`instance_id=${req.body.instance_id}`);
@@ -664,6 +689,7 @@ function _generateWebformUrls(id, req) {
                 req.loadWarning,
                 req.goToErrorUrl,
                 req.interfaceQueryParam,
+                req.langQueryParam,
             ]);
             url = `${BASEURL}edit/${FSPATH}dn/${dnClosePart}${IFRAMEPATH}${viewId}${queryString}${hash}`;
             break;
@@ -678,6 +704,7 @@ function _generateWebformUrls(id, req) {
                 req.pid,
                 'print=true',
                 req.interfaceQueryParam,
+                req.langQueryParam,
             ];
             if (req.body.instance_id) {
                 queryParts.push(`instance_id=${req.body.instance_id}`);
