@@ -1,0 +1,182 @@
+{
+  "widget": {
+    "dn": {
+      "assignto": "Zuweisen:",
+      "assignedto": "__id__ zugewiesen an __asenne__.",
+      "closequerytext": "Schließen Sie diese Abfrage",
+      "notifytext": "Email?",
+      "addquerybutton": "Abfrage hinzufügen",
+      "addannotationbutton": "Annotation hinzufügen",
+      "addnewtext": "Neu",
+      "emptyhistorytext": "Keine Geschichte",
+      "printhistoryheading": "Geschichte für - __labeltext__ (__QuestionName__)",
+      "me": "Mich",
+      "status": "Status: __status__",
+      "reopen": "Wieder öffnen",
+      "reopenlabel": "Geben Sie hier ein, um wieder zu öffnen",
+      "autoclosed": "Abfrage nach System geschlossen, weil dieser Gegenstand versteckt war",
+      "valuechange": "Wert geändert von __previous__ zu __new__",
+      "autoconstraint": "Automatische Abfrage für: __errormsg__",
+      "autonoreason": "Automatische Abfrage für: Wert geändert und kein Grund zur Änderung bereitgestellt",
+      "closedmodified": "Die Daten geändert, nachdem die Abfrage geschlossen wurde",
+      "newfile": "Neue Datei hochgeladen",
+      "fileremoved": "Datei entfernt",
+      "addnewquery": "Eine neue Frage hinzufügen",
+      "addnewannotation": "Eine neue Annotation hinzufügen",
+      "typeresponse": "Auf Abfrage antworten",
+      "allhistory": "Alle Geschichte anzeigen",
+      "queries": "Abfragen",
+      "annotations": "Anmerkungen",
+      "showvaluechanges": "Value Änderungen zeigen",
+      "now": "Soeben",
+      "second": "__Count__ Zweiter",
+      "second_plural": "__Count__ Sekunden",
+      "minute": "__Count__ Minute",
+      "minute_plural": "__Count__ Minuten",
+      "hour": "__Count__ Stunde",
+      "hour_plural": "__Count__ Stunden",
+      "day": "__Count__ Day",
+      "day_plural": "__Count__ Tage",
+      "month": "__Count__ Monat",
+      "month_plural": "__Count__ Monate",
+      "year": "__Count__ Jahr",
+      "year_plural": "__Count__ Jahre"
+    }
+  },
+  "fieldsubmission": {
+    "alert": {
+      "close": {
+        "heading1": "Schließen",
+        "heading2": "Warnung",
+        "msg1": "Senden Sie nicht gespeicherte Daten ...",
+        "msg2": "Nicht alle Daten wurden übermittelt. Wenn Sie diese Seite beenden, geht sie verloren."
+      },
+      "locked": {
+        "heading": "Gesperrt",
+        "msg": "Diese Form oder Aufzeichnung ist gesperrt und Einsendungen können nicht gespeichert werden."
+      },
+      "complete": {
+        "msg": "Daten konnten nicht eingereicht werden."
+      },
+      "validationerror": {
+        "msg": "Sie müssen alle Fehler in diesem Formular behandeln, bevor es fertiggestellt werden kann. Bitte aktualisieren Sie den Wert oder fügen Sie eine Abfrage für jedes in Rot gekennzeichnete Feld hinzu."
+      },
+      "relevantvalidationerror": {
+        "msg": "Antwort (n) in einigen Feld (n) erstellen einige Daten in diesem Formular ungültig. Dies muss korrigiert werden, um das Formular vollständig zu markieren."
+      },
+      "reasonforchangevalidationerror": {
+        "msg": "Für jedes geänderte Feld muss ein Grund für Änderungen bereitgestellt werden. Bitte fügen Sie alle fehlenden Gründe hinzu."
+      },
+      "stricterror": {
+        "heading": "Ungültiger Wert",
+        "msg": "Bitte geben Sie einen geeigneten Wert ein, um das Feld zu aktualisieren."
+      },
+      "participanterror": {
+        "msg": [
+          "Es sieht so aus, als ob einige Felder Aufmerksamkeit brauchen",
+          "Bitte überprüfen Sie sie, bevor Sie fortfahren."
+        ]
+      }
+    },
+    "confirm": {
+      "autoquery": {
+        "msg1": "Einige Feldwerte haben Fehler. Diese müssen behandelt werden, bevor das Formular geschlossen ist.",
+        "msg2": [
+          "Klicken Sie auf Abbrechen, um zum Formular zurückzukehren, um den Wert manuell zu aktualisieren oder eine Abfrage für jedes in Rot gekennzeichnete Feld hinzuzufügen.",
+          "Klicken Sie jetzt fort, um das Formular jetzt weiter zu schließen. Eine Abfrage wird für jedes in Rot gekennzeichnete Feld automatisch hinzugefügt."
+        ],
+        "automatic": "Fortfahren",
+        "manual": "Stornieren"
+      },
+      "complete": {
+        "msg": "Möchten Sie diesen Datensatz abschließen und beenden?",
+        "heading": "Fertigstellung bestätigen"
+      },
+      "leaveanyway": {
+        "msg": "Möchten Sie die Änderungen verwerfen und trotzdem verlassen?",
+        "button": "Ablasse trotzdem"
+      }
+    },
+    "prompt": {
+      "reason": {
+        "msg": "Wenn ja, geben Sie bitte einen Grund für das Löschen der Gruppe ein."
+      }
+    },
+    "feedback": {
+      "ongoing": "Speichern ...",
+      "success": "Alle Änderungen gespeichert.",
+      "fail": "Änderungen nicht speichern.",
+      "disabled": "Speichern ist deaktiviert."
+    },
+    "readonly": {
+      "msg": "Du bist im schreibgeschützten Modus."
+    },
+    "noteonly": {
+      "msg": "Sie sind nur im Überprüfungsmodus."
+    },
+    "reason": {
+      "heading": "Sieht so aus, als hätten Sie einige Updates gemacht. Bitte sagen Sie uns warum:",
+      "placeholder1": "Geben Sie einen Grund für Ihre Änderungen ein",
+      "placeholder2": "Geben Sie einen Grund für die Änderung dieses Wertes ein",
+      "applytoall": "Bewerben Sie sich für alle",
+      "questionmsg": "Bitte geben Sie am Ende der Seite einen Grund für die Änderung ein."
+    }
+  },
+  "confirm": {
+    "deleteall": {
+      "heading": "WARNUNG",
+      "msg": [
+        "Dadurch werden alle Ihre in der Warteschlange und alle Ihre Formulare aus dem Browserspeicher in der Warteschlange gestrichen.",
+        "Bevor Sie fortfahren, schließen Sie bitte alle Registerkarten Ihrer anderen Offline -Formular. Diese Seite wird neu geladen. Wenn Sie einen Fehler sehen, müssen Sie diese Aktion möglicherweise wiederholen.",
+        "Möchten Sie fortfahren?"
+      ],
+      "posButton": "Alles löschen"
+    },
+    "print": {
+      "queries": "Zeige die Geschichte",
+      "queryShow": "Show",
+      "heading": "Optionen",
+      "msg": "Um einen optimierten Druck vorzubereiten, wählen Sie bitte die folgenden Optionen aus"
+    },
+    "repeatremove": {
+      "msg": "Diese Aktion ist irreversibel (sie wird im Prüfungsweg aufgezeichnet). Sind Sie sicher, dass Sie fortfahren möchten?"
+    }
+  },
+  "constraint": {
+    "relevant": "Eine Antwort hat sich zu einer anderen Frage geändert, bei der diese Frage versteckt wird, aber wir können sie nicht verbergen, während sie Daten hat. Bitte löschen Sie die Daten oder ändern Sie die abhängigen Antworten."
+  },
+  "home": {
+    "msg": "__apptitle__ läuft! Bitte greifen Sie von Ihrer __ServerName__ -Installation auf OpenClinica -Formulare zu."
+  },
+  "alert": {
+    "appupdated": {
+      "heading": "Bitte aktualisieren",
+      "msg": "Bitte aktualisieren Sie diese Webseite, um das Formular offline (Ref: Anwendung) zu verwenden"
+    },
+    "formupdated": {
+      "heading": "Bitte aktualisieren",
+      "msg": "Bitte aktualisieren Sie diese Webseite, um das Formular Offline (Ref: Definition) zu verwenden"
+    },
+    "goto": {
+      "irrelevant": "Der Artikel, auf den Sie zugreifen möchten, ist derzeit versteckt.",
+      "invisible": "Der Artikel, auf den Sie zugreifen möchten, ist auf dem Formular nicht sichtbar.",
+      "notfound": "Der Artikel, auf den Sie zugreifen möchten, wurde aus diesem Formular entfernt.",
+      "msg1": "Bitte verwenden Sie das Symbol für Ansichtsabfrage anstelle der Ansichtsabfrage innerhalb des Datensatzes Symbol, um sie zu sehen.",
+      "msg2": "Bitte besuchen Sie __miniform__, um es zu sehen.",
+      "form": "diese Form"
+    },
+    "loaderror": {
+      "editadvice": "",
+      "entryadvice": "",
+      "heading": "Warte eine Sekunde...",
+      "msg1": "Bitte kontaktieren Sie Ihr Support -Team mit dem Link zu dieser Seite und der folgenden Nachricht, wenn Sie weitere Hilfe benötigen.",
+      "msg2": "",
+      "heading_plural": "Warte eine Sekunde...",
+      "msg1_plural": "Bitte kontaktieren Sie Ihr Support -Team mit dem Link zu dieser Seite und den folgenden Nachrichten, wenn Sie weitere Hilfe benötigen.",
+      "msg2_plural": ""
+    }
+  },
+  "submission": {
+    "http500": "Es gab ein Problem mit Ihrer Einreichung. Bitte versuchen Sie es erneut oder wenden Sie sich an __Supportemail__, wenn dies bestehen bleibt."
+  }
+}
