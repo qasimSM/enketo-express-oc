@@ -1,9 +1,9 @@
 // variables
-@import "variables";
-@import "../component/variables";
-@import "../../../../node_modules/enketo-core/src/sass/grid/variables";
-@import "../../../../node_modules/enketo-core/src/sass/formhub/variables";
-@import "../../../../node_modules/enketo-core/src/sass/core/variables";
+@import 'variables';
+@import '../component/variables';
+@import '../../../../node_modules/enketo-core/src/sass/grid/variables';
+@import '../../../../node_modules/enketo-core/src/sass/formhub/variables';
+@import '../../../../node_modules/enketo-core/src/sass/core/variables';
 
 // fonts
 @import '../component/fonts';
@@ -34,15 +34,10 @@
 @import '../../../../node_modules/enketo-core/src/sass/core/pages';
 
 // components
-@import "../component/side-slider";
-@import "form-grid";
-@import "../component/form_header";
-@import "../component/form_footer";
-
-// IE11 patches
-@import "../../../../node_modules/enketo-core/src/sass/core/iefix";
-@import "../../../../node_modules/enketo-core/src/sass/formhub/iefix";
-@import "../../../../node_modules/enketo-core/src/sass/grid/iefix";
+@import '../component/side-slider';
+@import 'form-grid';
+@import '../component/form_header';
+@import '../component/form_footer';
 
 // custom OC
-@import "../component/grid-oc";
+@import '../component/grid-oc';

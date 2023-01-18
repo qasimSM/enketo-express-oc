@@ -1,5 +1,9 @@
 extends ../layout
 
+block head-script
+  script
+    include component/redirect-IE.js
+
 block style
   // preload for performance
   link(rel='preload', as='font', href=`${basePath}${offlinePath || ''}/fonts/OpenSans-Bold-webfont.woff`, type='font/woff', crossorigin)
@@ -16,31 +20,7 @@ block style
 
 block script
   - var suffix = (type && type !== 'preview' && type !== 'single') ? '-' + (type === 'full' || type === 'fieldsubmission' ? 'oc' : type): ''
-  script#main-script(defer, module, src=`${basePath}${offlinePath || ''}/js/build/enketo-webform${suffix}.js`)
-  script.
-    if ( /rv:11.0/i.test(navigator.userAgent) || /Edge\/\d./i.test(navigator.userAgent) ) {
-      var mainScript = document.querySelector( '#main-script' );
-      var mainScriptSrc = mainScript.src;
-      if (mainScript.parentNode) {
-          mainScript.parentNode.removeChild(mainScript);
-      }
-      var ie11PolyfillScript = document.createElement( 'script' );
-      ie11PolyfillScript.type = 'text/javascript';
-      ie11PolyfillScript.src = mainScriptSrc.split('/js/build/')[0] + '/js/build/ie11-polyfill.min.js';
-      document.body.appendChild( ie11PolyfillScript );
-      var obscureIe11PolyfillScript = document.createElement( 'script' );
-      obscureIe11PolyfillScript.type = 'text/javascript';
-      obscureIe11PolyfillScript.src = mainScriptSrc.split('/js/build/')[0] + '/js/build/obscure-ie11-polyfills.js';
-      document.body.appendChild( obscureIe11PolyfillScript );
-      var cssEscapeScript = document.createElement( 'script' );
-      cssEscapeScript.type = 'text/javascript';
-      cssEscapeScript.src = mainScriptSrc.split('/js/build/')[0] + '/js/build/css.escape.js';
-      document.body.appendChild( cssEscapeScript );
-      var script = document.createElement( 'script' );
-      script.type = 'text/javascript';
-      script.src = mainScriptSrc.replace('enketo-webform.', 'enketo-webform-ie11.');
-      document.body.appendChild( script );
-    }
+    script#main-script(defer, module, src=`${basePath}${offlinePath || ''}/js/build/enketo-webform${suffix}.js`)
 
   -// load jini stuff asynchronously (OC)
   if jini && !headless

@@ -2,7 +2,7 @@ extends ../layout
 
 block script
   script.
-    var url = new URL(window.location.href);
+    const url = new URL(window.location.href);
 
     if( url.pathname.endsWith('/x/') || url.pathname.endsWith('/_/') ){
       url.pathname = `${url.pathname.slice(0, -3)}/x/${url.hash.substring(1)}`;
@@ -10,7 +10,7 @@ block script
     } else {
       url.pathname = url.pathname.replace('::', '');
     }
-
+    
     location.href = url.toString();
 
 block content

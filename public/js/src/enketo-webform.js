@@ -1,8 +1,8 @@
+import { FormModel } from './module/form-model';
 import gui from './module/gui';
 import controller from './module/controller-webform';
 import settings from './module/settings';
 import connection from './module/connection';
-import { FormModel } from './module/form-model';
 import {
     init as initTranslator,
     t,

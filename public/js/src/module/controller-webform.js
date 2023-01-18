@@ -4,10 +4,10 @@
 
 import downloadUtils from 'enketo-core/src/js/download-utils';
 import $ from 'jquery';
+import { Form } from './form';
 import gui from './gui';
 import connection from './connection';
 import settings from './settings';
-import { Form } from './form';
 import events from './event';
 import fileManager from './file-manager';
 import {

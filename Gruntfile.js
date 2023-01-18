@@ -9,14 +9,9 @@ module.exports = (grunt) => {
         '!public/js/build/*',
         '!docs/**',
         '!test-coverage/**',
-        '!**/redirect-IE.js',
     ];
     const path = require('path');
     const nodeSass = require('node-sass');
-    const pkg = require('./package');
-    const ie11Bundles = pkg.entries.map((file) =>
-        file.replace('/src/', '/build/')
-    );
 
     require('time-grunt')(grunt);
     require('load-grunt-tasks')(grunt);
@@ -102,13 +97,6 @@ module.exports = (grunt) => {
             },
         },
         shell: {
-            'polyfill-ie11': {
-                command: [
-                    'mkdir -p public/js/build && curl "https://polyfill.io/v3/polyfill.min.js?ua=ie%2F11.0.0&features=es2015%2Ces2016%2Ces2017%2Ces2018%2Cdefault-3.6%2Cfetch%2CNodeList.prototype.forEach" -o "public/js/build/ie11-polyfill.min.js"',
-                    'cp -f node_modules/enketo-core/src/js/obscure-ie11-polyfills.js public/js/build/obscure-ie11-polyfills.js',
-                    'cp -f node_modules/css.escape/css.escape.js public/js/build/css.escape.js',
-                ].join('&&'),
-            },
             'clean-css': {
                 command: 'rm -f public/css/*',
             },
@@ -119,42 +107,11 @@ module.exports = (grunt) => {
             'clean-js': {
                 command: 'rm -f public/js/build/* && rm -f public/js/*.js',
             },
-            'clean-temp-ie11-js': {
-                command:
-                    'rm -f public/js/build/*ie11-browserify.js public/js/build/*ie11-babel.js public/js/build/*ie11-src.js',
-            },
             translation: {
                 command:
                     'echo "No automatic translation key generation at the moment."',
                 // Does not work correctly yet for TError() calls and probably not for pug files either.
                 // npx i18next -c ./i18next-parser.config.js
-            },
-            'rollup-ie11': {
-                command: 'npx rollup --config rollup-ie11.config.js',
-            },
-            'babel-ie11': {
-                command: ie11Bundles
-                    .map((bundle) => bundle.replace('.js', '-ie11-src.js'))
-                    .map(
-                        (bundle) =>
-                            `npx babel ${bundle} --config-file ./babel-ie11.config.js --out-file ${bundle.replace(
-                                '-ie11-src.',
-                                '-ie11-babel.'
-                            )}`
-                    )
-                    .join('&&'),
-            },
-            'browserify-ie11': {
-                command: ie11Bundles
-                    .map((bundle) => bundle.replace('.js', '-ie11-babel.js'))
-                    .map(
-                        (bundle) =>
-                            `npx browserify node_modules/enketo-core/src/js/workarounds-ie11.js ${bundle} -o ${bundle.replace(
-                                '-ie11-babel.',
-                                '-ie11-browserify.'
-                            )}`
-                    )
-                    .join('&&'),
             },
             build: {
                 command: 'node ./scripts/build.js',
@@ -242,28 +199,6 @@ module.exports = (grunt) => {
                 },
             },
         },
-        // IE11 only
-        terser: {
-            options: {
-                // https://github.com/enketo/enketo-express/issues/72
-                keep_classnames: true,
-            },
-            all: {
-                files: ie11Bundles
-                    .map((bundle) =>
-                        bundle.replace('.js', '-ie11-browserify.js')
-                    )
-                    .map((bundle) => [
-                        bundle.replace('-ie11-browserify.js', '-ie11.js'),
-                        [bundle],
-                    ])
-                    .reduce((o, [key, value]) => {
-                        o[key] = value;
-
-                        return o;
-                    }, {}),
-            },
-        },
         env: {
             develop: {
                 NODE_ENV: 'develop',
@@ -288,24 +223,6 @@ module.exports = (grunt) => {
                     return `${dest + src}translation-combined.json`;
                 },
                 dest: 'locales/build/',
-            },
-        },
-        replace: {
-            // https://github.com/OpenClinica/enketo-express-oc/issues/426
-            // widget.name is not working properly on IE 11 win 10
-            'widgets-controller-ie11': {
-                src: ['public/js/build/*-ie11-browserify.js'],
-                overwrite: true,
-                replacements: [
-                    {
-                        from: 'Widget.name',
-                        to: 'Widget.selector',
-                    },
-                    {
-                        from: 'have a name',
-                        to: 'have a selector',
-                    },
-                ],
             },
         },
     });
@@ -437,18 +354,6 @@ module.exports = (grunt) => {
     ]);
     grunt.registerTask('locales', ['i18next']);
     grunt.registerTask('js', ['widgets', 'shell:build']);
-    grunt.registerTask('js-ie11', [
-        'shell:rollup-ie11',
-        'shell:polyfill-ie11',
-        'shell:babel-ie11',
-        'shell:browserify-ie11',
-        'replace:widgets-controller-ie11',
-    ]);
-    grunt.registerTask('build-ie11', [
-        'js-ie11',
-        'terser',
-        'shell:clean-temp-ie11-js',
-    ]);
     grunt.registerTask('test', [
         'env:test',
         'transforms',
@@ -465,13 +370,6 @@ module.exports = (grunt) => {
         'env:develop',
         'i18next',
         'js',
-        'sass',
-        'concurrent:develop',
-    ]);
-    grunt.registerTask('develop-ie11', [
-        'env:develop',
-        'i18next',
-        'js-ie11',
         'sass',
         'concurrent:develop',
     ]);
