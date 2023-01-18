@@ -3,7 +3,6 @@
 import { FormModel as Model } from 'enketo-core';
 import { getXPath } from 'enketo-core/src/js/dom-utils';
 import $ from 'jquery';
-import sniffer from './sniffer';
 
 // load customized nodeset module
 import './nodeset';
@@ -89,19 +88,6 @@ Model.prototype.isMarkedComplete = function () {
     }
     const nsPrefix = this.getNamespacePrefix(OPENCLINICA_NS);
 
-    if (sniffer.browser.ie && this.data.instanceStr) {
-        // In IE11, the merged model does not include the oc:complete attribute at all
-        // This crap should be removed once we drop IE11.
-        const record = new DOMParser().parseFromString(
-            this.data.instanceStr,
-            'text/xml'
-        );
-        const attribute = record
-            .querySelector('*')
-            .getAttribute(`${nsPrefix}:complete`);
-
-        return attribute && attribute === 'true';
-    }
     // This is proper
     return this.evaluate(
         `/*/@${nsPrefix}:complete = "true"`,

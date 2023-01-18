@@ -68,8 +68,3 @@ An OpenClinica theme was added that slightly tweaks the Formhub/Kobo themes. In 
 ### Translations
 
 A mechanism existing in the standard Enketo Express is used to add additional translation strings to the standard strings without augmenting the original files.
-
-### IE11 and Edge Legacy
-
-Internet Explorer and Edge Legacy are still supported.
-Edge Legacy support will be dropped since it has gone to end of life.

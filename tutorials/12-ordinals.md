@@ -62,21 +62,3 @@ A more complex ordinal example with nested repeats could look like this:
 </data>
 
 ```
-
-### Warning:
-
-Internet Explorer 11 will put the `xmlns:enk="http://enketo.org/xforms"` namespace declaration on the nodes where the attributes are used, so multiple times, instead of the more efficient single namespace declaration on the root node. E.g. the first example looks like this in IE11:
-
-```xml
-<data>
-	<person xmlns:enk=”http://enketo.org/xforms” enk:last-used-ordinal=”5” enk:ordinal=”1”>
-    	<firstname>krikor</firstname>
-	</person>
-	<person xmlns:enk=”http://enketo.org/xforms” enk:ordinal=”3”>
-        <firstname>jessica</firstname>
-	</person>
-	<person xmlns:enk=”http://enketo.org/xforms” enk:ordinal=”4”>
-        <firstname>steve</firstname>
-	</person>
-</data>
-```

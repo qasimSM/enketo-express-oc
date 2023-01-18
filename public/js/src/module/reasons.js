@@ -30,14 +30,15 @@ export default {
                     </header>
                 </section>`
         );
-        // firstElementChild is not supported in IE11
-        const firstElementChild =
-            contextual.firstElementChild || contextual.children[0];
+
         this._section =
             this._section ||
             document
                 .querySelector('.form-footer')
-                .insertAdjacentElement('beforebegin', firstElementChild);
+                .insertAdjacentElement(
+                    'beforebegin',
+                    contextual.firstElementChild
+                );
 
         return this._section;
     },
