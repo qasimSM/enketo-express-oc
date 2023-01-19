@@ -49,7 +49,7 @@
         "debug": "^4.3.4",
         "enketo-core": "^6.1.7",
         "enketo-transformer": "2.1.7",
-        "enketo-xpath-extensions-oc": "github:OpenClinica/enketo-xpath-extensions-oc#727803c",
+        "enketo-xpath-extensions-oc": "github:OpenClinica/enketo-xpath-extensions-oc#d526907",
         "evp_bytestokey": "^1.0.3",
         "express": "^4.18.2",
         "express-cls-hooked": "^0.3.8",
