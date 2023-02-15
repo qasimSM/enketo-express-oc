@@ -1402,7 +1402,7 @@ function _setButtonEventHandlers(survey) {
         };
         completeButton.addEventListener('click', () => {
             const $button = $(completeButton).btnBusyState(true);
-            _complete(false, options)
+            _complete(form.model.isMarkedComplete(), options)
                 .catch((e) => {
                     gui.alert(e.message);
                 })
