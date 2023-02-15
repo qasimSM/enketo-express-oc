@@ -50,8 +50,8 @@ describe('Analog-scale widget with show-scale', () => {
         expect(widgetInput.getAttribute('max')).to.equal('100');
     });
 
-    it('adds widget that contain input range with attribute step equals 10', () => {
-        expect(widgetInput.getAttribute('step')).to.equal('10');
+    it('adds widget that contain input range with attribute step equals 1', () => {
+        expect(widgetInput.getAttribute('step')).to.equal('1');
     });
 
     it('adds widget that contain visible min scale equals 0', () => {

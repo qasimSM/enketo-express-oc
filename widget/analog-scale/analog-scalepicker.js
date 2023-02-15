@@ -128,6 +128,29 @@ class AnalogScaleWidget extends RangeWidget {
     }
 
     /**
+     * @param {object} props - The widget properties.
+     * @return {string} HTML string
+     */
+    _stepsBetweenHtmlStr(props) {
+        let html = super._stepsBetweenHtmlStr(props);
+
+        // Special behavior for 0-100 analog-scale widget (integer and range)
+        // TODO: better to come up with a general range scale behavior that shows
+        // fewer scale labels if there are many steps.
+        if (
+            html === '' &&
+            props.showScale &&
+            (props.max - props.min) / props.step === 100
+        ) {
+            for (let i = props.min + 10; i < props.max; i += 10) {
+                html += `<span class="range-widget__scale__between">${i}</span>`;
+            }
+        }
+
+        return html;
+    }
+
+    /**
      * Stretch the question to full page height.
      * Doing this with pure css flexbox using "flex-direction: column" interferes with the Grid theme
      * because that theme relies on flexbox with "flex-direction: row".
@@ -178,8 +201,6 @@ class AnalogScaleWidget extends RangeWidget {
             : 100;
         const step = isNumber(this.element.getAttribute('step'))
             ? this.element.getAttribute('step')
-            : props.showScale
-            ? 10
             : 1; // ( props.type === 'decimal' ? 0.1 : 1 );
         props.min = Number(min);
         props.max = Number(max);
