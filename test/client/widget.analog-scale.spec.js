@@ -1,8 +1,8 @@
-import AnalogScaleWidget from '../../src/widget/analog-scale/analog-scalepicker';
 import {
     runAllCommonWidgetTests,
     testBasicInstantiation,
 } from '../helpers/test-widget';
+import AnalogScaleWidget from '../../widget/analog-scale/analog-scalepicker';
 
 const FORM1 = `<label class="question non-select or-appearance-analog-scale">
         <span lang="" class="question-label active">Range</span>
@@ -20,7 +20,7 @@ const FORM_SHOW_SCALE = `<label class="question non-select or-appearance-analog-
 
 testBasicInstantiation(AnalogScaleWidget, FORM_SHOW_SCALE);
 
-describe('Analog-scale widget with show scale', () => {
+describe('Analog-scale widget with show-scale', () => {
     /** @type {HTMLElement} */
     let widgetInput;
 
