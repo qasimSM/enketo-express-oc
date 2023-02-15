@@ -566,7 +566,7 @@ function _close(options = { autoQueries: false, reasons: false }) {
                 settings.strictViolationSelector
             );
 
-            if (strictViolations) {
+            if (settings.participant && strictViolations) {
                 throw new Error(
                     t('fieldsubmission.alert.participanterror.msg')
                 );
