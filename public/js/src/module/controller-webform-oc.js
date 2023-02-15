@@ -1323,11 +1323,6 @@ function _setFormEventHandlers() {
                             ) {
                                 clearTimeout(timeoutId);
                                 resetQuestion();
-                                gui.alert(
-                                    t(
-                                        'fieldsubmission.alert.signatureservicefailed.msg'
-                                    )
-                                );
                                 window.removeEventListener(
                                     'message',
                                     receiveMessage
