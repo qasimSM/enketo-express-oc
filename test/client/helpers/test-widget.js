@@ -3,7 +3,7 @@ import input from 'enketo-core/src/js/input';
 import events from 'enketo-core/src/js/event';
 
 // COPIED FROM ENKETO-CORE (with corrected imports)
-// TODO: ideally remove this after issue ... 
+// TODO: ideally remove this after issue
 
 const FORM_CONTROL_TEMPLATE = `
     <label class="question">

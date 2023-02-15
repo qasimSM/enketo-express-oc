@@ -1,7 +1,7 @@
 import {
     runAllCommonWidgetTests,
     testBasicInstantiation,
-} from '../helpers/test-widget';
+} from './helpers/test-widget';
 import AnalogScaleWidget from '../../widget/analog-scale/analog-scalepicker';
 
 const FORM1 = `<label class="question non-select or-appearance-analog-scale">
