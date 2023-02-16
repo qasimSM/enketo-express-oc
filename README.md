@@ -19,7 +19,7 @@ This is a fork of [enketo/enketo-express](https://github.com/enketo/enketo-expre
 
 ---
 
-OpenClinica users, in addition to the configuration documentation linked above, may want to take special note of these recommended settings:
+OpenClinica users, in addition to the configuration documentation linked above, may want to take special note of the following recommended settings:
 
 0. Set a secret value for `"account manager api key"` (or set it to `false` if OC's custom Account Manager is not used).
 1. The `"linked form and data server"` object should not have `"server url"` and `"api key"` properties (if OC's custom Account Manager API is used).
