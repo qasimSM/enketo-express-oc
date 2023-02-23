@@ -556,12 +556,13 @@ function _close(options = { autoQueries: false, reasons: false }) {
                         const newOptions = { ...options };
                         newOptions.autoQueries = false;
 
-                        return _close(options);
+                        return _close(newOptions);
                     });
                 }
             }
             // Note, if _close is called with options.autoQueries,
-            // the autoQueries should have fixed these violations when close is called again.
+            // the autoQueries should have fixed constraint and required violations when close is called again.
+            // However, relevant violations are not fixed by autoqueries.
             const strictViolations = form.view.html.querySelector(
                 settings.strictViolationSelector
             );
