@@ -1435,6 +1435,54 @@ function _setButtonEventHandlers(survey) {
         });
     }
 
+    $('button#validate-form:not(.disabled)').click(function () {
+        if (typeof form !== 'undefined') {
+            const $button = $(this);
+            $button.btnBusyState(true);
+            setTimeout(() => {
+                form.validate()
+                    .then((valid) => {
+                        $button.btnBusyState(false);
+                        if (!valid) {
+                            if (settings.strictViolationSelector) {
+                                const strictViolations =
+                                    form.view.html.querySelector(
+                                        settings.strictViolationSelector
+                                    );
+                                if (strictViolations) {
+                                    gui.alert(
+                                        t(
+                                            'fieldsubmission.confirm.autoquery.msg1'
+                                        ),
+                                        null,
+                                        'oc-strict-error'
+                                    );
+                                } else {
+                                    gui.alert(t('alert.validationerror.msg'));
+                                }
+                            } else {
+                                gui.alert(t('alert.validationerror.msg'));
+                            }
+                        } else {
+                            gui.alert(
+                                t('alert.validationsuccess.msg'),
+                                t('alert.validationsuccess.heading'),
+                                'success'
+                            );
+                        }
+                    })
+                    .catch((e) => {
+                        gui.alert(e.message);
+                    })
+                    .then(() => {
+                        $button.btnBusyState(false);
+                    });
+            }, 100);
+        }
+
+        return false;
+    });
+
     // Participant views that submit the whole record (i.e. not fieldsubmissions).
     if (settings.fullRecord) {
         $('button#submit-form').click(function () {

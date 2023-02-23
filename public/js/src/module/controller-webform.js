@@ -2,9 +2,9 @@
  * Deals with the main high level survey controls: saving, submitting etc.
  */
 
+import { Form } from 'enketo-core';
 import downloadUtils from 'enketo-core/src/js/download-utils';
 import $ from 'jquery';
-import { Form } from './form';
 import gui from './gui';
 import connection from './connection';
 import settings from './settings';
@@ -735,25 +735,7 @@ function _setEventHandlers(survey) {
                     .then((valid) => {
                         $button.btnBusyState(false);
                         if (!valid) {
-                            if (settings.strictViolationSelector) {
-                                const strictViolations =
-                                    form.view.html.querySelector(
-                                        settings.strictViolationSelector
-                                    );
-                                if (strictViolations) {
-                                    gui.alert(
-                                        t(
-                                            'fieldsubmission.confirm.autoquery.msg1'
-                                        ),
-                                        null,
-                                        'oc-strict-error'
-                                    );
-                                } else {
-                                    gui.alert(t('alert.validationerror.msg'));
-                                }
-                            } else {
-                                gui.alert(t('alert.validationerror.msg'));
-                            }
+                            gui.alert(t('alert.validationerror.msg'));
                         } else {
                             gui.alert(
                                 t('alert.validationsuccess.msg'),
