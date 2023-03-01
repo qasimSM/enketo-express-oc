@@ -714,7 +714,7 @@ function _complete(
                     t('fieldsubmission.alert.participanterror.msg')
                 );
             } else if (
-                settings.participant &&
+                !form.model.isMarkedComplete() &&
                 form.view.html.querySelector('.invalid-relevant')
             ) {
                 const msg = t(
