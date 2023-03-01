@@ -708,7 +708,8 @@ function _complete(
             const strictViolations = form.view.html.querySelector(
                 settings.strictViolationSelector
             );
-            if (strictViolations) {
+
+            if (strictViolations && !form.model.isMarkedComplete()) {
                 throw new Error(
                     t('fieldsubmission.alert.participanterror.msg')
                 );
@@ -757,14 +758,10 @@ function _complete(
                     });
                 }
             } else if (
-                !form.model.isMarkedComplete() ||
-                [
-                    ...form.view.html.querySelectorAll(
-                        '.invalid-constraint, .invalid-required'
-                    ),
-                ].length > 0
-                // A complete record with relevant errors will have passed through the
-                // autoquery stage first. Therefore its errors are now acceptable.
+                !form.model.isMarkedComplete()
+                // A complete record with errors will have passed through the
+                // autoquery stage first. Therefore its errors are now acceptable even though
+                // relevant errors and strict errors will not have been resolved by the autoqueries
             ) {
                 const msg = t('fieldsubmission.alert.validationerror.msg');
                 throw new Error(msg);
