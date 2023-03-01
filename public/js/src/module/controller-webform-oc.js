@@ -91,8 +91,6 @@ function init(formEl, data, loadErrors = []) {
                     ? `<a href="${settings.goToErrorUrl}">${settings.goToErrorUrl}</a>`
                     : '';
 
-                fieldSubmissionQueue = new FieldSubmissionQueue();
-
                 if (data.survey.instanceAttachments) {
                     fileManager.setInstanceAttachments(
                         data.survey.instanceAttachments
@@ -345,7 +343,10 @@ function init(formEl, data, loadErrors = []) {
 
                     throw loadErrors;
                 } else {
-                    if (settings.type !== 'view') {
+                    if (
+                        settings.type !== 'view' &&
+                        settings.type !== 'preview'
+                    ) {
                         console.info('Submissions enabled');
                         // Current queue can be submitted, and so can future fieldsubmissions.
                         fieldSubmissionQueue.enable();
