@@ -6,7 +6,6 @@ const { BrowserHandler, getBrowser } = require('./headless-browser');
 
 const { timeout } = config.headless;
 const { URL } = require('url');
-const { Browser } = require('puppeteer');
 
 /**
  * @typedef PdfGetOptions
