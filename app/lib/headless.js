@@ -38,11 +38,13 @@ async function run(url) {
             throw e;
         });
 
-        await page.goto(url).catch((e) => {
-            // Martijn has not been able to actually reach this code.
-            e.status = 400;
-            throw e;
-        });
+        await page
+            .goto(url, { waitUntil: 'networkidle0', timeout })
+            .catch((e) => {
+                // Martijn has not been able to actually reach this code.
+                e.status = 400;
+                throw e;
+            });
 
         const element = await page
             .waitForSelector('#headless-result', { timeout })
