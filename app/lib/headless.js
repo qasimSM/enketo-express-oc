@@ -1,45 +1,13 @@
-const puppeteer = require('puppeteer');
+const { BrowserHandler, getBrowser } = require('./headless-browser');
 const config = require('../models/config-model').server;
 
 const { timeout } = config.headless;
-
-const args = ['--no-startup-window'];
-const userDataDir = './chromium-cache';
-
-class BrowserHandler {
-    constructor() {
-        const launchBrowser = async () => {
-            this.browser = false;
-            this.browser = await puppeteer.launch({
-                headless: true,
-                devtools: false,
-                args,
-                userDataDir,
-            });
-            this.browser.on('disconnected', launchBrowser);
-        };
-
-        (async () => {
-            await launchBrowser();
-        })();
-    }
-}
-const browserHandler = new BrowserHandler();
-const getBrowser = (handler) =>
-    new Promise((resolve) => {
-        const browserCheck = setInterval(() => {
-            if (handler.browser !== false) {
-                clearInterval(browserCheck);
-                resolve(handler.browser);
-            }
-        }, 100);
-    });
 
 async function run(url) {
     if (!url) {
         throw new Error('No url provided');
     }
-    const browser = await getBrowser(browserHandler);
+    const browser = await getBrowser(new BrowserHandler());
     const page = await browser.newPage();
 
     // Turns request interceptor on
@@ -70,11 +38,13 @@ async function run(url) {
             throw e;
         });
 
-        await page.goto(url).catch((e) => {
-            // Martijn has not been able to actually reach this code.
-            e.status = 400;
-            throw e;
-        });
+        await page
+            .goto(url, { waitUntil: 'networkidle0', timeout })
+            .catch((e) => {
+                // Martijn has not been able to actually reach this code.
+                e.status = 400;
+                throw e;
+            });
 
         const element = await page
             .waitForSelector('#headless-result', { timeout })

@@ -2,9 +2,9 @@
  * @module pdf
  */
 const config = require('../models/config-model').server;
+const { BrowserHandler, getBrowser } = require('./headless-browser');
 
 const { timeout } = config.headless;
-const puppeteer = require('puppeteer');
 const { URL } = require('url');
 
 /**
@@ -51,7 +51,7 @@ async function get(url, options = {}) {
     urlObj.searchParams.append('landscape', options.landscape);
     urlObj.searchParams.append('scale', options.scale);
 
-    const browser = await puppeteer.launch({ headless: true });
+    const browser = await getBrowser(new BrowserHandler());
     const page = await browser.newPage();
 
     let pdf;
@@ -111,7 +111,6 @@ async function get(url, options = {}) {
     }
 
     await page.close();
-    await browser.close();
 
     return pdf;
 }
