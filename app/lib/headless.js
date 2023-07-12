@@ -2,12 +2,13 @@ const { BrowserHandler, getBrowser } = require('./headless-browser');
 const config = require('../models/config-model').server;
 
 const { timeout } = config.headless;
+const browserHandler = new BrowserHandler();
 
 async function run(url) {
     if (!url) {
         throw new Error('No url provided');
     }
-    const browser = await getBrowser(new BrowserHandler());
+    const browser = await getBrowser(browserHandler);
     const page = await browser.newPage();
 
     // Turns request interceptor on
@@ -26,18 +27,6 @@ async function run(url) {
     let fieldsubmissions;
 
     try {
-        page.on('pageerror', (e) => {
-            // Martijn has not been able to actually reach this code.
-            e.status = 400;
-            throw e;
-        });
-
-        page.on('requestfailed', (e) => {
-            // Martijn has not been able to actually reach this code.
-            e.status = 400;
-            throw e;
-        });
-
         await page
             .goto(url, { waitUntil: 'networkidle0', timeout })
             .catch((e) => {
