@@ -38,9 +38,12 @@ class FieldSubmissionQueue {
          */
         this._uploadStatus = {
             init() {
+                const statusElementSelector =
+                    '.fieldsubmission-status:not(.readonly)';
                 this.statusElements = document.querySelectorAll(
-                    '.fieldsubmission-status'
+                    statusElementSelector
                 );
+
                 if (!this.statusElements.length) {
                     const range = document.createRange();
                     const first = range.createContextualFragment(
@@ -58,7 +61,7 @@ class FieldSubmissionQueue {
                         formFooter.prepend(second);
                     }
                     this.statusElements = document.querySelectorAll(
-                        '.fieldsubmission-status'
+                        statusElementSelector
                     );
                 }
             },
