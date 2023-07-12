@@ -1465,6 +1465,14 @@ function _setButtonEventHandlers(survey) {
         });
     }
 
+    const exitButton = document.querySelector('button#exit-form');
+    if (exitButton) {
+        exitButton.addEventListener('click', () => {
+            document.dispatchEvent(events.Exit());
+            _redirect(100);
+        });
+    }
+
     $('button#validate-form:not(.disabled)').click(function () {
         if (typeof form !== 'undefined') {
             const $button = $(this);
@@ -1624,6 +1632,11 @@ function _setButtonEventHandlers(survey) {
         );
         document.addEventListener(
             events.Close().type,
+            rc.postEventAsMessageToParentWindow
+        );
+
+        document.addEventListener(
+            events.Exit().type,
             rc.postEventAsMessageToParentWindow
         );
 
